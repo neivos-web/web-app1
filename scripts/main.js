@@ -51,7 +51,7 @@ onSnapshot(q, (snapshot) => {
                 <h3 class="text-2xl font-bold mb-2">${article.title}</h3>
                 <p class="text-gray-600 mb-4">${article.content}</p>
                 ${embedUrl ? `<div class="aspect-w-16 aspect-h-9 my-4 rounded-lg overflow-hidden"><iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen></iframe></div>` : ''}
-                <a href="#" class="inline-block bg-brand-purple text-white px-6 py-2 rounded-md hover:opacity-90 font-semibold transition">Lire la suite</a>
+                <a href="#" class="inline-block bg-brand-blue text-white px-6 py-2 rounded-md hover:opacity-90 font-semibold transition">Lire la suite</a>
             </div>
         `;
         articlesContainer.appendChild(articleCard);
