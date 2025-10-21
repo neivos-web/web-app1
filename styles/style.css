@@ -1,0 +1,27 @@
+/* Ce fichier contient les styles de base partagés par les pages.
+  La majorité du design est gérée par Tailwind CSS directement dans le HTML.
+*/
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Gère la visibilité des vues (publique, admin, login) */
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+  /* Ajoute une petite animation de fondu à l'apparition */
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

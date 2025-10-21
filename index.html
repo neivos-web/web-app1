@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innoversa Factory - Accueil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Lien vers la feuille de style externe -->
+    <link rel="stylesheet" href="styles/style.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'brand-purple': '#8E44AD', 'brand-dark': '#34495E' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 text-brand-dark">
+
+    <!-- =========== En-tête du site =========== -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-gray-900 flex items-center">
+                 <svg class="w-8 h-8 mr-2 text-brand-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
+                <a href="#">Innoversa</a>
+            </div>
+            <div class="hidden md:flex space-x-8 items-center font-medium text-gray-600">
+                <a href="#" class="hover:text-brand-purple">Mission et vision</a>
+                <a href="#" class="hover:text-brand-purple">Portefeuille</a>
+                <a href="#articles-section" class="text-brand-purple font-semibold">Actualités / Blog</a>
+                <a href="#" class="hover:text-brand-purple">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Section Héros -->
+        <section class="relative bg-white">
+            <div class="absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace">
+                <div class="absolute inset-0 bg-black opacity-40"></div>
+            </div>
+            <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4">Bienvenue dans notre section actualités et blogs</h1>
+                <p class="text-lg max-w-3xl mx-auto">Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.</p>
+            </div>
+        </section>
+        
+        <!-- Section des articles -->
+        <section id="articles-section" class="py-16 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Actualités et blogs chez Innoversa</h2>
+                <div id="articles-container" class="space-y-12">
+                    <p id="loading-public" class="text-center text-gray-500">Chargement des actualités...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Lien vers le script JavaScript externe -->
+    <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
