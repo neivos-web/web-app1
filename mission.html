@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outsiders - Accueil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Lien vers la feuille de style externe -->
+    <link rel="stylesheet" href="styles/style.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#2AF598' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 text-brand-dark">
+
+    <!-- =========== En-tête du site =========== -->
+        
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="flex items-center space-x-2">
+                    <img src="icons/logo.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                    <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue"></span>
+                </a>
+            </div>
+
+            <!-- Menu principal -->
+            <div class="hidden md:flex space-x-8 items-center font-medium text-gray-700">
+                <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
+
+                <!-- Portefeuille -->
+                <div class="relative group">
+                    <button class="flex items-center hover:text-brand-blue focus:outline-none">
+                        Portefeuille
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
+                            fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div
+                        class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
+                        <a href="portfeuille.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Gaming</a>
+                        <a href="portfeuille.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a>
+                        <a href="portfeuille.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a>
+                        <a href="portfeuille.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
+                        <a href="portfeuille.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">IA</a>
+                        <a href="portfeuille.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">360</a>
+                    </div>
+                </div>
+
+                <a href="simulateurs.html" class="hover:text-brand-blue">Simulateurs</a>
+
+                <!-- Formations & conseils -->
+                <div class="relative group">
+                    <button class="flex items-center hover:text-brand-blue focus:outline-none">
+                        Formations & conseils
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
+                            fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div
+                        class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-48 text-center z-20">
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">360</a>
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">XR</a>
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">IA</a>
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Robotique</a>
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Atelier de conseil</a>
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Processus d'affaires</a>
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Etude de faisabilité</a>
+                        <a href="formations.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Formations à l'autisme</a>
+                    </div>
+                </div>
+
+                <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
+
+                <!-- Actualités / Blog -->
+                <div class="relative group">
+                    <button class="flex items-center text-brand-blue font-semibold focus:outline-none">
+                        Actualités / Blog
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
+                            fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div
+                        class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20">
+                        <a href="actualites.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Actualités</a>
+                    </div>
+                </div>
+
+                <a href="contact.html" class="hover:text-brand-blue">Contact</a>
+            </div>
+    </nav>
+    </header>
+
+    <!-- Banner -->
+    <div class="kasten2">
+        <div class="banner-wrapper">
+            <article id="banner" style="background-image: url('./images/innoversa.jpg');">
+                <div class="background-blur"></div>
+            </article>
+        </div>
+    </div>
+
+    <section class="innoverse-section">
+        <div class="innoverse-container">
+            <article class="feature-article right">
+                <div class="feature-content">
+                    <h2 class="section-heading">Herzlich Willkommen bei Innoversa!</h2>
+                    <p class="section-text no-spacing mobile-tight">
+                        Mission & Vision: Innoversa verbindet Inklusion
+                        und technologische Innovation. Unser diverses
+                        und interdisziplinäres Team vereint Talente aus
+                        den unterschiedlichsten Bereichen, die gemeinsam
+                        nach dem 'Perfect Flow' streben – effiziente und
+                        innovative Lösungen, die von echter Inklusion
+                        angetrieben werden.
+                    </p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="footerTopWrapper">
+            <div class="footerTop">
+                <div class="title">
+                    Haben Sie Fragen? Kontaktieren Sie uns – wir
+                    sind gerne für Sie da.
+                </div>
+                <a href="kontakt.html" target="_blank" class="btnFooter">Kontaktieren Sie uns!</a>
+            </div>
+        </div>
+
+        <div class="footerBottom">
+            <div class="leftSide content">
+                <li><a class="links_all" href="impressum.html">Impressum</a></li>
+                <li><a class="links_all" href="datenschutz.html">Datenschutzerklärung</a></li>
+            </div>
+            <div class="rightSide content">
+                <a href="https://www.linkedin.com/company/innoversa-factory-gmbh?originalSubdomain=de">
+                    <img src="images/footer/linkedin.png" alt="LinkedIn Icon">
+                </a>
+                <a href="https://www.instagram.com/innoversa_factory_?igsh=ZGJ2ODJ4MnE2ZjZt">
+                    <img src="images/footer/instagram.png" alt="Instagram Icon">
+                </a>
+                <a href="https://www.facebook.com/share/18EmFUEt2u/">
+                    <img src="images/footer/facebook (1).png" alt="Facebook Icon">
+                </a>
+            </div>
+        </div>
+    </footer>
+
+  <!-- Lien vers le script JavaScript externe -->
+    <script type="module" src="scripts/main.js"></script>
+
+</body>
+
+</html>

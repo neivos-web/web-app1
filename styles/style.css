@@ -16,6 +16,68 @@ body {
   /* Ajoute une petite animation de fondu à l'apparition */
   animation: fadeIn 0.5s ease-in-out;
 }
+  /* Section de bienvenue */
+  .welcome-section {
+    background: url('images/banner-bg.jpg') no-repeat center/cover; 
+    padding: 100px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .welcome-box {
+    background: #ffffff;
+    padding: 50px 60px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+  }
+
+  .welcome-box h1 {
+    font-size: 2.2rem;
+    color: #0FBED8;
+    margin-bottom: 20px;
+  }
+
+  .welcome-box p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #333;
+  }
+
+    /* Section innovation et avenir */
+  .innovation-section {
+    background: url('images/banner-bg.jpg') no-repeat center/cover; 
+    padding: 100px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .innovation-box {
+    background: #ffffff;
+    padding: 50px 60px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+  }
+
+  .innovation-box h1 {
+    font-size: 2.2rem;
+    color: #0FBED8;
+    margin-bottom: 20px;
+  }
+
+  .innovation-box p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #333;
+  }
+
 
 @keyframes fadeIn {
   from {
@@ -24,4 +86,6 @@ body {
   to {
     opacity: 1;
   }
+
+  
 }
