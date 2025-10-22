@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Innoversa Factory - Accueil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { 'brand-purple': '#8E44AD', 'brand-dark': '#34495E' }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-100 text-brand-dark">
+
+  <!-- HEADER -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-gray-900 flex items-center">
+        <svg class="w-8 h-8 mr-2 text-brand-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path>
+        </svg>
+        <a href="#" id="site-name" data-editable>Innoversa</a>
+      </div>
+
+      <div class="hidden md:flex space-x-8 items-center font-medium text-gray-600">
+        <a href="#" id="nav-mission" data-editable class="hover:text-brand-purple">Mission et vision</a>
+        <a href="#" id="nav-portfolio" data-editable class="hover:text-brand-purple">Portefeuille</a>
+        <a href="#articles-section" id="nav-blog" data-editable class="text-brand-purple font-semibold">Actualités / Blog</a>
+        <a href="#" id="nav-contact" data-editable class="hover:text-brand-purple">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO SECTION -->
+  <main>
+    <section class="relative bg-white overflow-hidden" id="hero-section" style="height: 85vh;">
+      <div class="absolute inset-0 editable-image" id="hero-image" style="z-index: 0;">
+        <img id="hero-img"
+          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
+          class="w-full h-full object-cover opacity-80 transition-all duration-300"
+          alt="Workspace">
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+        <button class="edit-btn absolute top-4 right-4 text-blue-500 text-2xl z-20"
+          title="Changer l’image ou la vidéo">&#9998;</button>
+      </div>
+
+      <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white z-10">
+        <h1 id="hero-title" data-editable class="text-3xl md:text-5xl font-extrabold mb-4">
+          Bienvenue dans notre section actualités et blogs
+        </h1>
+        <p id="hero-desc" data-editable class="text-lg max-w-3xl mx-auto">
+          Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- TOOLTIP -->
+  <div id="tooltip" class="tooltip">Sauvegardé avec succès</div>
+
+  <!-- JS -->
+  <script src="scripts/admin_main.js"></script>
+</body>
+</html>
