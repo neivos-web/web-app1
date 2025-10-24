@@ -89,7 +89,7 @@
     font-size: 1.05rem;
     line-height: 1.7;
     color: #333;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
   }
 
   /* === FOOTER === */
@@ -100,7 +100,6 @@
   padding: 50px 20px;
   font-family: "Poppins", sans-serif;
 }
-<<<<<<< HEAD
 
   .footer-container {
     max-width: 1100px;
@@ -203,6 +202,104 @@
     }
   }
 
+  /* ===== Section contact ===== */
+  .contact-section {
+    background: #fff;
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+  }
+
+  .contact-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+
+  .contact-section p {
+    font-size: 1.1rem;
+    margin-bottom: 50px;
+    color: #f1f1f1;
+  }
+
+  .contact-container {
+    max-width: 1100px;
+    margin: auto;
+    background: linear-gradient(135deg, #08B3E5, #22E4AC);
+    color: #333;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 50px;
+  }
+
+  /* ===== Contenu principal ===== */
+  .contact-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 70px;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  /* ===== Formulaire ===== */
+  .contact-form {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #feffff;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #0FBED8;
+  }
+
+  .send-btn {
+    background: #e0e0e0;
+    color: black;
+    border: black;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+  }
+
+  .send-btn:hover {
+    background: linear-gradient(135deg, #0FBED8, #1BD7BB);
+  }
+
+
+
+
+  /* ===== Responsive ===== */
+  @media (max-width: 900px) {
+    .contact-content {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+  /* ===== Fin section contact ===== */
+
 
   /* ==== Autres ajustements ==== */
   @media (max-width: 768px) {
@@ -248,34 +345,3 @@
   .tooltip.show {
     opacity: 1;
   }
-=======
-/**/
-
-
-.edit-btn {
-  cursor: pointer;
-  font-size: 1.3rem;
-  transition: transform 0.2s ease;
-}
-.edit-btn:hover {
-  transform: scale(1.2);
-}
-
-/* Tooltip */
-.tooltip {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background-color: #16a34a;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 6px;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  font-weight: 500;
-  z-index: 9999;
-}
-.tooltip.show {
-  opacity: 1;
-}
->>>>>>> 01c0f33d2fd5e8c260670662063c728341c46a7a
