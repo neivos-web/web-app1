@@ -1,0 +1,138 @@
+/* ===== Section VR / Portefeuille ===== */
+.vr-section {
+  background: #f8f9fb;
+  padding: 80px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.vr-container {
+  background: #ffffff;
+  padding: 40px 60px;
+  border-radius: 15px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  max-width: 1100px;
+  width: 90%;
+  border: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+}
+
+/* Image */
+.vr-image {
+  flex: 1;
+  text-align: center;
+}
+
+.vr-image img {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 10px;
+}
+
+/* Contenu texte */
+.vr-content {
+  flex: 1.2;
+  color: #333;
+}
+
+.vr-content h2 {
+  font-size: 1.8rem;
+  color: #08b3e5;
+  margin-bottom: 15px;
+}
+
+.vr-content h2 span {
+  color: #0fbed8;
+}
+
+.vr-content p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 15px;
+}
+
+.vr-subtitle {
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+/* Liste */
+.vr-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 25px 0;
+}
+
+.vr-list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.vr-list i {
+  color: #0fbed8;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.vr-list div {
+  line-height: 1.5;
+}
+
+.vr-list strong {
+  color: #000;
+  display: block;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.vr-list p {
+  margin: 0;
+  font-size: 0.98rem;
+  color: #444;
+}
+
+/* Bouton */
+.btn-vr {
+  display: inline-block;
+  background: linear-gradient(135deg, #0fbed8, #08b3e5);
+  color: #fff;
+  padding: 10px 30px;
+  border-radius: 30px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(15, 190, 216, 0.4);
+  transition: all 0.3s ease;
+}
+
+.btn-vr:hover {
+  background: linear-gradient(135deg, #14c9cb, #1bd71b);
+  box-shadow: 0 6px 15px rgba(138, 43, 226, 0.5);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .vr-container {
+    flex-direction: column;
+    padding: 30px;
+  }
+
+  .vr-image img {
+    max-width: 300px;
+  }
+
+  .vr-content h2 {
+    text-align: center;
+  }
+
+  .btn-vr {
+    display: block;
+    margin: 20px auto 0;
+  }
+}

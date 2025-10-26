@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outsiders - Recherche</title>
+    <title>Outsiders - Actualités/blogs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
 </head>
 <body class="bg-gray-100 text-brand-dark">
 
-   <!-- =========== En-tête du site =========== -->
+       <!-- =========== En-tête du site =========== -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
         
@@ -117,42 +117,26 @@
                 <div class="absolute inset-0 bg-black opacity-40"></div>
             </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4">Bienvenue dans notre section Inclusion et Recherche</h1>
-                <p class="text-lg max-w-3xl mx-auto">Découvrez les dernières nouvelles recherches illustrant notre vision et nos derniers progrès réalisés.</p>
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4">Bienvenue dans notre section actualites et blogs</h1>
+                <p class="text-lg max-w-3xl mx-auto">Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.</p>
             </div>
         </section>
         
-        <!--Section Inclusion et recherche-->
-       <section class="content-section">
-            <div class="content-box">
-                <div class="content-image">
-                    <img src="images/inclusion.gif" alt="Illustration Inclusion et Recherche">
-                </div>
-
-                <div class="content">
-                <h2>Inclusion & Recherche</h2>
-                <p>
-                    Pour nous, l'inclusion est bien plus qu'une simple idée. Elle est synonyme d'intégration
-                    sans faille de toutes les personnes dans la société. Chez Outsiders, nous vivons l'inclusion
-                    – non seulement par la loi, mais aussi parce qu'elle correspond à notre conviction la plus
-                    profonde. Nous reconnaissons et apprécions le caractère unique de chaque individu, ce qui
-                    se traduit par la qualité de notre travail et nos solutions innovantes.
-                </p>
-                <p>
-                    Grâce à la collaboration et à la force de notre équipe interdisciplinaire, comprenant
-                    également des personnes ayant des besoins particuliers, nous sommes en mesure de créer des
-                    solutions qui sont à la fois économiquement viables et bénéfiques pour la société. Outsiders
-                    s'efforce de construire un avenir où chacun peut atteindre son plein potentiel. Le "Perfect
-                    Flow" n'est pas seulement une vision, mais une mission que nous partageons avec nos
-                    collaborateurs et partenaires.
-                </p>
+        <!-- Section des articles -->
+        <section id="articles-section" class="py-16 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Actualités et blogs chez Outsiders</h2>
+                <div id="articles-container" class="space-y-12">
+                    <p id="loading-public" class="text-center text-gray-500">Chargement des actualités...</p>
                 </div>
             </div>
         </section>
+
+        
     </main>
 
-   <!-- =========== Pied de page du site =========== -->
-    <footer class="site-footer">
+    <!-- =========== Pied de page du site =========== -->
+     <footer class="site-footer">
         <div class="footer-container">
 
             <p class="footer-text">
@@ -192,6 +176,7 @@
         </div>
     </footer>
 
+     
 
 
     <!-- Lien vers le script JavaScript externe -->

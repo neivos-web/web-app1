@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outsiders - Recherche</title>
+    <title>Outsiders - AR/MR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <!-- Lien vers la feuille de style externe -->
     <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/submenu.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+
     <script>
         tailwind.config = {
             theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#2AF598' } } }
@@ -18,7 +21,7 @@
 </head>
 <body class="bg-gray-100 text-brand-dark">
 
-   <!-- =========== En-tête du site =========== -->
+       <!-- =========== En-tête du site =========== -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
         
@@ -109,49 +112,94 @@
     </nav>
     </header>
 
+
+
     <main>
         <!-- Section Héros -->
         <section class="relative bg-white">
             <div class="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace">
+                <img src="images/ar_mr_banner.jpg" alt="Image de fond VR" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-black opacity-40"></div>
             </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4">Bienvenue dans notre section Inclusion et Recherche</h1>
-                <p class="text-lg max-w-3xl mx-auto">Découvrez les dernières nouvelles recherches illustrant notre vision et nos derniers progrès réalisés.</p>
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4">Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations. </h1>
+                <p class="text-lg max-w-3xl mx-auto">Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !</p>
             </div>
         </section>
-        
-        <!--Section Inclusion et recherche-->
-       <section class="content-section">
-            <div class="content-box">
-                <div class="content-image">
-                    <img src="images/inclusion.gif" alt="Illustration Inclusion et Recherche">
-                </div>
 
-                <div class="content">
-                <h2>Inclusion & Recherche</h2>
+        <!-- ===== Section VR ===== -->
+        <section class="vr-section">
+            <div class="vr-container">
+            
+            <!-- Image gauche -->
+            <div class="vr-image">
+                <img src="images/ar_mr.jpg" alt="jeux vidéo">
+            </div>
+
+            <!-- Texte droite -->
+            <div class="vr-content">
+                <h2><span>AR/MR - </span>Réalité augmentée mixte</h2>
                 <p>
-                    Pour nous, l'inclusion est bien plus qu'une simple idée. Elle est synonyme d'intégration
-                    sans faille de toutes les personnes dans la société. Chez Outsiders, nous vivons l'inclusion
-                    – non seulement par la loi, mais aussi parce qu'elle correspond à notre conviction la plus
-                    profonde. Nous reconnaissons et apprécions le caractère unique de chaque individu, ce qui
-                    se traduit par la qualité de notre travail et nos solutions innovantes.
+                La réalité augmentée et la réalité mixte redéfinissent notre rapport au monde numérique. En fusionnant harmonieusement éléments réels et contenus virtuels, 
+                nous créons des expériences immersives qui transcendent les écrans traditionnels. Les utilisateurs ne se contentent plus d'observer : ils interagissent, 
+                explorent et s'engagent activement dans des environnements enrichis. Que ce soit pour la formation, la visualisation de projets, la collaboration à 
+                distance ou l'exploration de concepts complexes, ces technologies transforment radicalement notre manière d'interagir avec l'information.
                 </p>
-                <p>
-                    Grâce à la collaboration et à la force de notre équipe interdisciplinaire, comprenant
-                    également des personnes ayant des besoins particuliers, nous sommes en mesure de créer des
-                    solutions qui sont à la fois économiquement viables et bénéfiques pour la société. Outsiders
-                    s'efforce de construire un avenir où chacun peut atteindre son plein potentiel. Le "Perfect
-                    Flow" n'est pas seulement une vision, mais une mission que nous partageons avec nos
-                    collaborateurs et partenaires.
-                </p>
-                </div>
+
+                <p class="vr-subtitle"><strong>Ce que nous créons pour vous</strong></p>
+                <!-- Contenu à droite -->
+                <ul class="vr-list">
+                    <li>
+                    <i class="bi bi-check2"></i>
+                    <div>
+                        <strong>Apprentissage immersif  :</strong>
+                        <p>
+                        Nous écrivons des histoires captivantes et bâtissons des mondes 3D cohérents où vos joueurs auront envie de se perdre.Des environnements de formation en réalité mixte où vos équipes peuvent s'entraîner dans des conditions réalistes, répéter les gestes techniques et apprendre de leurs erreurs sans conséquences.
+                        </p>
+                    </div>
+                    </li>
+
+                    <li>
+                    <i class="bi bi-check2"></i>
+                    <div>
+                        <strong>Guidage intelligent :</strong>
+                        <p>
+                        Des instructions contextuelles qui s'affichent directement sur vos machines, accompagnant vos opérateurs étape par étape dans les procédures de maintenance et d'utilisation.
+                        </p>
+                    </div>
+                    </li>
+
+                    <li>
+                    <i class="bi bi-check2"></i>
+                    <div>
+                        <strong>Support expert à distance :</strong>
+                        <p>
+                        Vos spécialistes peuvent assister les techniciens sur le terrain en temps réel, annoter leur champ de vision et les guider avec précision, peu importe la distance.
+                        </p>
+                    </div>
+                    </li>
+
+                    <li>
+                    <i class="bi bi-check2"></i>
+                    <div>
+                        <strong>Showrooms virtuels :</strong>
+                        <p>
+                        Vos catalogues prennent vie : les produits apparaissent en 3D, se configurent selon les préférences, changent de couleur ou de dimension d'un simple geste.
+                        </p>
+                    </div>
+                    </li>
+                </ul>
+
+
+                <a href="#" class="btn-vr">En savoir plus</a>
+            </div>
+
             </div>
         </section>
-    </main>
-
-   <!-- =========== Pied de page du site =========== -->
+        </main>
+    
+    
+        <!-- =========== Pied de page du site =========== -->
     <footer class="site-footer">
         <div class="footer-container">
 
@@ -192,10 +240,11 @@
         </div>
     </footer>
 
+     
 
 
     <!-- Lien vers le script JavaScript externe -->
-    <script type="module" src="scripts/main.js"></script>
+    <script type="module" src="scripts/admin_main.js"></script>
     <!-- Script pour le menu mobile -->
     <script>
     document.getElementById('menu-toggle').addEventListener('click', function () {
