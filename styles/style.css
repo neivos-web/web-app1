@@ -441,100 +441,46 @@
   }
 
   /* === FOOTER === */
+
   .site-footer {
-  background: linear-gradient(135deg, #08B3E5, #22E4AC);
+  background-color: #222;
   color: white;
   text-align: center;
-  padding: 50px 20px;
-  font-family: "Poppins", sans-serif;
-}
+  padding: 30px 20px;
+  }
 
   .footer-container {
-    max-width: 1100px;
+    max-width: 900px;
     margin: 0 auto;
   }
 
   .footer-logo img {
     width: 120px;
-    margin-bottom: 20px;
-  }
-
-  .footer-text {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-  }
-
-  .footer-text span {
-    font-weight: 600;
-  }
-
-  .footer-btn {
-    display: inline-block;
-    background: transparent;
-    border: 2px solid white;
-    color: white;
-    padding: 10px 30px;
-    border-radius: 25px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-
-  .footer-btn:hover {
-    background: white;
-    color: #0fbed8;
+    margin: 20px auto;
+    display: block;
   }
 
   .footer-social {
-    margin: 30px 0 15px;
-  }
-
-  .footer-social a {
-    margin: 0 10px;
-    display: inline-block;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-  }
-
-  .footer-social a:hover {
-    transform: scale(1.2);
-    opacity: 0.8;
+    margin: 20px 0;
   }
 
   .footer-bottom {
     margin-top: 20px;
     display: flex;
     justify-content: center;
-    gap: 25px;
-    flex-wrap: wrap;
-    font-size: 0.95rem;
+    gap: 20px;
+    font-size: 14px;
   }
 
   .footer-bottom a {
-    color: white;
+    color: #fffbfb;
     text-decoration: none;
-    transition: opacity 0.3s;
   }
 
   .footer-bottom a:hover {
-    opacity: 0.7;
+    color: linear-gradient(135deg, #0FBED8, #1BD7BB);
   }
 
-  /* === Responsive === */
-  @media (max-width: 768px) {
-    .footer-logo img {
-      width: 100px;
-    }
-    .footer-text {
-      font-size: 1rem;
-    }
-    .footer-btn {
-      padding: 8px 20px;
-    }
-    .footer-social a svg {
-      width: 22px;
-      height: 22px;
-    }
-  }
 
   /* === Responsive === */
   @media (max-width: 768px) {
