@@ -91,6 +91,49 @@
     color: #333;
     margin-bottom: 16px;
   }
+  .content p, .content-box p {
+  line-height: 1.8;
+  margin-bottom: 1.5em; /* plus d’espace entre les paragraphes */
+  text-align: justify; /* optionnel, pour un rendu plus propre */
+}
+
+
+  @media (max-width: 1024px) {
+  .content-box {
+    flex-direction: column;
+    gap: 30px; /* réduit l'espacement pour les petits écrans */
+    padding: 30px 20px; /* ajuste le padding */
+  }
+
+  .content-image, .content {
+    flex: unset; /* enlève le flex pour chaque div */
+    width: 100%;
+    text-align: center;
+  }
+
+  .content h2 {
+    font-size: 1.8rem;
+  }
+
+  .content p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome-box {
+    padding: 30px 20px;
+  }
+
+  .welcome-box h1 {
+    font-size: 1.8rem;
+  }
+
+  .welcome-box p {
+    font-size: 0.95rem;
+  }
+}
+
 
   /* === FOOTER === */
   .site-footer {
