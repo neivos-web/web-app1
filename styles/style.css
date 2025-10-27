@@ -41,73 +41,76 @@
 
   
   /* ==== Sections de contenu (Innovation, Inclusion, Services, ...) ==== */
-  .content-section {
-    background: #f8f9fb;
-    padding: 60px 0; /* Espace autour de la section */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: -40px;
-  }
-
-  .content-box {
-    background: #ffffff;
-    padding: 50px 60px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    max-width: 1100px;
-    width: 90%;
-    border: 1px solid #e0e0e0;
-    display: flex;
-    gap: 50px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .content-image {
-    flex: 1;
-    text-align: center;
-  }
-
-  .content-image img {
-    width: 100%;
-    max-width: 350px;
-    height: auto;
-  }
-
-  .content {
-    flex: 1.2;
-  }
-
-  .content h2 {
-    font-size: 2rem;
-    color: #0FBED8;
-    margin-bottom: 20px;
-  }
-
-  .content p {
-    font-size: 1.05rem;
-    line-height: 1.7;
-    color: #333;
-    margin-bottom: 16px;
-  }
-  .content p, .content-box p {
-  line-height: 1.8;
-  margin-bottom: 1.5em; /* plus d’espace entre les paragraphes */
-  text-align: justify; /* optionnel, pour un rendu plus propre */
+/* ==== Sections de contenu (Innovation, Inclusion, Services, ...) ==== */
+.content-section {
+  background: #f8f9fb;
+  padding: 60px 0;
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 3rem; /* space between each box */
+  align-items: center;
 }
 
+/* each content box */
+.content-box {
+  background: #ffffff;
+  padding: 50px 60px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 1100px;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 50px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-  @media (max-width: 1024px) {
+.content-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* image zone */
+.content-image {
+  flex: 1;
+  text-align: center;
+}
+
+.content-image img {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+/* text zone */
+.content {
+  flex: 1.2;
+}
+
+.content h2 {
+  font-size: 2rem;
+  color: #0FBED8;
+  margin-bottom: 20px;
+}
+
+.content p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+/* responsive behavior */
+@media (max-width: 1024px) {
   .content-box {
     flex-direction: column;
-    gap: 30px; /* réduit l'espacement pour les petits écrans */
-    padding: 30px 20px; /* ajuste le padding */
-  }
-
-  .content-image, .content {
-    flex: unset; /* enlève le flex pour chaque div */
-    width: 100%;
+    gap: 30px;
+    padding: 30px 20px;
     text-align: center;
   }
 
@@ -118,7 +121,13 @@
   .content p {
     font-size: 1rem;
   }
+
+  .content-image img {
+    max-width: 100%;
+  }
 }
+
+
 
 @media (max-width: 640px) {
   .welcome-box {
@@ -132,6 +141,15 @@
   .welcome-box p {
     font-size: 0.95rem;
   }
+}
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 
 
