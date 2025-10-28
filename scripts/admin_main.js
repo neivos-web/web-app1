@@ -1,7 +1,3 @@
-// scripts/admin_main.js
-// Full admin CMS logic (Firestore + Storage) for your page
-// Drop this file into scripts/admin_main.js
-
 // ======================= IMPORTS =======================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
