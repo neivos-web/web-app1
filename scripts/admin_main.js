@@ -219,13 +219,24 @@ function attachContentBoxBehaviors(box) {
       const file = e.target.files[0];
       if (!file) return;
       try {
-        const fileRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
+        // === Upload to cPanel ===
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("https://yourdomain.com/upload.php", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Upload failed");
+
+        const url = data.url; // uploaded file URL from cPanel
+
         img.src = url;
-        showTooltip("✅ Image importée");
+        showTooltip("Image importée");
       } catch (err) {
-        console.error("❌ Erreur upload image:", err);
+        console.error("Erreur upload image:", err);
         alert("Erreur lors de l'importation de l'image");
       }
     });
@@ -271,7 +282,6 @@ function enableEditingForStaticElements() {
     if (!nextEditable) return;
 
     btn.style.display = "inline-flex";
-
     if (nextEditable.tagName === "IMG" || nextEditable.tagName === "VIDEO") {
       btn.addEventListener("click", async () => {
         const input = document.createElement("input");
@@ -281,11 +291,21 @@ function enableEditingForStaticElements() {
           const file = e.target.files[0];
           if (!file) return;
           try {
-            const fileRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
-            await uploadBytes(fileRef, file);
-            const url = await getDownloadURL(fileRef);
-            if (nextEditable.tagName === "IMG") nextEditable.src = url;
-            else {
+            // === Upload to cPanel ===
+            const formData = new FormData();
+            formData.append("file", file);
+            const response = await fetch("https://outsdrs.com/upload.php", {
+              method: "POST",
+              body: formData
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Upload failed");
+
+            const url = data.url;
+            if (nextEditable.tagName === "IMG") {
+              nextEditable.src = url;
+            } else {
               const source = nextEditable.querySelector("source");
               if (source) {
                 source.src = url;
@@ -300,7 +320,7 @@ function enableEditingForStaticElements() {
         };
         input.click();
       });
-    } else {
+    }else {
       // remove permanent contenteditable
       btn.addEventListener("click", () => {
         const originalText = nextEditable.innerText;

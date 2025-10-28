@@ -745,3 +745,6 @@ nav {
 .move-controls button:hover {
   background: #ddd;
 }
+.up-btn, .down-btn, .delete-btn {
+  margin-left: 4px;
+}
