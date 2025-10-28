@@ -11,13 +11,13 @@
     <link rel="stylesheet" href="styles/style.css">
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#2AF598' } } }
+            theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#22e4ac' } } }
         }
     </script>
     <style>
         .edit-btn {
             font-size: 0.8rem;
-            background: #08B3E5;
+            background: #1bd7bb;
             color: white;
             border-radius: 50%;
             width: 22px;
@@ -28,7 +28,7 @@
             cursor: pointer;
             margin-right: 4px;
         }
-        .edit-btn:hover { background: #06a0c5; }
+        .edit-btn:hover { background: #22e4ac; }
     </style>
 </head>
 <body class="bg-gray-100 text-brand-dark">
@@ -40,8 +40,7 @@
             <div class="flex items-center space-x-4">
                 <button class="edit-btn">✎</button>
                 <a href="index.html" class="flex items-center space-x-5">
-                    <img src="images/logo.png" alt="Outsiders Logo" class="h-10 w-auto object-contain" data-editable>
-                    <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue" data-editable>Outsiders</span>
+                    <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain" data-editable>
                 </a>
             </div>
             <div class="hidden md:flex space-x-5 items-center font-medium text-gray-700">
@@ -50,52 +49,45 @@
                     <a href="mission.html" class="hover:text-brand-blue" data-editable>Mission et Vision</a>
                 </div>
                 <div class="relative nav-item-wrapper">
-                <button class="edit-btn">✎</button>
-
-                <!-- Main button -->
-                <button 
-                    id="dropdownButtonPortefeuille"  class="flex items-center hover:text-brand-blue focus:outline-none" data-editable>
-                    Portefeuille
-                    <svg class="w-4 h-4 ml-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                        clip-rule="evenodd" />
-                    </svg>
-                </button>
-
-                <!-- Dropdown menu -->
-                <div id="dropdownMenuPortefeuille" class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
-
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="portfeuille.html#gaming" data-editable>Jeux Video</a>
-                    <button class="edit-btn text-xs">✎</button>
-                    </div>
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="portfeuille.html#cad" data-editable>AR/MR</a>
-                    <button class="edit-btn text-xs">✎</button>
-                    </div>
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="portfeuille.html#ar-mr" data-editable>AR/MR</a>
-                    <button class="edit-btn text-xs">✎</button>
-                    </div>
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="portfeuille.html#vr" data-editable>VR</a>
-                    <button class="edit-btn text-xs">✎</button>
-                    </div>
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="portfeuille.html#ia" data-editable>CAD</a>
-                    <button class="edit-btn text-xs">✎</button>
-                    </div>
-
-                </div>
-                </div>
-
-
-
-                <div class="nav-item-wrapper">
                     <button class="edit-btn">✎</button>
-                    <a href="simulateurs.html" class="hover:text-brand-blue" data-editable>Simulateurs</a>
+
+                    <!-- Main button -->
+                    <button 
+                        id="dropdownButtonPortefeuille"  class="flex items-center hover:text-brand-blue focus:outline-none" data-editable>
+                        Portefeuille
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                            clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown menu -->
+                    <div id="dropdownMenuPortefeuille" class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-jeux.html" data-editable>Jeux Video</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-ar.html" data-editable>AR/MR</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+                        
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-vr.html" data-editable>VR</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-cao.html" data-editable>CAD</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
+                    </div>
                 </div>
+
                 <div class="relative nav-item-wrapper">
                 <button class="edit-btn">✎</button>
 
@@ -116,21 +108,22 @@
 
 
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="formations.html#vr" data-editable>VR</a>
-                    <button class="edit-btn text-xs">✎</button>
+                        <a href="formations-vr.html" data-editable>VR</a>
+                        <button class="edit-btn text-xs">✎</button>
                     </div>
 
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="formations.html#processus" data-editable>Jeux Vidéo</a>
-                    <button class="edit-btn text-xs">✎</button>
+                        <a href="formations-jeux.html" data-editable>Jeux Vidéo</a>
+                        <button class="edit-btn text-xs">✎</button>
                     </div>
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="formations.html#etude" data-editable>Systèmes Embarquée & IOT</a>
-                    <button class="edit-btn text-xs">✎</button>
+                        <a href="formations-iot.html" data-editable>Systèmes Embarquée & IOT</a>
+                        <button class="edit-btn text-xs">✎</button>
                     </div>
+
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
-                    <a href="formations.html#autisme" data-editable>Consulting et accompagnements IT</a>
-                    <button class="edit-btn text-xs">✎</button>
+                        <a href="formations-consulting.html" data-editable>Consulting et accompagnements IT</a>
+                        <button class="edit-btn text-xs">✎</button>
                     </div>
                                           
                 </div>
