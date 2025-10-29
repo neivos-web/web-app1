@@ -10,25 +10,42 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <!-- Lien vers la feuille de style externe -->
     <link rel="stylesheet" href="styles/style.css">
+   <link rel="stylesheet" href="styles/submenu.css"> 
     <script>
         tailwind.config = {
             theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#2AF598' } } }
         }
     </script>
+<style>
+        .edit-btn {
+            font-size: 0.8rem;
+            background: #1bd7bb;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 4px;
+        }
+        .edit-btn:hover { background: #22e4ac; }
+    </style>
 </head>
 <body class="bg-gray-100 text-brand-dark">
 
-   <!-- =========== En-tête du site =========== -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-        
-        <!-- Logo -->
-        <div class="flex items-center space-x-3">
-        <a href="index.html" class="flex items-center space-x-2">
-            <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-            <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue"></span>
-        </a>
-        </div>
+     
+    <!-- =========== En-tête du site =========== -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="container mx-auto max-w-full px-20 py-6 flex justify-between items-center gap-10">
+    
+            <div class="flex items-center space-x-4">
+                <button class="edit-btn">✎</button>
+                <a href="admin_index.html" class="flex items-center space-x-5">
+                    <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain" data-editable>
+                </a>
+            </div>
 
         <!-- Bouton hamburger (mobile) -->
         <button id="menu-toggle" class="md:hidden flex items-center text-gray-700 hover:text-brand-blue focus:outline-none">
@@ -39,86 +56,153 @@
         </svg>
         </button>
 
-        <!-- Menu principal -->
-        <div id="menu"
-            class="hidden md:flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">
-        
-        <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
+            <div class="hidden md:flex space-x-5 items-center font-medium text-gray-700">
+                <div class="nav-item-wrapper">
+                    <button class="edit-btn">✎</button>
+                    <a href="mission.html" class="hover:text-brand-blue" data-editable>Mission et Vision</a>
+                </div>
+                <div class="relative nav-item-wrapper">
+                    <button class="edit-btn">✎</button>
 
-        <!-- Portefeuille -->
-        <div class="relative group">
-            <button class="flex items-center hover:text-brand-blue focus:outline-none">
-            Portefeuille
-            <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
-                fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd" />
-            </svg>
-            </button>
-            <div
-            class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
-            <a href="portefeuille-jeux.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a>
-            <a href="portefeuille-ar.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a>
-            <a href="portefeuille-vr.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
-            <a href="portefeuille-cao.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a>
+                    <!-- Main button -->
+                    <button 
+                        id="dropdownButtonPortefeuille"  class="flex items-center hover:text-brand-blue focus:outline-none" data-editable>
+                        Portefeuille
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                            clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown menu -->
+                    <div id="dropdownMenuPortefeuille" class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-jeux.html" data-editable>Jeux Video</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-ar.html" data-editable>AR/MR</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+                        
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-vr.html" data-editable>VR</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-cao.html" data-editable>CAD</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="relative nav-item-wrapper">
+                <button class="edit-btn">✎</button>
+
+                <!-- Main toggle button -->
+                <button id="dropdownButtonFormations" class="flex items-center hover:text-brand-blue focus:outline-none px-3 py-2" data-editable>
+                    Formations & conseils
+                    <svg class="w-4 h-4 ml-1 transition-transform duration-200"
+                        fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+
+                <!-- Dropdown menu -->
+                <div id="dropdownMenuFormations"
+                    class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
+
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="formations-vr.html" data-editable>VR</a>
+                        <button class="edit-btn text-xs">✎</button>
+                    </div>
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="formations-jeux.html" data-editable>Jeux Vidéo</a>
+                        <button class="edit-btn text-xs">✎</button>
+                    </div>
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="formations-iot.html" data-editable>Systèmes Embarquée & IOT</a>
+                        <button class="edit-btn text-xs">✎</button>
+                    </div>
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="formations-consulting.html" data-editable>Consulting et accompagnements IT</a>
+                        <button class="edit-btn text-xs">✎</button>
+                    </div>
+                                          
+                </div>
             </div>
-        </div>
 
-        <!-- Formations & conseils -->
-        <div class="relative group">
-            <button class="flex items-center hover:text-brand-blue focus:outline-none">
-            Formations & conseils
-            <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
-                fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd" />
-            </svg>
-            </button>
-            <div
-            class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20">
-            <a href="formations-vr.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
-            <a href="formations-jeux.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a>
-            <a href="formations-iot.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a>
-            <a href="formations-consulting.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a>
+                <div class="nav-item-wrapper">
+                    <button class="edit-btn">✎</button>
+                    <a href="recherche.html" class="hover:text-brand-blue" data-editable>Recherche</a>
+                </div>
+                <div class="relative nav-item-wrapper">
+                    <button class="edit-btn">✎</button>
+
+                    <!-- Main toggle button -->
+                    <button id="dropdownButtonBlog" 
+                            class="flex items-center hover:text-brand-blue focus:outline-none px-3 py-2 font-semibold text-brand-blue" 
+                            data-editable>
+                        Actualités / Blog
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200"
+                            fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown menu -->
+                    <div id="dropdownMenuBlog" class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="actualites.html" data-editable>Actualités</a>
+                        <button class="edit-btn text-xs">✎</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-item-wrapper">
+                    <button class="edit-btn">✎</button>
+                    <a href="contact.html" class="hover:text-brand-blue" data-editable>Contact</a>
+                </div>
             </div>
-        </div>
+            <div class="extra-right-buttons">
+                <!-- Save Button -->
+                <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
+                    Publier 
+                </button>
 
-        <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
-
-        <!-- Actualités -->
-        <div class="relative group">
-            <button class="flex items-center text-brand-blue font-semibold focus:outline-none">
-            Actualités / Blog
-            <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
-                fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd" />
-            </svg>
-            </button>
-            <div
-            class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20">
-            <a href="actualites.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Actualités</a>
+                <!-- Déconnexion Button -->
+                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
+                    ⏻
+                </button>
             </div>
-        </div>
-
-        <a href="contact.html" class="hover:text-brand-blue">Contact</a>
-        </div>
-    </nav>
+          
+        </nav>
     </header>
 
     <main>
         <!-- Section Héros -->
         <section class="relative bg-white">
             <div class="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace">
+                <button class="edit-btn text-xs">✎</button>
+                <img src="images/ar_mr_banner.jpg" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
                 <div class="absolute inset-0 bg-black opacity-40"></div>
             </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4">Bienvenue dans notre section Inclusion et Recherche</h1>
-                <p class="text-lg max-w-3xl mx-auto">Découvrez les dernières nouvelles recherches illustrant notre vision et nos derniers progrès réalisés.</p>
+                <button class="edit-btn text-xs">✎</button>
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue dans notre section Inclusion et Recherche</h1>
+                <button class="edit-btn text-xs">✎</button>
+                <p class="text-lg max-w-3xl mx-auto" data-editable>Découvrez les dernières nouvelles recherches illustrant notre vision et nos derniers progrès réalisés.</p>
             </div>
         </section>
         
@@ -126,7 +210,8 @@
        <section class="content-section">
             <div class="content-box">
                 <div class="content-image">
-                    <img src="images/inclusion.gif" alt="Illustration Inclusion et Recherche">
+                    <button class="edit-btn text-xs">✎</button>
+                    <img src="images/inclusion.gif" alt="Illustration Inclusion et Recherche" data-editable>
                 </div>
 
                 <div class="content">
