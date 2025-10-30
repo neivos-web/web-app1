@@ -42,15 +42,28 @@ const loginError = document.getElementById('login-error');
 
 // ----- État d’authentification -----
 onAuthStateChanged(auth, user => {
+    const currentPage = window.location.pathname;
+
     if (user) {
-        // ✅ Si l’utilisateur est connecté, redirection vers admin_index.html
-        window.location.href = "admin_index.html";
+        // If logged in and on the login page, redirect to admin_index.html
+        if (currentPage.includes("admin.html") || currentPage.endsWith("/")) {
+            window.location.href = "admin_index.html";
+        } else {
+            // Stay on admin_index.html
+            loginView?.classList.remove('active');
+            adminView?.classList.add('active');
+        }
     } else {
-        // Si non connecté, afficher la vue de connexion
-        adminView.classList.remove('active');
-        loginView.classList.add('active');
+        // If not logged in and we’re on admin_index.html → send back to login
+        if (currentPage.includes("admin_index.html")) {
+            window.location.href = "admin.html";
+        } else {
+            adminView?.classList.remove('active');
+            loginView?.classList.add('active');
+        }
     }
 });
+
 
 // ----- Connexion -----
 loginForm.addEventListener('submit', async e => {

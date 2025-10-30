@@ -748,3 +748,18 @@ nav {
 .up-btn, .down-btn, .delete-btn {
   margin-left: 4px;
 }
+
+.edit-btn {
+    font-size: 0.8rem;
+    background: #1bd7bb;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 4px;
+}
+.edit-btn:hover { background: #22e4ac; }

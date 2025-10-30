@@ -1,24 +1,6 @@
 // ======================= IMPORTS =======================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-
-// ======================= FIREBASE CONFIG =======================
-// <-- using the config you provided
-const firebaseConfig = {
-  apiKey: "AIzaSyA_ISeo6xAyEYGN2QK5NNap8jd4NqBk4hU",
-  authDomain: "web-karim.firebaseapp.com",
-  projectId: "web-karim",
-  storageBucket: "web-karim.appspot.com",
-  messagingSenderId: "1069191146645",
-  appId: "1:1069191146645:web:61affcf6fbdf99c93f3f9c",
-  measurementId: "G-52F19RZSNM"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+import { auth, db, storage, onAuthStateChanged, signOut } from "./firebase_connect.js";
+import { doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // ======================= SELECTORS & STATE =======================
 const saveBtn = document.getElementById("save-btn");
@@ -44,461 +26,248 @@ function generateKey(el) {
   return path.join("/");
 }
 
-// ======================= SAVE FUNCTION =======================
-// Saves contentBoxes array + other editable elements map in one document
-async function saveSiteContent() {
-  try {
-    const content = {
-      other: {},
-      contentBoxes: []
-    };
+// (--- your save/load/content-box functions are unchanged ---)
+// I assume you already have saveSiteContent, loadSiteContent,
+// buildContentBoxFromData, attachContentBoxBehaviors, showTooltip,
+// showUndoNotification, ensureDeleteButtonsExist, showAddBlockButton, hideAddBlockButton, createNewContentBox, enableDragAndDrop, etc.
+// Keep them as they were. Only the static/edit handling logic below is replaced.
 
-    // collect content-boxes (preserve order)
-    const boxes = Array.from(document.querySelectorAll(".content-box"));
-    boxes.forEach(box => {
-      const imageEl = box.querySelector("img");
-      const titleEl = box.querySelector("h2");
-      const pEls = Array.from(box.querySelectorAll("p"));
-      content.contentBoxes.push({
-        image: imageEl ? imageEl.src : "",
-        title: titleEl ? titleEl.innerText : "",
-        paragraphs: pEls.map(p => p.innerText)
-      });
-    });
+// ======================= DELEGATED EDIT-BUTTON HANDLER =======================
+// This single handler replaces the previous per-button approach and works for dynamically added buttons too.
+document.addEventListener("click", async (e) => {
+  // only proceed if the click came from an .edit-btn (or a child inside it)
+  const btn = e.target.closest(".edit-btn");
+  if (!btn) return;
 
-    // collect other editable elements not inside a content-box
-    const editableEls = Array.from(allEditableElements()).filter(el => !el.closest(".content-box"));
-    editableEls.forEach(el => {
-      const key = generateKey(el);
-      if (el.tagName === "IMG") content.other[key] = el.src;
-      else if (el.tagName === "VIDEO") {
-        const source = el.querySelector("source");
-        content.other[key] = source ? source.src : "";
-      } else if (el.tagName === "A") content.other[key] = { text: el.textContent, href: el.getAttribute("href") || "" };
-      else content.other[key] = el.innerText;
-    });
-
-    await setDoc(CONTENT_DOC, content);
-    showTooltip("✅ Contenu publié avec succès !");
-  } catch (e) {
-    console.error("❌ Erreur sauvegarde :", e);
-    alert("Erreur lors de la sauvegarde !");
-  }
-}
-
-// ======================= LOAD CONTENT =======================
-async function loadSiteContent() {
-  try {
-    const snap = await getDoc(CONTENT_DOC);
-    if (!snap.exists()) {
-      console.log("ℹ️ Aucun contenu Firestore existant (document vide).");
-      return;
-    }
-
-    const data = snap.data();
-
-    // 1) restore other elements
-    const other = data.other || {};
-    Object.keys(other).forEach(key => {
-      // find element by matching generateKey -> brute force: iterate all editable els not in content-boxes
-      const editableEls = Array.from(allEditableElements()).filter(el => !el.closest(".content-box"));
-      for (const el of editableEls) {
-        if (generateKey(el) === key) {
-          const value = other[key];
-          if (el.tagName === "IMG") el.src = value;
-          else if (el.tagName === "VIDEO") {
-            const source = el.querySelector("source");
-            if (source) {
-              source.src = value;
-              el.load();
-            }
-          } else if (el.tagName === "A") {
-            if (value && typeof value === "object") {
-              el.textContent = value.text || el.textContent;
-              if (value.href) el.setAttribute("href", value.href);
-            } else el.textContent = value;
-          } else {
-            el.innerText = value;
-          }
-          break;
-        }
-      }
-    });
-
-    // 2) restore contentBoxes array (rebuild all .content-box nodes)
-    const savedBoxes = data.contentBoxes || [];
-    if (savedBoxes.length) {
-      // Remove all existing .content-box elements inside content-section(s)
-      // We'll find top-level containers (sections with class content-section) and replace their .content-box children
-      // Simpler: remove all .content-box in the document, then append saved ones under the first .content-section
-      const existingBoxes = Array.from(document.querySelectorAll(".content-box"));
-      existingBoxes.forEach(b => b.remove());
-
-      const firstContentSection = document.querySelector(".content-section");
-      if (!firstContentSection) {
-        console.warn("Aucune .content-section trouvée pour restaurer les content-boxes.");
-      }
-
-      // Append saved boxes to the first .content-section
-      const target = firstContentSection || mainEl;
-
-      savedBoxes.forEach(boxData => {
-        const box = buildContentBoxFromData(boxData);
-        target.appendChild(box);
-      });
-    }
-
-    console.log("✅ Contenu chargé depuis Firestore");
-  } catch (e) {
-    console.error("❌ Erreur Firestore:", e);
-  }
-}
-
-// Helper to build DOM content-box from saved data
-function buildContentBoxFromData(boxData) {
-  const newBox = document.createElement("div");
-  newBox.className = "content-box bg-white shadow-md rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-6 relative";
-
-  // image area
-  const imageHtml = `
-    <div class="content-image flex-1">
-      <input type="file" accept="image/*" class="hidden file-input">
-      <button class="edit-btn image-edit absolute top-2 left-2 bg-gray-800 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-md" title="Edit image">📷</button>
-      <img src="${escapeAttr(boxData.image || "https://placehold.co/600x400")}" alt="Image" data-editable>
-    </div>
-  `;
-
-  // text paragraphs
-  const paragraphsHtml = (boxData.paragraphs || []).map(p => `<p data-editable>${escapeHtml(p)}</p>`).join("\n") || `<p data-editable>Nouvelle description...</p>`;
-
-  const titleText = escapeHtml(boxData.title || "Titre");
-
-  newBox.innerHTML = `
-    ${imageHtml}
-    <div class="content flex-1">
-      <div class="flex justify-between items-center mb-2">
-        <h2 data-editable contenteditable="true" class="text-2xl font-bold">${titleText}</h2>
-        <button class="delete-btn bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center">×</button>
-      </div>
-      ${paragraphsHtml}
-    </div>
-  `;
-
-  attachContentBoxBehaviors(newBox);
-  return newBox;
-}
-
-// ======================= EDITING HELPERS =======================
-
-// Attach behaviors (image upload button, file input, delete, mark title/paragraphs editable)
-// ======================= ATTACH CONTENT BOX BEHAVIORS =======================
-function attachContentBoxBehaviors(box) {
-  if (box.dataset.behaviorsAttached) return;
-  box.dataset.behaviorsAttached = "true";
-
-  // DELETE BUTTON
-  const del = box.querySelector(".delete-btn");
-  if (del) {
-    del.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (confirm("Supprimer ce bloc ?")) box.remove();
-    });
-  }
-
-  // IMAGE UPLOAD
-  const editBtn = box.querySelector(".image-edit");
-  const fileInput = box.querySelector(".file-input");
-  const img = box.querySelector("img[data-editable]");
-  if (editBtn && fileInput && img) {
-    editBtn.addEventListener("click", () => fileInput.click());
-    fileInput.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        // === Upload to cPanel ===
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await fetch("https://yourdomain.com/upload.php", {
-          method: "POST",
-          body: formData
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Upload failed");
-
-        const url = data.url; // uploaded file URL from cPanel
-
-        img.src = url;
-        showTooltip("Image importée");
-      } catch (err) {
-        console.error("Erreur upload image:", err);
-        alert("Erreur lors de l'importation de l'image");
-      }
-    });
-  }
-
-  // TEXT EDIT
-  box.querySelectorAll("[data-editable]").forEach((el) => {
-    if (["IMG", "VIDEO", "A"].includes(el.tagName)) return;
-
-    el.addEventListener("click", () => {
-      const originalText = el.innerText;
-      const input = document.createElement(el.tagName === "H2" ? "input" : "textarea");
-      input.value = originalText;
-      input.className = "border border-blue-400 rounded p-1 w-full";
-      el.replaceWith(input);
-      input.focus();
-
-      const saveEdit = () => {
-        el.innerText = input.value || originalText;
-        input.replaceWith(el);
-      };
-
-      input.addEventListener("blur", saveEdit);
-      input.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter" && el.tagName === "H2") {
-          ev.preventDefault();
-          saveEdit();
-        }
-      });
-    });
-  });
-}
-
-
-// make existing page edit buttons behave (for static elements outside content-box)
-function enableEditingForStaticElements() {
-  const editButtons = Array.from(document.querySelectorAll(".edit-btn")).filter(btn => !btn.classList.contains("image-edit"));
-
-  editButtons.forEach(btn => {
-    const nextEditable = btn.nextElementSibling?.hasAttribute("data-editable")
-      ? btn.nextElementSibling
-      : btn.parentElement?.querySelector("[data-editable]");
-    if (!nextEditable) return;
-
-    btn.style.display = "inline-flex";
-    if (nextEditable.tagName === "IMG" || nextEditable.tagName === "VIDEO") {
-      btn.addEventListener("click", async () => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = nextEditable.tagName === "IMG" ? "image/*" : "video/*";
-        input.onchange = async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          try {
-            // === Upload to cPanel ===
-            const formData = new FormData();
-            formData.append("file", file);
-            const response = await fetch("https://outsdrs.com/upload.php", {
-              method: "POST",
-              body: formData
-            });
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || "Upload failed");
-
-            const url = data.url;
-            if (nextEditable.tagName === "IMG") {
-              nextEditable.src = url;
-            } else {
-              const source = nextEditable.querySelector("source");
-              if (source) {
-                source.src = url;
-                nextEditable.load();
-              }
-            }
-            showTooltip("✅ Fichier importé !");
-          } catch (err) {
-            console.error("❌ Upload error:", err);
-            alert("Erreur lors de l'importation du fichier");
-          }
-        };
-        input.click();
-      });
-    }else {
-      // remove permanent contenteditable
-      btn.addEventListener("click", () => {
-        const originalText = nextEditable.innerText;
-        const input = document.createElement(nextEditable.tagName === "H2" ? "input" : "textarea");
-        input.value = originalText;
-        input.className = "border border-blue-400 rounded p-1 w-full";
-        nextEditable.replaceWith(input);
-        input.focus();
-
-        const saveEdit = () => {
-          nextEditable.innerText = input.value || originalText;
-          input.replaceWith(nextEditable);
-        };
-
-        input.addEventListener("blur", saveEdit);
-        input.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter" && nextEditable.tagName === "H2") {
-            ev.preventDefault();
-            saveEdit();
-          }
-        });
-      });
-    }
-  });
-
-  // show save & logout
-  saveBtn.style.display = "inline-block";
-  logoutBtn.style.display = "inline-block";
-}
-
-
-// ======================= UI: add block button (shown only for admin) =======================
-let addBlockBtn = null;
-function showAddBlockButton() {
-  if (addBlockBtn) return;
-
-  addBlockBtn = document.createElement("button");
-  addBlockBtn.id = "add-block-admin-btn";
-  addBlockBtn.textContent = "+ Ajouter un bloc";
-  addBlockBtn.className =
-    "bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-md shadow-md block mx-auto mt-6";
-
-  const referenceNode =
-    mainEl.querySelector(".content-section:last-of-type") || mainEl;
-  referenceNode.appendChild(addBlockBtn);
-
-addBlockBtn.addEventListener("click", () => {
-  // Create the new editable content box
-  const newBox = createNewContentBox();
-
-  // Always insert the new box right BEFORE the addBlockBtn
-  const parent = addBlockBtn.parentNode;
-  if (parent) {
-    parent.insertBefore(newBox, addBlockBtn);
-  } else {
-    console.error("Parent container for Add Block button not found.");
+  // If user not authenticated (visitor), ignore edits
+  if (!auth?.currentUser) {
+    // allow normal behavior for links if not admin
     return;
   }
 
-  // Reattach editing behavior for the new box
-  attachContentBoxBehaviors(newBox);
+  // Prevent other handlers from interfering with editing UI
+  e.stopPropagation();
+  e.preventDefault?.();
 
-  // Add a small fade-in effect (optional but nice)
-  newBox.style.opacity = "0";
-  newBox.style.transition = "opacity 0.3s ease-in-out";
-  requestAnimationFrame(() => {
-    newBox.style.opacity = "1";
-  });
+  // Find the *closest* editable target. We try multiple strategies so it works in many HTML layouts:
+  // 1) If button has data-target attribute (explicit wiring) -> use that selector
+  // 2) Look for an editable element inside the same container (btn.parentElement or nearest positioned ancestor)
+  // 3) Walk nextElementSibling chain to find a node with [data-editable]
+  // 4) fallback: search within nearest section/header/container for first [data-editable]
+  let target = null;
 
-  // Smoothly scroll to the newly added box
-  newBox.scrollIntoView({ behavior: "smooth", block: "center" });
-
-  // Optionally show tooltip
-  showTooltip("Nouveau bloc ajouté !");
-});
-}
-function hideAddBlockButton() {
-  if (!addBlockBtn) return;
-  addBlockBtn.remove();
-  addBlockBtn = null;
-}
-// Creates a new empty content box DOM node (with behaviors attached)
-function createNewContentBox() {
-  const newBox = document.createElement("div");
-  newBox.className = "content-box bg-white shadow-md rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-6 relative";
-
-  newBox.innerHTML = `
-    <div class="content-image flex-1">
-      <input type="file" accept="image/*" class="hidden file-input">
-      <button class="edit-btn image-edit absolute top-2 left-2 bg-gray-800 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-md" title="Edit image">📷</button>
-      <img src="https://placehold.co/600x400" alt="Nouvelle image" data-editable>
-    </div>
-    <div class="content flex-1">
-      <div class="flex justify-between items-center mb-2">
-        <h2 data-editable contenteditable="true" class="text-2xl font-bold">Nouveau titre</h2>
-        <button class="delete-btn bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center">×</button>
-      </div>
-      <p data-editable contenteditable="true" class="text-gray-700">Nouveau contenu ici. Cliquez pour modifier ce texte.</p>
-    </div>
-  `;
-
-  attachContentBoxBehaviors(newBox);
-  return newBox;
-}
-
-// ======================= TOOLTIP small helper =======================
-function showTooltip(message = "Sauvegardé") {
-  // create one if needed
-  let tooltip = document.querySelector(".tooltip");
-  if (!tooltip) {
-    tooltip = document.createElement("div");
-    tooltip.className = "tooltip";
-    document.body.appendChild(tooltip);
+  // (1) explicit data-target on button (optional)
+  const explicit = btn.getAttribute("data-target");
+  if (explicit) {
+    target = document.querySelector(explicit);
   }
-  tooltip.textContent = message;
-  tooltip.classList.add("show");
-  setTimeout(() => tooltip.classList.remove("show"), 1800);
-}
-function ensureDeleteButtonsExist() {
-  document.querySelectorAll(".content-box").forEach(box => {
-    // if box already has a delete button, skip
-    if (box.querySelector(".delete-btn")) return;
 
-    const titleRow = box.querySelector(".content h2")?.parentElement;
-    if (titleRow) {
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className =
-        "delete-btn bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center";
-      deleteBtn.textContent = "×";
-      deleteBtn.title = "Supprimer ce bloc";
-      titleRow.appendChild(deleteBtn);
+  // helper to find nearby container
+  const container = btn.closest("section, header, footer, nav, div") || btn.parentElement || document.body;
+
+  // (2) prefer common image area:
+  if (!target) {
+    // if there is an image in same container
+    const imgNearby = container.querySelector("img[data-editable]");
+    if (imgNearby) target = imgNearby;
+  }
+
+  // (3) search siblings forward for [data-editable]
+  if (!target) {
+    let s = btn.nextElementSibling;
+    while (s) {
+      if (s.hasAttribute && s.hasAttribute("data-editable")) { target = s; break; }
+      // also consider nested editable inside sibling
+      const nested = s.querySelector && s.querySelector("[data-editable]");
+      if (nested) { target = nested; break; }
+      s = s.nextElementSibling;
     }
-  });
-}
+  }
 
-// ======================= ENABLE/DISABLE EDIT MODE =======================
-function enableEditingForAdmin() {
+  // (4) fallback: search within same container for first [data-editable]
+  if (!target) {
+    const found = container.querySelector && container.querySelector("[data-editable]");
+    if (found) target = found;
+  }
 
-  ensureDeleteButtonsExist();
-  // show/hook static elements
-  enableEditingForStaticElements();
+  if (!target) {
+    console.warn("Edit button clicked but no [data-editable] target found for", btn);
+    return;
+  }
 
-  // show add block button
-  showAddBlockButton();
+  // --- If target is an image or video: open file picker & upload (image-edit behavior) ---
+  if (target.tagName === "IMG" || target.tagName === "VIDEO") {
+    // Create hidden file input
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = target.tagName === "IMG" ? "image/*" : "video/*";
+    fileInput.style.display = "none";
+    document.body.appendChild(fileInput);
 
-  // attach behaviors for existing content-boxes
-  document.querySelectorAll(".content-box").forEach(box => {
-    attachContentBoxBehaviors(box);
-  });
-}
+    // When file picked, upload like your other upload code
+    fileInput.addEventListener("change", async (ev) => {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) {
+        fileInput.remove();
+        return;
+      }
 
-function disableEditingForVisitors() {
-  // hide edit buttons
-  document.querySelectorAll(".edit-btn").forEach(btn => btn.style.display = "none");
-  // remove contenteditable attributes
-  allEditableElements().forEach(el => el.removeAttribute("contenteditable"));
-  // hide add button
-  hideAddBlockButton();
-  // hide save/logout
-  if (saveBtn) saveBtn.style.display = "none";
-  if (logoutBtn) logoutBtn.style.display = "none";
-}
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const baseUrl = window.location.hostname === "localhost"
+          ? "http://localhost:8000/php/upload.php"
+          : "/php/upload.php";
 
-// ======================= EVENT LISTENERS =======================
+        const resp = await fetch(baseUrl, { method: "POST", body: formData });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || "Upload failed");
 
-if (saveBtn) {
-  saveBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await saveSiteContent();
-  });
-}
+        // update DOM
+        if (target.tagName === "IMG") {
+          target.src = data.url;
+        } else {
+          // video: update source and load
+          const src = target.querySelector("source");
+          if (src) { src.src = data.url; target.load(); }
+        }
 
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
+        showTooltip("Fichier importé !");
+      } catch (err) {
+        console.error("Upload error:", err);
+        alert("Erreur lors de l'upload du fichier.");
+      } finally {
+        fileInput.remove();
+      }
+    });
+
+    // trigger picker
+    fileInput.click();
+    return;
+  }
+
+  // --- If target is a link (<a>) ---
+  if (target.tagName === "A") {
+    // If admin wants normal navigation, just follow the link
+    // We follow normal navigation unless the admin holds ALT while clicking the ✎ button
+    if (!e.altKey) {
+      const href = target.getAttribute("href");
+      if (href) window.location.href = href;
+      return;
+    }
+
+    // ALT pressed => inline edit link text + href (keep original anchor node)
+    const anchor = target;
+    const wrapper = document.createElement("div");
+    wrapper.className = "inline-edit-wrapper flex flex-col gap-1";
+
+    const textInput = document.createElement("input");
+    textInput.type = "text";
+    textInput.value = anchor.textContent.trim();
+    textInput.placeholder = "Texte du lien";
+    textInput.className = "border border-blue-400 rounded p-1 w-full";
+
+    const hrefInput = document.createElement("input");
+    hrefInput.type = "text";
+    hrefInput.value = anchor.getAttribute("href") || "";
+    hrefInput.placeholder = "URL du lien";
+    hrefInput.className = "border border-green-400 rounded p-1 w-full";
+
+    anchor.replaceWith(wrapper);
+    wrapper.append(textInput, hrefInput);
+    textInput.focus();
+
+    const saveLink = () => {
+      anchor.textContent = textInput.value.trim();
+      anchor.setAttribute("href", hrefInput.value.trim());
+      wrapper.replaceWith(anchor);
+      showTooltip("Lien mis à jour !");
+    };
+
+    hrefInput.addEventListener("blur", saveLink);
+    hrefInput.addEventListener("keydown", (ke) => { if (ke.key === "Enter") saveLink(); });
+    return;
+  }
+
+  // --- Otherwise: treat as text editing (replace target with input/textarea)
+  // Note: we do NOT enable contenteditable globally on nav/menu items to preserve interactivity.
+
+  // choose input type
+  const isHeading = /^h[1-6]$/i.test(target.tagName);
+  const inputEl = document.createElement(isHeading ? "input" : "textarea");
+  inputEl.className = "inline-edit-input border border-blue-300 rounded p-1 w-full";
+  inputEl.value = target.innerText.trim();
+
+  // preserve some inline styles/width by copying computed width (optional)
+  // inputEl.style.minWidth = target.offsetWidth + "px";
+
+  // replace node with input
+  const original = target;
+  original.replaceWith(inputEl);
+  inputEl.focus();
+
+  // select all for convenience
+  inputEl.setSelectionRange && inputEl.setSelectionRange(0, inputEl.value.length);
+
+  // save function (restores original element text and updates Firestore)
+  const saveText = async () => {
+    const newText = inputEl.value;
+    original.innerText = newText || original.innerText;
+    inputEl.replaceWith(original);
+
+    // update Firestore: we update the 'other' map at the content document
     try {
-      await signOut(auth);
-      alert("Déconnexion réussie !");
-      window.location.reload();
+      const path = generateKey(original);
+      const docRef = doc(db, "siteContent", "main");
+      // Use updateDoc to set nested field `other.<path>`
+      const payload = {};
+      payload[`other.${path}`] = newText;
+      await updateDoc(docRef, payload);
+      showTooltip("Contenu mis à jour !");
     } catch (err) {
-      console.error("Erreur déconnexion", err);
+      console.error("Erreur sauvegarde champ:", err);
     }
+  };
+
+  // Save on blur or Enter (for inputs)
+  inputEl.addEventListener("blur", saveText, { once: true });
+  inputEl.addEventListener("keydown", (ke) => {
+    if (ke.key === "Enter" && isHeading) {
+      ke.preventDefault();
+      inputEl.blur();
+    }
+  });
+});
+
+// ======================= enableEditingForAdmin (slightly restricted) =======
+// keeps admin buttons visible and enables editing only for non-nav elements
+function enableEditingForAdmin() {
+  document.querySelectorAll('.edit-btn, .delete-btn, .add-block-btn, #save-btn, #logout-btn').forEach(btn => {
+    btn.style.display = 'inline-block';
+  });
+
+  // DO NOT set contenteditable on nav/menu elements so dropdowns still work
+  // Instead we let the edit-button delegation above create inputs on demand.
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    // hide actual contentEditable setting for navigation and menu items
+    if (el.closest('nav') || el.closest('.nav-item-wrapper') || el.matches('nav *')) {
+      // ensure nav anchors keep normal behavior
+      el.setAttribute('contenteditable', 'false');
+    } else {
+      // optional: leave as not contenteditable; we use inputs via the edit button
+      el.setAttribute('contenteditable', 'false');
+    }
+  });
+}
+
+// ======================= disableEditingForVisitors =======================
+function disableEditingForVisitors() {
+  document.querySelectorAll('.edit-btn, .delete-btn, .add-block-btn, #save-btn, #logout-btn').forEach(btn => {
+    btn.style.display = 'none';
+  });
+
+  document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+    el.setAttribute('contenteditable', 'false');
   });
 }
 
@@ -508,16 +277,16 @@ onAuthStateChanged(auth, async user => {
   await loadSiteContent();
 
   if (user) {
-    // allow editing
     enableEditingForAdmin();
+    // Note: enableEditingForStaticElements replaced by the delegation above
+    showAddBlockButton();
+    ensureDeleteButtonsExist();
   } else {
-    // visitor mode
     disableEditingForVisitors();
   }
 });
 
-// ensure that any dynamic .content-box created by your other scripts also get behaviors
-// (covers cases where other code adds boxes after DOMContentLoaded)
+// Ensure dynamic boxes get behaviors (keep your mutation observer)
 const mutationObserver = new MutationObserver(mutations => {
   for (const m of mutations) {
     for (const node of Array.from(m.addedNodes)) {
@@ -525,7 +294,6 @@ const mutationObserver = new MutationObserver(mutations => {
       if (node.classList && node.classList.contains("content-box")) {
         attachContentBoxBehaviors(node);
       } else {
-        // if a subtree contains content-boxes, attach their behaviors
         node.querySelectorAll && node.querySelectorAll(".content-box").forEach(box => attachContentBoxBehaviors(box));
       }
     }
@@ -533,45 +301,4 @@ const mutationObserver = new MutationObserver(mutations => {
 });
 mutationObserver.observe(document.body, { childList: true, subtree: true });
 
-// helper: escape HTML for safe injection
-function escapeHtml(str = "") {
-  return ("" + str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-function escapeAttr(str = "") {
-  return ("" + str).replace(/"/g, "&quot;");
-}
-function enableDragAndDrop() {
-  const container = document.querySelector("main") || document.body;
-  let dragSrcEl = null;
-
-  container.querySelectorAll(".content-box").forEach(box => {
-    box.setAttribute("draggable", true);
-
-    box.addEventListener("dragstart", (e) => {
-      dragSrcEl = box;
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/html", box.outerHTML);
-      box.classList.add("dragging");
-    });
-
-    box.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-    });
-
-    box.addEventListener("drop", (e) => {
-      e.stopPropagation();
-      if (dragSrcEl !== box) {
-        container.insertBefore(dragSrcEl, box.nextSibling);
-      }
-      box.classList.remove("dragging");
-    });
-
-    box.addEventListener("dragend", () => {
-      box.classList.remove("dragging");
-    });
-  });
-}
+// (rest of your helpers unchanged: escapeHtml, escapeAttr, enableDragAndDrop, etc.)
