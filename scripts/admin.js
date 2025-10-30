@@ -47,7 +47,7 @@ onAuthStateChanged(auth, user => {
     if (user) {
         // If logged in and on the login page, redirect to admin_index.html
         if (currentPage.includes("admin.html") || currentPage.endsWith("/")) {
-            window.location.href = "admin_index.html";
+            window.location.href = "index.html";
         } else {
             // Stay on admin_index.html
             loginView?.classList.remove('active');
@@ -55,7 +55,7 @@ onAuthStateChanged(auth, user => {
         }
     } else {
         // If not logged in and we’re on admin_index.html → send back to login
-        if (currentPage.includes("admin_index.html")) {
+        if (currentPage.includes("index.html")) {
             window.location.href = "admin.html";
         } else {
             adminView?.classList.remove('active');
@@ -83,10 +83,11 @@ loginForm.addEventListener('submit', async e => {
 });
 
 // ----- Déconnexion (optionnelle si tu ajoutes un bouton dans admin_index.html) -----
-const logoutButton = document.getElementById('logout-button');
-if (logoutButton) {
-    logoutButton.addEventListener('click', () => signOut(auth));
-}
+document.body.addEventListener("click", e => {
+    if (e.target.id === "logout-button") {
+        signOut(auth).then(() => location.reload());
+    }
+});
 
 // ----- Exemple : Accès à Firestore (si besoin) -----
 const articlesCollection = collection(db, "articles");
