@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local_path: "./*"
-          remote_path: "/home/outsdrs/public_html/"
+          remote_path: "/"
           exclude: |
             **/.git*
             **/.github*
