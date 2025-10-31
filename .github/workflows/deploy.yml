@@ -18,11 +18,12 @@ jobs:
           server: ftp.outsdrsc.com
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          local-dir: ./        
-          server-dir: /../public_html/  
+          local-dir: ./
+          server-dir: /home/outsdrsc/public_html/   
           exclude: |
             **/.git*
             **/.github*
             **/node_modules/**
             **/.DS_Store
             **/README.md
+
