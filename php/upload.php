@@ -1,65 +1,59 @@
 <?php
-// Allow requests from your frontend domains
-$allowed_origins = [
-    'https://client-web1.netlify.app',
-    'https://outsdrs.com',
-    'http://127.0.0.1:5500'
-];
-
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowed_origins)) {
-    header("Access-Control-Allow-Origin: $origin");
-    header("Access-Control-Allow-Credentials: true");
-}
-
+// ======================= CORS HEADERS =======================
+header("Access-Control-Allow-Origin: *"); // Replace * with your domain in production
 header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
 
-// Handle preflight request
+// Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
+// ======================= INITIAL RESPONSE =======================
+$response = [];
 
-
-// Base upload directory
-$uploadDir = __DIR__ . '/../uploads/';
-if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
-
-// Page folder from query param
-$pageFolder = isset($_GET['page']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $_GET['page']) : 'general';
-
-// Check file
+// ======================= CHECK FILE =======================
 if (!isset($_FILES['file'])) {
     http_response_code(400);
-    echo json_encode(["error" => "No file uploaded"]);
+    $response['error'] = "No file uploaded.";
+    echo json_encode($response);
     exit;
 }
 
 $file = $_FILES['file'];
-$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-$typeDir = in_array($ext, ['mp4', 'mov', 'avi', 'webm']) ? 'videos' : 'images';
 
-// Create folder
-$targetDir = $uploadDir . $pageFolder . '/' . $typeDir . '/';
-if (!file_exists($targetDir)) mkdir($targetDir, 0777, true);
+// ======================= DETERMINE UPLOAD FOLDER =======================
+// Optional: organize by page
+$page = isset($_GET['page']) ? preg_replace("/[^a-zA-Z0-9_-]/", "_", $_GET['page']) : "general";
+$uploadDir = __DIR__ . "/uploads/$page/";
 
-// Unique filename
-$filename = uniqid('upload_') . '.' . $ext;
-$targetPath = $targetDir . $filename;
-
-// Move file
-if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
-    $host = $_SERVER['HTTP_HOST'];
-    $url = "{$protocol}://{$host}/uploads/{$pageFolder}/{$typeDir}/{$filename}";
-
-    echo json_encode(["url" => $url]);
-} else {
-    http_response_code(500);
-    echo json_encode(["error" => "Failed to save file"]);
+// Create directory if it does not exist
+if (!is_dir($uploadDir)) {
+    if (!mkdir($uploadDir, 0755, true)) {
+        http_response_code(500);
+        $response['error'] = "Failed to create directory.";
+        echo json_encode($response);
+        exit;
+    }
 }
 
-// Always exit after sending JSON
-exit();
+// ======================= MOVE FILE =======================
+$fileName = basename($file['name']);
+$targetFile = $uploadDir . $fileName;
+
+// Optional: add timestamp to avoid overwriting
+$targetFile = $uploadDir . time() . "_" . $fileName;
+
+if (move_uploaded_file($file['tmp_name'], $targetFile)) {
+    // Return accessible URL (adjust path if your PHP folder is not web-root)
+    $response['url'] = "/php/uploads/$page/" . basename($targetFile);
+    echo json_encode($response);
+    exit;
+} else {
+    http_response_code(500);
+    $response['error'] = "Failed to move uploaded file.";
+    echo json_encode($response);
+    exit;
+}
