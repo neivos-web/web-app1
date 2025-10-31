@@ -3,7 +3,7 @@ name: Deploy static site to cPanel
 on:
   push:
     branches:
-      - main  # or master, depending on your default branch
+      - main
 
 jobs:
   ftp-deploy:
@@ -13,18 +13,17 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy via FTP to cPanel
-        uses: SamKirkland/FTP-Deploy-Action@v4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ftp.outsdrs.com
-          username: outsiders
-          password: AQW8759mlouK123vgyhn
-          local-dir: ./             
-          server-dir: /public_html  
-          exclude: |                
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          local-dir: ./
+          server-dir: /public_html
+          exclude: |
             **/.git*
             **/.github*
             **/node_modules/**
             **/README.md
             **/.DS_Store
-            **/deploy.yml
             **/.vscode/**
