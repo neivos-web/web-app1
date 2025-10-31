@@ -1,13 +1,7 @@
 <?php
-// login.php (example)
 session_start();
-if ($username === 'admin' && $password === 'secret') {
-    $_SESSION['admin_logged_in'] = true;
-    echo json_encode(['success' => true]);
-} else {
-    echo json_encode(['success' => false]);
-}
 
+// Headers
 header("Access-Control-Allow-Origin: https://outsdrs.com");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -25,25 +19,28 @@ if ($mysqli->connect_error) {
 $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';
 
-if(!$username || !$password){
+if (!$username || !$password) {
     echo json_encode(['success'=>false,'message'=>'Champs manquants']);
     exit;
 }
 
+// Vérification utilisateur
 $stmt = $mysqli->prepare("SELECT password_hash FROM admin_users WHERE username=?");
 $stmt->bind_param("s",$username);
 $stmt->execute();
 $stmt->store_result();
 
-if($stmt->num_rows===1){
+if ($stmt->num_rows === 1) {
     $stmt->bind_result($hash);
     $stmt->fetch();
 
-    if(password_verify($password,$hash) || $password===$hash){
-        $_SESSION['admin']=$username;
+    if (password_verify($password, $hash) || $password === $hash) {
+        $_SESSION['admin'] = $username;
         echo json_encode(['success'=>true]);
         exit;
     }
 }
 
+// Si échec
 echo json_encode(['success'=>false,'message'=>'Nom d’utilisateur ou mot de passe incorrect']);
+exit;

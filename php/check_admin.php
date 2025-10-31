@@ -1,18 +1,18 @@
 <?php
-// check_admin.php
 session_start();
-header('Content-Type: application/json');
 
-// Default response
-$response = ['logged_in' => false];
+// Headers CORS + JSON
+header("Access-Control-Allow-Origin: https://outsdrs.com");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
+header("Content-Type: application/json");
 
-// Example: if your login sets $_SESSION['admin_logged_in'] = true
-if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    $response['logged_in'] = true;
-}
+// Vérifie si l’admin est connecté
+$logged_in = isset($_SESSION['admin']) && $_SESSION['admin'] !== '';
 
-// Return JSON
-echo json_encode($response);
-echo json_encode(['success'=>true]);
+echo json_encode([
+    'logged_in' => $logged_in
+]);
 exit;
 ?>
