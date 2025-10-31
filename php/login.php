@@ -9,7 +9,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
 // DB connection
-$mysqli = new mysqli("localhost", "outsdrsc", "", "cms_site");
+$mysqli = new mysqli("localhost", "outsdrsc_outsiders", "AQW8759mlouK123vgyhn", "cms_site");
 
 if ($mysqli->connect_error) {
     http_response_code(500);

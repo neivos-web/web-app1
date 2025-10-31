@@ -7,8 +7,8 @@ header("Content-Type: application/json");
 // CONFIGURATION
 // =========================
 $host = "localhost";
-$db_user = "outsdrsc";
-$db_pass = "";
+$db_user = "outsdrsc_outsiders";
+$db_pass = "AQW8759mlouK123vgyhn";
 $db_name = "cms_site";
 
 header('Content-Type: application/json; charset=utf-8');
