@@ -5,6 +5,6 @@ header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 session_start();
-session_destroy();
 header('Content-Type: application/json');
-echo json_encode(['success' => true]);
+echo json_encode(['logged_in' => isset($_SESSION['admin']) && $_SESSION['admin'] === true]);
+?>

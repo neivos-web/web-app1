@@ -1,26 +1,41 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
+
+
 session_start();
 
-// Get JSON POST data
-$input = json_decode(file_get_contents('php://input'), true);
-$email = $input['email'] ?? '';
-$password = $input['password'] ?? '';
+header("Access-Control-Allow-Origin: *"); // Replace * with your domain in production
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
+header('Content-Type: application/json');
 
-if (!$email || !$password) {
-    echo json_encode(['success' => false, 'message' => 'Veuillez remplir tous les champs.']);
+// DB connection
+$mysqli = new mysqli("localhost", "outsdrsc", "", "cms_site");
+
+if ($mysqli->connect_error) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Erreur de connexion à la base de données']);
     exit;
 }
 
-// Load users
-$users = include 'admin_users.php';
+$username = $_POST['username'] ?? '';
+$password = $_POST['password'] ?? '';
 
-if (isset($users[$email]) && password_verify($password, $users[$email])) {
-    // Login success
-    $_SESSION['admin_logged_in'] = true;
-    $_SESSION['admin_email'] = $email;
-    echo json_encode(['success' => true]);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Email ou mot de passe incorrect.']);
+$stmt = $mysqli->prepare("SELECT password_hash FROM admin_users WHERE username = ?");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$stmt->store_result();
+
+if ($stmt->num_rows === 1) {
+    $stmt->bind_result($hash);
+    $stmt->fetch();
+    if (password_verify($password, $hash)) {
+        $_SESSION['admin'] = $username;
+        echo json_encode(['success' => true]);
+        exit;
+    }
 }
+
+http_response_code(401);
+echo json_encode(['success' => false, 'message' => 'Nom d’utilisateur ou mot de passe incorrect']);
 ?>
