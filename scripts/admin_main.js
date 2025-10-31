@@ -617,6 +617,23 @@ document.body.addEventListener("click", async (e) => {
 });
 
 
+// === Fix submenu edit buttons (works for dropdown or nav elements) ===
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("edit-btn") && e.target.closest(".submenu")) {
+    e.preventDefault();
+
+    const targetElement = e.target.closest(".submenu").querySelector("[data-editable]");
+    if (!targetElement) return;
+
+    const currentValue = targetElement.textContent.trim();
+    const newValue = prompt("Modifier le contenu :", currentValue);
+    if (newValue !== null) {
+      targetElement.textContent = newValue;
+      showTooltip("Sous-menu mis à jour !");
+      saveSiteContent();
+    }
+  }
+});
 
 
 
