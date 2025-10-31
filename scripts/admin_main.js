@@ -223,46 +223,69 @@ function attachContentBoxBehaviors(box) {
   }
 
 
-  // IMAGE UPLOAD
+  // IMAGE / VIDEO UPLOAD for content-boxes
   const editBtn = box.querySelector(".image-edit");
   const fileInput = box.querySelector(".file-input");
   const img = box.querySelector("img[data-editable]");
-  if (editBtn && fileInput && img) {
+  const video = box.querySelector("video[data-editable]");
+
+  if (editBtn && fileInput && (img || video)) {
     editBtn.addEventListener("click", () => fileInput.click());
+
     fileInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
+
       try {
-        // === Upload to cPanel ===
-        const isLocal = window.location.hostname === "localhost";
-        const baseUrl = isLocal 
-            ? "http://localhost:8000/php/upload.php"
-            : "https://" + window.location.hostname + "/php/upload.php";
+        const formData = new FormData();
+        formData.append("file", file);
 
-          
-        const response = await fetch(baseUrl, {
+        const pageFolder = window.location.pathname
+          .replace(/\//g, "_")
+          .replace(".html", "")
+          .replace(/^_+|_+$/g, "") || "general";
 
-            method: "POST",
-            body: formData
-          });
+        const baseUrl = window.location.hostname === "localhost"
+          ? `http://localhost:8000/php/upload.php?page=${pageFolder}`
+          : `/php/upload.php?page=${pageFolder}`;
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Upload failed");
+        const response = await fetch(baseUrl, { method: "POST", body: formData });
 
-        const url = data.url; // uploaded file URL from cPanel
+        // SAFELY parse JSON without consuming twice
+        let data;
+        try {
+          data = await response.clone().json(); // clone allows safe retry
+        } catch (err) {
+          const text = await response.text();
+          console.error("Invalid JSON response from server:", text);
+          alert("Erreur upload: le serveur n’a pas renvoyé de JSON valide");
+          return;
+        }
 
-        img.src = url;
-        showTooltip("Image importée");
+        if (!response.ok) throw new Error(data?.error || "Upload failed");
+
+        if (img) img.src = data.url;
+        if (video) {
+          const source = video.querySelector("source");
+          if (source) {
+            source.src = data.url;
+            video.load();
+          }
+        }
+
+        showTooltip("Fichier importé !");
         await saveSiteContent();
-        enableEditingForStaticElements();
-        setupMenuLinkEditing();
 
       } catch (err) {
-        console.error("Erreur upload image:", err);
-        alert("Erreur lors de l'importation de l'image");
+        console.error("Erreur upload fichier:", err);
+        alert(err.message || "Erreur lors de l'importation du fichier");
       }
     });
+
+
+
   }
+
 
   // TEXT EDIT
   box.querySelectorAll("[data-editable]").forEach((el) => {
@@ -307,11 +330,14 @@ function enableEditingForStaticElements() {
   const editButtons = document.querySelectorAll(".edit-btn:not(.image-edit)");
 
   editButtons.forEach(btn => {
+    if (btn.dataset.behaviorsAttached) return;
+    btn.dataset.behaviorsAttached = "true";
+
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
       const target = btn.nextElementSibling;
 
-      // Handle image editing differently
+      // IMAGE handling
       if (target && target.tagName === "IMG" && target.hasAttribute("data-editable")) {
         const input = document.createElement("input");
         input.type = "file";
@@ -327,15 +353,22 @@ function enableEditingForStaticElements() {
           try {
             const formData = new FormData();
             formData.append("file", file);
+
+            const pageFolder = window.location.pathname
+              .replace(/\//g, "_")
+              .replace(".html", "")
+              .replace(/^_+|_+$/g, "") || "general";
+
             const baseUrl = window.location.hostname === "localhost"
-              ? "http://localhost:8000/php/upload.php"
-              : "/php/upload.php";
+                ? `http://localhost:8000/php/upload.php?page=${pageFolder}`
+                : `/php/upload.php?page=${pageFolder}`;
 
             const response = await fetch(baseUrl, { method: "POST", body: formData });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || "Upload failed");
 
             target.src = data.url;
+            await saveSiteContent(); // keep Firebase in sync
             showTooltip("Image mise à jour !");
           } catch (err) {
             console.error("Erreur d’upload:", err);
@@ -348,7 +381,7 @@ function enableEditingForStaticElements() {
         return; // stop here for images
       }
 
-      // Handle normal text elements
+      // TEXT / other elements
       if (!target || !target.hasAttribute("data-editable")) return;
 
       target.contentEditable = "true";
@@ -364,11 +397,8 @@ function enableEditingForStaticElements() {
         "blur",
         async () => {
           target.contentEditable = "false";
-          const path = generateKey(target);
-          const newValue = target.innerText.trim();
-          const docRef = doc(db, "content", path);
-          await updateDoc(docRef, { value: newValue });
-          console.log("Updated:", path, "→", newValue);
+          await saveSiteContent(); // save changes to Firebase
+          showTooltip("Contenu mis à jour !");
         },
         { once: true }
       );

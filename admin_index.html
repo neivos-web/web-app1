@@ -15,12 +15,7 @@
         }
     </script>
 
-    <style>
-        body {
-            opacity: 0;
-            transition: opacity 0.2s ease-in;
-        }
-</style>
+
 
 
 </head>
@@ -174,7 +169,6 @@
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-image">
             <div class="absolute inset-0">
-                <button class="edit-btn">✎</button>
                 <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
                 <div class="absolute inset-0 bg-black opacity-40"></div>
             </div>
@@ -367,17 +361,13 @@
             </div>
         </div>
     </footer>
+    <script type="module" src="scripts/firebase_connect.js"></script>
+    <script src="js/dropdown.js"></script>
 
-    <script>
-        // Reveal the page only after auth logic runs
-        window.showPage = () => {
-            document.body.style.opacity = 1;
-        };
-    </script>
+
+
 
     <script type="module" src="scripts/admin_main.js"></script>
-    <script src="js/dropdown.js"></script>
-        <script type="module" src="scripts/firebase_connect.js"></script>
 
 
 

@@ -18,6 +18,9 @@ if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
+// === Get page folder from query param ===
+$pageFolder = isset($_GET['page']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $_GET['page']) : 'general';
+
 // === Check file presence ===
 if (!isset($_FILES['file'])) {
     http_response_code(400);
@@ -30,7 +33,8 @@ $file = $_FILES['file'];
 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $typeDir = in_array($ext, ['mp4', 'mov', 'avi', 'webm']) ? 'videos' : 'images';
 
-$targetDir = $uploadDir . $typeDir . '/';
+// === Create target directory ===
+$targetDir = $uploadDir . $pageFolder . '/' . $typeDir . '/';
 if (!file_exists($targetDir)) {
     mkdir($targetDir, 0777, true);
 }
@@ -41,10 +45,9 @@ $targetPath = $targetDir . $filename;
 
 // === Move uploaded file ===
 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-    // Detect environment (local or online)
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
     $host = $_SERVER['HTTP_HOST'];
-    $url = "{$protocol}://{$host}/uploads/{$typeDir}/{$filename}";
+    $url = "{$protocol}://{$host}/uploads/{$pageFolder}/{$typeDir}/{$filename}";
     
     echo json_encode(["url" => $url]);
 } else {
