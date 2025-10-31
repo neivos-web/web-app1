@@ -189,10 +189,10 @@ function createNewContentBox() {
   box.dataset.behaviorsAttached = "true";
 
   // SHOW DELETE BUTTON FOR ADMINS
-  if(isAdmin){
-    const delBtn = box.querySelector(".delete-btn");
-    if(delBtn) delBtn.style.display = "inline-block";
-  }
+    // SHOW DELETE BUTTON FOR ADMINS (always attach)
+  const delBtn = box.querySelector(".delete-btn");
+  if(delBtn) delBtn.style.display = isAdmin ? "inline-block" : "none";
+
 
   // existing delete event
   const del = box.querySelector(".delete-btn");
@@ -208,10 +208,14 @@ function createNewContentBox() {
  
 
   // ================= IMAGE & VIDEO UPLOAD =================
-  const editBtn = box.querySelector(".image-edit");
   const fileInput = box.querySelector(".file-input");
   const img = box.querySelector("img[data-editable]");
   const video = box.querySelector("video[data-editable]");
+
+
+  // SHOW IMAGE EDIT BUTTON FOR ADMINS
+  const editBtn = box.querySelector(".image-edit");
+  if(editBtn) editBtn.style.display = isAdmin ? "inline-flex" : "none";
 
   if(editBtn && fileInput){
     editBtn.addEventListener("click", () => fileInput.click());
@@ -486,6 +490,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ======================= AUTH STATE =======================
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadSiteContent();
-  await checkAdminSession();
+  await checkAdminSession();   // Check admin first
+  await loadSiteContent();     // Then load content
+  if (isAdmin) enableEditingForAdmin(); // Ensure admin mode activates
 });

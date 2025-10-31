@@ -1,7 +1,4 @@
 <?php
-
-
-
 session_start();
 header("Access-Control-Allow-Origin: *"); // Replace * with your domain in production
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
