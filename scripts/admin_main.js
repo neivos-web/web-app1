@@ -360,7 +360,52 @@ async function handleFileUpload(file, targetEl){
 // ======================= EVENT LISTENERS =======================
 if(saveBtn) saveBtn.addEventListener("click",async e=>{ e.preventDefault(); await saveSiteContent(); enableEditingForStaticElements(); setupMenuLinkEditing(); });
 
-if(logoutBtn) logoutBtn.addEventListener("click",async e=>{ e.preventDefault(); try{ await signOut(auth); window.location.href="/admin.html"; }catch(err){ console.error(err); alert("Erreur lors de la déconnexion"); }});
+// ================== LOGOUT (robust) ==================
+async function handleLogoutClick(e) {
+  e.preventDefault();
+  try {
+    await signOut(auth);
+    console.log("User signed out");
+    window.location.href = "/admin.html"; // Redirect to login
+  } catch (err) {
+    console.error("Erreur lors de la déconnexion:", err);
+    alert("Erreur lors de la déconnexion");
+  }
+}
+
+// Attach logout handler (both possible IDs)
+function attachLogoutHandlerOnce() {
+  const selectors = ["#logout-btn", "#logout-button"];
+  for (const sel of selectors) {
+    const el = document.querySelector(sel);
+    if (el && !el.dataset.logoutAttached) {
+      el.addEventListener("click", handleLogoutClick);
+      el.dataset.logoutAttached = "true";
+    }
+  }
+}
+attachLogoutHandlerOnce();
+
+// Fallback for dynamic buttons (appearing later)
+document.addEventListener("click", (e) => {
+  const target = e.target;
+  if (!target) return;
+  if (target.matches("#logout-btn, #logout-button") || target.closest("#logout-btn, #logout-button")) {
+    handleLogoutClick(e);
+  }
+});
+
+// Make sure admin mode re-attaches handler if button appears
+function enableEditingForAdmin(){
+  document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn, #logout-button')
+    .forEach(b=>b.style.display='inline-block');
+  document.querySelectorAll('[data-editable]').forEach(el=>el.setAttribute('contenteditable','true'));
+  enableEditingForStaticElements();
+  setupMenuLinkEditing();
+  showAddBlockButton();
+  enableDragAndDrop();
+  attachLogoutHandlerOnce(); // ensure logout handler bound
+}
 
 // ======================= MUTATION OBSERVER =======================
 new MutationObserver(mutations=>{
