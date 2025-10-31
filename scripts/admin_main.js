@@ -1,6 +1,4 @@
-// ======================= IMPORTS =======================
-import { auth, db, storage, onAuthStateChanged, signOut } from "./firebase_connect.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
 
 // ======================= SELECTORS & STATE =======================
 const saveBtn = document.getElementById("save-btn");
@@ -9,6 +7,25 @@ const pageContainer = document.querySelector("main") || document.body;
 
 let addBlockBtn = null;
 
+
+
+// ======================= ADMIN SESSION =======================
+let isAdmin = false;
+
+// Check admin session from backend
+async function checkAdminSession() {
+  try {
+    const res = await fetch("/php/check_admin.php");
+    if (!res.ok) throw new Error("Erreur serveur");
+    const data = await res.json();
+    isAdmin = !!data.logged_in; // true/false
+    if (isAdmin) enableEditingForAdmin();
+    else disableEditingForVisitors();
+  } catch (err) {
+    console.error("Erreur vérification admin:", err);
+    disableEditingForVisitors();
+  }
+}
 // ======================= UTILITY =======================
 function allEditableElements() {
   return document.querySelectorAll("[data-editable]");
@@ -172,7 +189,7 @@ function createNewContentBox() {
   box.dataset.behaviorsAttached = "true";
 
   // SHOW DELETE BUTTON FOR ADMINS
-  if(auth.currentUser){
+  if(isAdmin){
     const delBtn = box.querySelector(".delete-btn");
     if(delBtn) delBtn.style.display = "inline-block";
   }
@@ -256,7 +273,7 @@ function enableEditingForStaticElements(){
 function setupMenuLinkEditing(){
   document.querySelectorAll("a[data-editable]").forEach(a=>{
     a.addEventListener("click", e=>{
-      if(!auth.currentUser) return;
+      if(!isAdmin) return;
       if(!e.altKey) return;
       e.preventDefault();
       const orig=a.textContent;
@@ -367,17 +384,18 @@ async function handleFileUpload(file, targetEl){
 if(saveBtn) saveBtn.addEventListener("click",async e=>{ e.preventDefault(); await saveSiteContent(); enableEditingForStaticElements(); setupMenuLinkEditing(); });
 
 // ================== LOGOUT (robust) ==================
-async function handleLogoutClick(e) {
+async function handleLogoutClick(e){
   e.preventDefault();
   try {
-    await signOut(auth);
-    console.log("User signed out");
-    window.location.href = "/admin.html"; // Redirect to login
-  } catch (err) {
-    console.error("Erreur lors de la déconnexion:", err);
+    await fetch("/php/logout.php"); // destroy session
+    console.log("User logged out");
+    window.location.href = "/admin.html"; // redirect to login
+  } catch(err){
+    console.error("Erreur logout:", err);
     alert("Erreur lors de la déconnexion");
   }
 }
+
 
 // Attach logout handler (both possible IDs)
 function attachLogoutHandlerOnce() {
@@ -467,8 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ======================= AUTH STATE =======================
-onAuthStateChanged(auth, async user=>{
+document.addEventListener("DOMContentLoaded", async () => {
   await loadSiteContent();
-  if(user) enableEditingForAdmin();
-  else disableEditingForVisitors();
+  await checkAdminSession();
 });

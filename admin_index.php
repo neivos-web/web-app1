@@ -365,10 +365,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
             </div>
         </div>
     </footer>
-    <script type="module" src="scripts/firebase_connect.js"></script>
     <script src="js/dropdown.js"></script>
-
-
 
 
     <script type="module" src="scripts/admin_main.js"></script>
