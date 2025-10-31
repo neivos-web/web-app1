@@ -4,26 +4,18 @@ on:
   push:
     branches:
       - main
-
 jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Deploy via FTP to cPanel
+      - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ftp.outsdrsc.com
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
+          server: ftp.outsdrs.com
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: /
-          exclude: |
-            **/.git*
-            **/.github*
-            **/node_modules/**
-            **/.DS_Store
-            **/README.md
-
+          server-dir: ./
