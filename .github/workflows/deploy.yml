@@ -1,9 +1,10 @@
-name: Deploy static site to cPanel
+name: Deploy site directly to public_html
 
 on:
   push:
     branches:
       - main
+
 jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
@@ -11,11 +12,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy via FTP
+      - name: Deploy via FTP to cPanel public_html
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ftp.outsdrs.com
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: ./
+          local-dir: ./             
+          server-dir: ./              
+          exclude: |
+            **/.git*
+            **/.github*
+            **/node_modules/**
+            **/.DS_Store
+            **/README.md
