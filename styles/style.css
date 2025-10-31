@@ -379,15 +379,7 @@
   }
 
   /* ==== Boutons et tooltip ==== */
-  .edit-btn {
-    cursor: pointer;
-    font-size: 1.3rem;
-    transition: transform 0.2s ease;
-  }
 
-  .edit-btn:hover {
-    transform: scale(1.2);
-  }
 
   .tooltip {
     position: fixed;
@@ -575,15 +567,7 @@
   }
 
   /* ==== Boutons et tooltip ==== */
-  .edit-btn {
-    cursor: pointer;
-    font-size: 1.3rem;
-    transition: transform 0.2s ease;
-  }
-
-  .edit-btn:hover {
-    transform: scale(1.2);
-  }
+ 
 
   .tooltip {
     position: fixed;
@@ -605,15 +589,6 @@
 /**/
 
 
-.edit-btn {
-  cursor: pointer;
-  font-size: 1.3rem;
-  transition: transform 0.2s ease;
-  
-}
-.edit-btn:hover {
-  transform: scale(1.2);
-}
 
 /* Tooltip */
 .tooltip {
@@ -667,7 +642,7 @@
 
 .nav-item-wrapper .edit-btn:hover {
     transform: scale(1.2);
-    background: #06a0c5;
+    background: #22e4ac
 }
 
 /* Optional: make the dropdown itself unaffected */
@@ -761,5 +736,13 @@ nav {
     justify-content: center;
     cursor: pointer;
     margin-right: 4px;
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: transform 0.2s ease;
 }
 .edit-btn:hover { background: #22e4ac; }
+
+
+  .edit-btn:hover {
+    transform: scale(1.2);
+  }

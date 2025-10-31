@@ -49,8 +49,8 @@ async function saveSiteContent() {
 
     if (el.tagName === 'IMG') type = 'image', value = el.src;
     else if (el.tagName === 'VIDEO') type = 'video', value = el.src;
-    else if (el.tagName === 'A') type = 'link', value = JSON.stringify({ text: el.innerText, href: el.href });
-    else type = 'text', value = el.innerText.trim();
+    else if (el.tagName === 'A') type = 'link', value = JSON.stringify({ text: el.innerText || "", href: el.href || "" });
+    else type = 'text', value = el.innerText ? el.innerText.trim() : "";
 
     data.push({ page, key, type, value });
   });
@@ -66,7 +66,14 @@ async function loadSiteContent() {
   try {
     const response = await fetch("/php/load_content.php");
     if (!response.ok) throw new Error("Erreur lors du chargement");
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch(err){
+      console.error("Erreur JSON:", err, "Response text:", text);
+      return;
+    }
     if (!data) return;
 
     const other = data.other || {};
