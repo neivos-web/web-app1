@@ -16,8 +16,8 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: outsdrs.com
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS}}
+          username: ${{secrets.FTP_USER}}
+          password: ${{secrets.FTP_PASS}}
           local-dir: ./             
           server-dir: ./              
           exclude: |
