@@ -1,41 +1,35 @@
 <?php
-// Enable full error reporting (for debugging, remove in production)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
 
-// ---- CORS headers ----
+// Autorisation CORS
 header("Access-Control-Allow-Origin: https://outsdrs.com");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
-// ---- Handle preflight OPTIONS request ----
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
-// ---- Database connection ----
+// Connexion à la DB
 $mysqli = new mysqli("localhost", "outsdrsc_outsiders", "AQW8759mlouK123vgyhn", "outsdrsc_cms_site");
 if ($mysqli->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Erreur de connexion DB: ' . $mysqli->connect_error]);
     exit;
 }
 
-// ---- Parse POST data ----
+// Récupérer les données POST envoyées en fetch
 parse_str(file_get_contents("php://input"), $postData);
-$username = trim($postData['username'] ?? '');
+$username = $postData['username'] ?? '';
 $password = $postData['password'] ?? '';
 
+// Vérification des champs
 if (!$username || !$password) {
     echo json_encode(['success' => false, 'message' => 'Champs manquants']);
     exit;
 }
 
-// ---- Prepare SQL and check user ----
+// Préparer et exécuter la requête
 $stmt = $mysqli->prepare("SELECT password_hash FROM admin_users WHERE username = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
@@ -45,6 +39,7 @@ if ($stmt->num_rows === 1) {
     $stmt->bind_result($hash);
     $stmt->fetch();
 
+    // Vérifier le mot de passe
     if (password_verify($password, $hash) || $password === $hash) {
         $_SESSION['admin'] = $username;
         echo json_encode(['success' => true]);
@@ -52,7 +47,7 @@ if ($stmt->num_rows === 1) {
     }
 }
 
-// ---- Wrong credentials ----
+// Si échec
 echo json_encode(['success' => false, 'message' => 'Nom d’utilisateur ou mot de passe incorrect']);
 exit;
 ?>
