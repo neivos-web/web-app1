@@ -7,7 +7,6 @@ header("Access-Control-Allow-Origin: *"); // Replace * with your domain in produ
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
-header('Content-Type: application/json');
 
 // DB connection
 $mysqli = new mysqli("localhost", "outsdrsc", "", "cms_site");
