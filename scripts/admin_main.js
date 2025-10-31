@@ -265,13 +265,19 @@ function attachContentBoxBehaviors(box) {
 
         // Determine base URL depending on environment
         let baseUrl;
-        if (window.location.hostname === "localhost") {
-          baseUrl = `http://localhost:8000/php/upload.php?page=${pageFolder}`;
+
+        if (window.location.hostname === "127.0.0.1") {
+            baseUrl = "http://127.0.0.1:5500/php/upload.php";
         } else if (window.location.hostname.endsWith("netlify.app")) {
-          baseUrl = `https://outsdrs.com/php/upload.php?page=${pageFolder}`;
+            baseUrl = "https://outsdrs.com/php/upload.php";
+        } else if (window.location.hostname === "outsdrs.com") {
+            baseUrl = "https://outsdrs.com/php/upload.php";
         } else {
-          baseUrl = `/php/upload.php?page=${pageFolder}`;
+            console.error("Unknown host, upload may fail");
         }
+
+        baseUrl += `?page=${pageFolder}`;
+
 
         const response = await fetch(baseUrl, { method: "POST", body: formData });
 

@@ -1,15 +1,27 @@
 <?php
-header("Access-Control-Allow-Origin: *"); // adjust for your domain
+// Allowed origins
+$allowed_origins = [
+    'http://127.0.0.1:5500',        
+    'https://client-web1.netlify.app', 
+    'https://outsdrs.com'           
+];
+
+// Detect origin
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: $origin");
+    header("Access-Control-Allow-Credentials: true");
+}
+
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
-header('Content-Type: application/json; charset=utf-8');
 
-// Handle OPTIONS preflight
+// Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    echo json_encode(["status" => "ok"]);
     exit();
 }
+
 
 // Base upload directory
 $uploadDir = __DIR__ . '/../uploads/';
