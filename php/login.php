@@ -16,9 +16,10 @@ if ($mysqli->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Erreur de connexion DB: ' . $mysqli->connect_error]);
     exit;
 }
+$data = json_decode(file_get_contents("php://input"), true);
+$username = $data['username'] ?? '';
+$password = $data['password'] ?? '';
 
-$username = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
 
 if (!$username || !$password) {
     echo json_encode(['success' => false, 'message' => 'Champs manquants']);
@@ -43,4 +44,6 @@ if ($stmt->num_rows === 1) {
 
 echo json_encode(['success' => false, 'message' => 'Nom d’utilisateur ou mot de passe incorrect']);
 exit;
+
+
 ?>
