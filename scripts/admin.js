@@ -83,7 +83,3 @@ if (logoutButton) {
   });
 }
 
-// ================== Helper ==================
-function showPage() {
-  document.body.style.display = "block";
-}
