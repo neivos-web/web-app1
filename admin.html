@@ -17,6 +17,13 @@
             theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#1bd7bb' } } }
         }
     </script>
+    <style>
+        body {
+            opacity: 0;
+            transition: opacity 0.2s ease-in;
+        }
+    </style>
+
 </head>
 <body class="bg-gray-100">
 
@@ -57,6 +64,13 @@
         </a>
     </form>
 </div>
+<script>
+  // Reveal the page only after auth logic runs
+  window.showPage = () => {
+    document.body.style.opacity = 1;
+  };
+</script>
+
 
 <!-- Script principal -->
 <script type="module" src="scripts/admin.js"></script>

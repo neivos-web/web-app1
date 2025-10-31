@@ -15,6 +15,14 @@
         }
     </script>
 
+    <style>
+        body {
+            opacity: 0;
+            transition: opacity 0.2s ease-in;
+        }
+</style>
+
+
 </head>
 <body class="bg-gray-100 text-brand-dark">
 
@@ -359,6 +367,13 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Reveal the page only after auth logic runs
+        window.showPage = () => {
+            document.body.style.opacity = 1;
+        };
+    </script>
 
     <script type="module" src="scripts/admin_main.js"></script>
     <script src="js/dropdown.js"></script>
