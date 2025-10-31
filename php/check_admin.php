@@ -15,5 +15,4 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 echo json_encode($response);
 echo json_encode(['success'=>true]);
 exit;
-
 ?>
