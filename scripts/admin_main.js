@@ -8,7 +8,6 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/f
 const saveBtn = document.getElementById("save-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const mainEl = document.querySelector("main");
-const CONTENT_DOC = doc(db, "siteContent", "main");
 
 // Utility: returns NodeList of all elements with data-editable (live)
 function allEditableElements() {
@@ -27,9 +26,7 @@ function generateKey(el) {
   }
   return path.join("/");
 }
-
 // ======================= SAVE FUNCTION =======================
-// Saves contentBoxes array + other editable elements map in one document
 async function saveSiteContent() {
   try {
     const content = {
@@ -37,7 +34,7 @@ async function saveSiteContent() {
       contentBoxes: []
     };
 
-    // 1) collect content-boxes (preserve order)
+    // Collect content boxes
     const boxes = Array.from(document.querySelectorAll(".content-box"));
     boxes.forEach(box => {
       const imageEl = box.querySelector("img");
@@ -50,7 +47,7 @@ async function saveSiteContent() {
       });
     });
 
-    // 2) collect other editable elements not inside a content-box
+    // Collect other editable elements
     const editableEls = Array.from(allEditableElements()).filter(el => !el.closest(".content-box"));
     editableEls.forEach(el => {
       const key = generateKey(el);
@@ -71,17 +68,22 @@ async function saveSiteContent() {
           };
           break;
         default:
-          // fallback: for any other element including SVG, DIV, SPAN
           value = el.innerText ?? el.textContent ?? "";
           break;
       }
-
-      // ensure we never store undefined
-      if (value === undefined) value = null;
       content.other[key] = value;
     });
 
-    await setDoc(CONTENT_DOC, content);
+    // POST to PHP
+    const response = await fetch("/php/save_content.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(content)
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Erreur sauvegarde");
+
     showTooltip("Contenu publié avec succès !");
   } catch (e) {
     console.error("Erreur sauvegarde :", e);
@@ -89,44 +91,33 @@ async function saveSiteContent() {
   }
 }
 
-
 // ======================= LOAD CONTENT =======================
 async function loadSiteContent() {
   try {
-    const snap = await getDoc(CONTENT_DOC);
-    if (!snap.exists()) {
-      console.log("Aucun contenu Firestore existant (document vide).");
-      return;
-    }
+    const response = await fetch("/php/load_content.php");
+    if (!response.ok) throw new Error("Erreur lors du chargement");
 
-    const data = snap.data();
+    const data = await response.json();
+    if (!data) return;
 
-    // 1) restore "other" elements
+    // Restore "other" elements
     const other = data.other || {};
     Object.keys(other).forEach(key => {
       const editableEls = Array.from(allEditableElements()).filter(el => !el.closest(".content-box"));
       for (const el of editableEls) {
         if (generateKey(el) === key) {
           const value = other[key] ?? "";
-
           switch (el.tagName) {
             case "IMG":
               el.src = value;
               break;
             case "VIDEO":
               const source = el.querySelector("source");
-              if (source) {
-                source.src = value;
-                el.load();
-              }
+              if (source) { source.src = value; el.load(); }
               break;
             case "A":
-              if (value && typeof value === "object") {
-                el.textContent = value.text || "";
-                el.setAttribute("href", value.href || "");
-              } else {
-                el.textContent = value;
-              }
+              if (typeof value === "object") { el.textContent = value.text || ""; el.href = value.href || ""; }
+              else el.textContent = value;
               break;
             default:
               el.innerText = value;
@@ -137,37 +128,40 @@ async function loadSiteContent() {
       }
     });
 
-    // 2) restore contentBoxes array (rebuild all .content-box nodes)
+    // Restore content boxes
     const savedBoxes = data.contentBoxes || [];
+    const target = document.querySelector(".content-section") || document.querySelector("main");
+
+    // Remove all existing boxes (optional: only if savedBoxes exist)
     if (savedBoxes.length) {
       const existingBoxes = Array.from(document.querySelectorAll(".content-box"));
       existingBoxes.forEach(b => b.remove());
-
-      const firstContentSection = document.querySelector(".content-section");
-      const target = firstContentSection || mainEl;
-
-      savedBoxes.forEach(boxData => {
-        const box = buildContentBoxFromData(boxData);
-        target.appendChild(box);
-        attachContentBoxBehaviors(box); 
-      });
-      enableEditingForStaticElements(); // reattach static elements like logo
-      setupMenuLinkEditing();
     }
 
-    console.log("Contenu chargé depuis Firestore");
+    // Add saved boxes
+    savedBoxes.forEach(boxData => {
+      const box = buildContentBoxFromData(boxData);
+      target.appendChild(box);
+    });
+
+    // Attach delete & edit behaviors to **all boxes**, including pre-existing ones
+    document.querySelectorAll(".content-box").forEach(box => attachContentBoxBehaviors(box));
+
+    // Enable editing for static elements outside content boxes
+    enableEditingForStaticElements();
+    setupMenuLinkEditing();
+
+    console.log("Contenu chargé depuis le serveur");
   } catch (e) {
-    console.error("Erreur Firestore:", e);
+    console.error("Erreur serveur:", e);
   }
 }
-
 
 // Helper to build DOM content-box from saved data
 function buildContentBoxFromData(boxData) {
   const newBox = document.createElement("div");
   newBox.className = "content-box bg-white shadow-md rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-6 relative";
 
-  // image area
   const imageHtml = `
     <div class="content-image flex-1">
       <input type="file" accept="image/*" class="hidden file-input">
@@ -176,9 +170,7 @@ function buildContentBoxFromData(boxData) {
     </div>
   `;
 
-  // text paragraphs
   const paragraphsHtml = (boxData.paragraphs || []).map(p => `<p data-editable>${escapeHtml(p)}</p>`).join("\n") || `<p data-editable>Nouvelle description...</p>`;
-
   const titleText = escapeHtml(boxData.title || "Titre");
 
   newBox.innerHTML = `
@@ -196,6 +188,32 @@ function buildContentBoxFromData(boxData) {
   return newBox;
 }
 
+
+
+// ======================= IMAGE/VIDEO UPLOAD HANDLER (PHP) =======================
+async function handleFileUpload(file, targetEl) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const pageFolder = window.location.pathname
+    .replace(/\//g, "_")
+    .replace(".html", "")
+    .replace(/^_+|_+$/g, "") || "general";
+
+  let baseUrl = `/php/upload.php?page=${pageFolder}`;
+  const response = await fetch(baseUrl, { method: "POST", body: formData });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Upload failed");
+
+  if (targetEl.tagName === "IMG") targetEl.src = data.url;
+  if (targetEl.tagName === "VIDEO") {
+    const source = targetEl.querySelector("source");
+    if (source) { source.src = data.url; targetEl.load(); }
+  }
+
+  showTooltip("Fichier importé !");
+  await saveSiteContent();
+}
 // ======================= EDITING HELPERS =======================
 
 // Attach behaviors (image upload button, file input, delete, mark title/paragraphs editable)
@@ -245,25 +263,31 @@ function attachContentBoxBehaviors(box) {
           .replace(".html", "")
           .replace(/^_+|_+$/g, "") || "general";
 
-        const baseUrl = window.location.hostname === "localhost"
-          ? `http://localhost:8000/php/upload.php?page=${pageFolder}`
-          : `/php/upload.php?page=${pageFolder}`;
+        // Determine base URL depending on environment
+        let baseUrl;
+        if (window.location.hostname === "localhost") {
+          baseUrl = `http://localhost:8000/php/upload.php?page=${pageFolder}`;
+        } else if (window.location.hostname.endsWith("netlify.app")) {
+          baseUrl = `https://outsdrs.com/php/upload.php?page=${pageFolder}`;
+        } else {
+          baseUrl = `/php/upload.php?page=${pageFolder}`;
+        }
 
         const response = await fetch(baseUrl, { method: "POST", body: formData });
 
-        // SAFELY parse JSON without consuming twice
+        // Read body once
+        const text = await response.text();
         let data;
         try {
-          data = await response.clone().json(); // clone allows safe retry
+          data = JSON.parse(text);
         } catch (err) {
-          const text = await response.text();
-          console.error("Invalid JSON response from server:", text);
-          alert("Erreur upload: le serveur n’a pas renvoyé de JSON valide");
-          return;
+          console.error("Invalid JSON from server:", text);
+          throw new Error("Server did not return valid JSON");
         }
 
-        if (!response.ok) throw new Error(data?.error || "Upload failed");
+        if (!response.ok) throw new Error(data.error || "Upload failed");
 
+        // Update element
         if (img) img.src = data.url;
         if (video) {
           const source = video.querySelector("source");
@@ -274,17 +298,14 @@ function attachContentBoxBehaviors(box) {
         }
 
         showTooltip("Fichier importé !");
-        await saveSiteContent();
-
+        await saveSiteContent(); // save changes
       } catch (err) {
         console.error("Erreur upload fichier:", err);
-        alert(err.message || "Erreur lors de l'importation du fichier");
+        alert("Erreur lors de l'importation du fichier");
       }
     });
-
-
-
   }
+
 
 
   // TEXT EDIT
@@ -358,10 +379,18 @@ function enableEditingForStaticElements() {
               .replace(/\//g, "_")
               .replace(".html", "")
               .replace(/^_+|_+$/g, "") || "general";
+            // Determine base URL depending on environment
+            let baseUrl;
+            if (window.location.hostname === "localhost") {
+                baseUrl = `http://localhost:8000/php/upload.php?page=${pageFolder}`;
+            } else if (window.location.hostname.endsWith("netlify.app")) {
+                // If using Netlify frontend but PHP is on cPanel
+                baseUrl = `https://outsdrs.com/php/upload.php?page=${pageFolder}`;
+            } else {
+                // cPanel domain directly
+                baseUrl = `/php/upload.php?page=${pageFolder}`;
+            }
 
-            const baseUrl = window.location.hostname === "localhost"
-                ? `http://localhost:8000/php/upload.php?page=${pageFolder}`
-                : `/php/upload.php?page=${pageFolder}`;
 
             const response = await fetch(baseUrl, { method: "POST", body: formData });
             const data = await response.json();
@@ -530,17 +559,28 @@ function showUndoNotification(parent, deletedBox, nextSibling) {
 
 function ensureDeleteButtonsExist() {
   document.querySelectorAll(".content-box").forEach(box => {
-    // if box already has a delete button, skip
-    if (box.querySelector(".delete-btn")) return;
-
+    let deleteBtn = box.querySelector(".delete-btn");
     const titleRow = box.querySelector(".content h2")?.parentElement;
-    if (titleRow) {
-      const deleteBtn = document.createElement("button");
+    if (!deleteBtn && titleRow) {
+      deleteBtn = document.createElement("button");
       deleteBtn.className =
         "delete-btn bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center";
       deleteBtn.textContent = "×";
       deleteBtn.title = "Supprimer ce bloc";
       titleRow.appendChild(deleteBtn);
+    }
+    if (deleteBtn && !deleteBtn.dataset.listenerAttached) {
+      deleteBtn.dataset.listenerAttached = "true";
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (confirm("Supprimer ce bloc ?")) {
+          const deletedBox = box;
+          const parent = box.parentNode;
+          const nextSibling = box.nextSibling;
+          deletedBox.remove();
+          showUndoNotification(parent, deletedBox, nextSibling);
+        }
+      });
     }
   });
 }

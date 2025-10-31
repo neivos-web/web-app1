@@ -1,56 +1,53 @@
 <?php
-header('Content-Type: application/json');
-
-// Allow local testing from any origin
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: *"); // adjust for your domain
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Headers: Content-Type");
+header('Content-Type: application/json; charset=utf-8');
 
-// Handle preflight (OPTIONS) request
+// Handle OPTIONS preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
+    echo json_encode(["status" => "ok"]);
     exit();
 }
 
-// === Upload base directory ===
+// Base upload directory
 $uploadDir = __DIR__ . '/../uploads/';
-if (!file_exists($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
-}
+if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
 
-// === Get page folder from query param ===
+// Page folder from query param
 $pageFolder = isset($_GET['page']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $_GET['page']) : 'general';
 
-// === Check file presence ===
+// Check file
 if (!isset($_FILES['file'])) {
     http_response_code(400);
     echo json_encode(["error" => "No file uploaded"]);
     exit;
 }
 
-// === Detect type (image/video) ===
 $file = $_FILES['file'];
 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $typeDir = in_array($ext, ['mp4', 'mov', 'avi', 'webm']) ? 'videos' : 'images';
 
-// === Create target directory ===
+// Create folder
 $targetDir = $uploadDir . $pageFolder . '/' . $typeDir . '/';
-if (!file_exists($targetDir)) {
-    mkdir($targetDir, 0777, true);
-}
+if (!file_exists($targetDir)) mkdir($targetDir, 0777, true);
 
-// === Generate unique filename ===
+// Unique filename
 $filename = uniqid('upload_') . '.' . $ext;
 $targetPath = $targetDir . $filename;
 
-// === Move uploaded file ===
+// Move file
 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
     $host = $_SERVER['HTTP_HOST'];
     $url = "{$protocol}://{$host}/uploads/{$pageFolder}/{$typeDir}/{$filename}";
-    
+
     echo json_encode(["url" => $url]);
 } else {
     http_response_code(500);
     echo json_encode(["error" => "Failed to save file"]);
 }
+
+// Always exit after sending JSON
+exit();
