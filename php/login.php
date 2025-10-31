@@ -35,7 +35,7 @@ $stmt->store_result();
 if ($stmt->num_rows === 1) {
     $stmt->bind_result($hash);
     $stmt->fetch();
-    if (password_verify($password, $hash)) {
+    if ($password==$hash) {
         $_SESSION['admin'] = $username;
         echo json_encode(['success' => true]);
         exit;
