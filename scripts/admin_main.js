@@ -126,6 +126,27 @@ async function loadSiteContent() {
   }
 }
 
+// === Fix submenu edit buttons ===
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("edit-btn")) {
+    e.preventDefault();
+
+    const targetElement = e.target.closest("[data-editable]");
+    if (!targetElement) return;
+
+    const currentValue = targetElement.textContent.trim();
+    const newValue = prompt("Modifier le contenu :", currentValue);
+    if (newValue !== null) {
+      targetElement.textContent = newValue;
+
+      // Mark as unsaved to show publish button active
+      const publishButton = document.getElementById("publish");
+      if (publishButton) publishButton.classList.add("unsaved");
+    }
+  }
+});
+
+
 // Helper to build DOM content-box from saved data
 function buildContentBoxFromData(boxData) {
   const newBox = document.createElement("div");
