@@ -560,12 +560,16 @@ document.body.addEventListener("click", async (e) => {
     try {
       await signOut(auth);
       alert("Déconnexion réussie !");
-      window.location.reload();
+      // Redirect to /admin (pretty URL)
+      window.location.href = "/admin.html";
     } catch (err) {
       console.error("Erreur déconnexion", err);
+      alert("Erreur lors de la déconnexion !");
     }
   }
 });
+
+
 
 
 
@@ -608,8 +612,9 @@ function setupMenuLinkEditing() {
 
 
 // ======================= AUTH STATE =======================
+const currentPath = window.location.pathname;
+
 onAuthStateChanged(auth, async user => {
-  document.body.style.visibility = "hidden";
   await loadSiteContent();
   if (user) {
       
@@ -620,15 +625,16 @@ onAuthStateChanged(auth, async user => {
     setupMenuLinkEditing();
     showAddBlockButton();
     ensureDeleteButtonsExist();
-    console.log("✅ Admin mode");
   } else {
-    
+      if (currentPath === "/admin_index" || currentPath === "/admin_index.html") {
+        window.location.href = "/admin.html";
+      }
+
+
     // visitor mode
     disableEditingForVisitors();
     hideAddBlockButton(); // 
-    console.log("👤 Visitor mode");
   }
-  document.body.style.visibility = "visible";
 });
 
 
