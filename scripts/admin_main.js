@@ -424,6 +424,48 @@ new MutationObserver(mutations=>{
   });
 }).observe(document.body,{childList:true,subtree:true});
 
+
+// ======================= PORTFEUILLE DROPDOWN FIX =======================
+document.addEventListener("DOMContentLoaded", () => {
+  const btns = document.querySelectorAll("#dropdownButtonPortefeuille");
+  const menu = document.getElementById("dropdownMenuPortefeuille");
+  
+  if (!btns.length || !menu) return; // Skip if elements not found
+
+  btns.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation(); // prevent global click handlers from closing it
+      menu.classList.toggle("hidden");
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!menu.classList.contains("hidden") && !menu.contains(e.target) && ![...btns].some(b => b.contains(e.target))) {
+      menu.classList.add("hidden");
+    }
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btns = document.querySelectorAll("#dropdownButtonFormations");
+  const menu = document.getElementById("dropdownButtonFormations");
+  
+  if (!btns.length || !menu) return; // Skip if elements not found
+
+  btns.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation(); // prevent global click handlers from closing it
+      menu.classList.toggle("hidden");
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!menu.classList.contains("hidden") && !menu.contains(e.target) && ![...btns].some(b => b.contains(e.target))) {
+      menu.classList.add("hidden");
+    }
+  });
+});
+
 // ======================= AUTH STATE =======================
 onAuthStateChanged(auth, async user=>{
   await loadSiteContent();
