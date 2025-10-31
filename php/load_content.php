@@ -1,13 +1,17 @@
 <?php
+$mysqli = new mysqli("localhost", "user", "password", "database");
 header('Content-Type: application/json');
-$page = $_GET['page'] ?? 'general';
-$file = __DIR__ . "/content_$page.json";
 
-if (!file_exists($file)) {
-    echo json_encode(['other'=>[], 'contentBoxes'=>[]]);
-    exit;
+$page = $mysqli->real_escape_string($_GET['page'] ?? 'home');
+$result = $mysqli->query("SELECT * FROM site_content WHERE page='$page'");
+
+$content = [];
+while ($row = $result->fetch_assoc()) {
+    $content[$row['element_key']] = [
+        'type' => $row['type'],
+        'value' => $row['value']
+    ];
 }
 
-$data = file_get_contents($file);
-echo $data;
+echo json_encode($content);
 ?>

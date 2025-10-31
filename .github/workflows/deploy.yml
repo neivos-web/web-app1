@@ -1,0 +1,30 @@
+name: Deploy static site to cPanel
+
+on:
+  push:
+    branches:
+      - main  # or master, depending on your default branch
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy via FTP to cPanel
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ftp.outsdrs.com
+          username: outsiders
+          password: AQW8759mlouK123vgyhn
+          local-dir: ./             
+          server-dir: /public_html  
+          exclude: |                
+            **/.git*
+            **/.github*
+            **/node_modules/**
+            **/README.md
+            **/.DS_Store
+            **/deploy.yml
+            **/.vscode/**

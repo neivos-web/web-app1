@@ -28,67 +28,36 @@ function generateKey(el) {
 }
 // ======================= SAVE FUNCTION =======================
 async function saveSiteContent() {
-  try {
-    const content = {
-      other: {},
-      contentBoxes: []
-    };
+  const elements = document.querySelectorAll('[contenteditable], img, video, a');
+  const data = [];
 
-    // Collect content boxes
-    const boxes = Array.from(document.querySelectorAll(".content-box"));
-    boxes.forEach(box => {
-      const imageEl = box.querySelector("img");
-      const titleEl = box.querySelector("h2");
-      const pEls = Array.from(box.querySelectorAll("p"));
-      content.contentBoxes.push({
-        image: imageEl?.src || "",
-        title: titleEl?.innerText || "",
-        paragraphs: pEls.map(p => p.innerText || "")
-      });
-    });
+  elements.forEach(el => {
+    const key = generateKey(el);
+    const page = currentPage; // e.g. 'home'
+    let type, value;
 
-    // Collect other editable elements
-    const editableEls = Array.from(allEditableElements()).filter(el => !el.closest(".content-box"));
-    editableEls.forEach(el => {
-      const key = generateKey(el);
-      let value;
+    if (el.tagName === 'IMG') {
+      type = 'image';
+      value = el.src;
+    } else if (el.tagName === 'VIDEO') {
+      type = 'video';
+      value = el.src;
+    } else if (el.tagName === 'A') {
+      type = 'link';
+      value = JSON.stringify({ text: el.innerText, href: el.href });
+    } else {
+      type = 'text';
+      value = el.innerText.trim();
+    }
 
-      switch (el.tagName) {
-        case "IMG":
-          value = el.src || "";
-          break;
-        case "VIDEO":
-          const source = el.querySelector("source");
-          value = source?.src || "";
-          break;
-        case "A":
-          value = {
-            text: el.textContent || "",
-            href: el.getAttribute("href") || ""
-          };
-          break;
-        default:
-          value = el.innerText ?? el.textContent ?? "";
-          break;
-      }
-      content.other[key] = value;
-    });
+    data.push({ page, key, type, value });
+  });
 
-    // POST to PHP
-    const response = await fetch("/php/save_content.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(content)
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Erreur sauvegarde");
-
-    showTooltip("Contenu publié avec succès !");
-  } catch (e) {
-    console.error("Erreur sauvegarde :", e);
-    alert("Erreur lors de la sauvegarde !");
-  }
+  await fetch('/php/save_content.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
 }
 
 // ======================= LOAD CONTENT =======================
@@ -387,16 +356,18 @@ function enableEditingForStaticElements() {
               .replace(/^_+|_+$/g, "") || "general";
             // Determine base URL depending on environment
             let baseUrl;
-            if (window.location.hostname === "localhost") {
-                baseUrl = `http://localhost:8000/php/upload.php?page=${pageFolder}`;
+
+            if (window.location.hostname === "127.0.0.1") {
+                baseUrl = "http://127.0.0.1:5500/php/upload.php";
             } else if (window.location.hostname.endsWith("netlify.app")) {
-                // If using Netlify frontend but PHP is on cPanel
-                baseUrl = `https://outsdrs.com/php/upload.php?page=${pageFolder}`;
+                baseUrl = "https://outsdrs.com/php/upload.php";
+            } else if (window.location.hostname === "outsdrs.com") {
+                baseUrl = "https://outsdrs.com/php/upload.php";
             } else {
-                // cPanel domain directly
-                baseUrl = `/php/upload.php?page=${pageFolder}`;
+                console.error("Unknown host, upload may fail");
             }
 
+            baseUrl += `?page=${pageFolder}`;
 
             const response = await fetch(baseUrl, { method: "POST", body: formData });
             const data = await response.json();
