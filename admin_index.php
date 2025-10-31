@@ -4,6 +4,8 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     header('Location: /admin.html');
     exit;
 }
+header('Content-Type: text/html; charset=UTF-8');
+
 ?>
 
 
