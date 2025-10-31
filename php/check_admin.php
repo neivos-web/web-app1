@@ -1,7 +1,7 @@
 <?php
 // check_admin.php
-header('Content-Type: application/json');
 session_start();
+header('Content-Type: application/json');
 
 // Default response
 $response = ['logged_in' => false];
@@ -13,4 +13,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
 // Return JSON
 echo json_encode($response);
+echo json_encode(['success'=>true]);
 exit;
+
+?>
