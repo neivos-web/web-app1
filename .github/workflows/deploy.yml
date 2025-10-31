@@ -15,11 +15,11 @@ jobs:
       - name: Deploy via FTP to cPanel
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ftp.outsdrs.com
+          server: ftp.outsdrsc.com
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./        
-          server-dir: /        
+          server-dir: /../public_html/  
           exclude: |
             **/.git*
             **/.github*
