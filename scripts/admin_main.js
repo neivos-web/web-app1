@@ -160,11 +160,17 @@ function createNewContentBox() {
 }
 
 // ======================= ATTACH BEHAVIORS =======================
-function attachContentBoxBehaviors(box){
+  function attachContentBoxBehaviors(box){
   if(box.dataset.behaviorsAttached) return;
   box.dataset.behaviorsAttached = "true";
 
-  // ================= DELETE =================
+  // SHOW DELETE BUTTON FOR ADMINS
+  if(auth.currentUser){
+    const delBtn = box.querySelector(".delete-btn");
+    if(delBtn) delBtn.style.display = "inline-block";
+  }
+
+  // existing delete event
   const del = box.querySelector(".delete-btn");
   if(del) del.addEventListener("click", e => {
     e.stopPropagation();
@@ -175,6 +181,7 @@ function attachContentBoxBehaviors(box){
       showUndoNotification(parent, box, nextSibling);
     }
   });
+ 
 
   // ================= IMAGE & VIDEO UPLOAD =================
   const editBtn = box.querySelector(".image-edit");
