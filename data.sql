@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS site_content (
     value TEXT COMMENT 'text, URL, or JSON string depending on type',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_page_element (page, element_key)
-) ENGINE=InnoDB DEFA
+) ENGINE=InnoDB 

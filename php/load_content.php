@@ -2,10 +2,10 @@
 // =========================
 // CONFIGURATION
 // =========================
-$host = "localhost";          // usually 'localhost'
-$db_user = "outsdrsc";    // replace with your DB username
-$db_pass = "";    // replace with your DB password
-$db_name = "cms_site";        // your database name
+$host = "localhost";
+$db_user = "outsdrsc";
+$db_pass = "";
+$db_name = "cms_site";
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -13,8 +13,6 @@ header('Content-Type: application/json; charset=utf-8');
 // CONNECT TO DATABASE
 // =========================
 $mysqli = new mysqli($host, $db_user, $db_pass, $db_name);
-
-// Check connection
 if ($mysqli->connect_error) {
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed']);
@@ -42,19 +40,46 @@ if (!$result) {
 // =========================
 // FORMAT DATA
 // =========================
-$content = [];
+$data = [
+    'contentBoxes' => [],
+    'other' => []
+];
+
 while ($row = $result->fetch_assoc()) {
-    $content[$row['element_key']] = [
-        'type' => $row['type'],
-        'value' => $row['value'],
-        'updated_at' => $row['updated_at']
-    ];
+    $key = $row['element_key'];
+    $type = $row['type'];
+    $value = $row['value'];
+
+    // Detect content boxes by key pattern: page_index_key
+    if (preg_match('/^' . preg_quote($page, '/') . '_(\d+)_(.+)$/', $key, $matches)) {
+        $index = intval($matches[1]);
+        $subKey = $matches[2];
+
+        if (!isset($data['contentBoxes'][$index])) {
+            $data['contentBoxes'][$index] = ['title' => '', 'paragraphs' => [], 'image' => null];
+        }
+
+        if ($subKey === 'title') {
+            $data['contentBoxes'][$index]['title'] = $value;
+        } elseif (strpos($subKey, 'paragraph_') === 0) {
+            $data['contentBoxes'][$index]['paragraphs'][] = $value;
+        } elseif ($subKey === 'image') {
+            $data['contentBoxes'][$index]['image'] = $value;
+        }
+    } else {
+        // Static elements
+        if ($type === 'link') {
+            $data['other'][$key] = ['type' => $type, 'value' => json_decode($value, true)];
+        } else {
+            $data['other'][$key] = ['type' => $type, 'value' => $value];
+        }
+    }
 }
 
 // =========================
 // RETURN JSON
 // =========================
-echo json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 // Close connection
 $mysqli->close();
