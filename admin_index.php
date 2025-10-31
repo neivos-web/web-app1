@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['admin'])) {
-    header("Location: login.html");
+    header("Location: admin.html");
     exit;
 }
 header('Content-Type: text/html; charset=UTF-8');
@@ -26,7 +26,22 @@ header('Content-Type: text/html; charset=UTF-8');
             theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#22e4ac' } } }
         }
     </script>
-
+    <style>
+        .edit-btn {
+            font-size: 0.8rem;
+            background: #08B3E5;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 4px;
+        }
+        .edit-btn:hover { background: #06a0c5; }
+    </style>
 
 
 
@@ -39,11 +54,14 @@ header('Content-Type: text/html; charset=UTF-8');
             
             <!-- Logo -->
             <div class="flex items-center space-x-3">
-                <a href="index.html" data-editable data-key="logo_text" class="flex items-center space-x-2">
-                    <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-                    <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue">Outsiders</span>
+                <div class="nav-item-wrapper">
                     <button class="edit-btn">✎</button>
-                </a>
+                    <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
+                        <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                        <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue">Outsiders</span>
+                        <button class="edit-btn">✎</button>
+                    </a>
+                </div>
             </div>
 
             <!-- Bouton hamburger (mobile) -->

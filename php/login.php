@@ -1,5 +1,12 @@
 <?php
+// login.php (example)
 session_start();
+if ($username === 'admin' && $password === 'secret') {
+    $_SESSION['admin_logged_in'] = true;
+    echo json_encode(['success' => true]);
+} else {
+    echo json_encode(['success' => false]);
+}
 
 header("Access-Control-Allow-Origin: https://outsdrs.com");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
