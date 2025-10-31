@@ -15,7 +15,7 @@ jobs:
       - name: Deploy via FTP to cPanel public_html
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ftp.outsdrs.com
+          server: outsdrs.com
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS}}
           local-dir: ./             
