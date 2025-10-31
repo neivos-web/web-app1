@@ -9,7 +9,7 @@ header("Content-Type: application/json");
 $host = "localhost";
 $db_user = "outsdrsc_outsiders";
 $db_pass = "AQW8759mlouK123vgyhn";
-$db_name = "cms_site";
+$db_name = "outsdrsc_cms_site";
 
 header('Content-Type: application/json; charset=utf-8');
 

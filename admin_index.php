@@ -26,6 +26,8 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     </script>
 
 
+
+
 </head>
 <body class="bg-gray-100 text-brand-dark">
     
@@ -150,15 +152,6 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                     <a href="contact.html" class="hover:text-brand-blue" data-editable>Contact</a>
                 </div>
             </div>
-            <!--language traslation -->
-    
-            <div class="flex items-center space-x-2">
-            <select id="language-selector" class="border border-gray-300 rounded-md p-1 text-sm">
-                <option value="fr">🇫🇷 Français</option>
-                <option value="en">🇬🇧 English</option>
-            </select>
-            </div>
-
             <div class="extra-right-buttons">
                 <!-- Save Button -->
                 <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
