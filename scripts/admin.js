@@ -1,26 +1,29 @@
-const loginForm = document.getElementById("login-form");
-if (loginForm) {
-  loginForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+const form = document.getElementById('login-form');
+const errorEl = document.getElementById('login-error');
 
-    try {
-      const res = await fetch('https://outsdrs.com/php/login.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-      if (data.success) {
-        window.location.href = '/admin_index.html'; // Dashboard
-      } else {
-        document.getElementById("login-error").textContent = data.message;
-      }
-    } catch (err) {
-      console.error(err);
-      document.getElementById("login-error").textContent = 'Erreur serveur.';
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  try {
+    const res = await fetch('https://outsdrs.com/php/login.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ username, password }),
+      credentials: 'include'
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      window.location.href = 'https://outsdrs.com/admin_index.php';
+    } else {
+      errorEl.textContent = data.message || 'Nom d’utilisateur ou mot de passe incorrect';
     }
-  });
-}
+  } catch (err) {
+    errorEl.textContent = 'Erreur serveur, réessayez plus tard';
+    console.error(err);
+  }
+});
