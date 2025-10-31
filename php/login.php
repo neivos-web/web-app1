@@ -9,11 +9,15 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
 // DB connection
-$mysqli = new mysqli("localhost", "outsdrsc_outsiders", "AQW8759mlouK123vgyhn", "outsdrsc_cms_site");
+$mysqli = new mysqli("localhost", "outsdrsc_outsiders", "YOUR_DB_PASSWORD", "outsdrsc_cms_site");
 
 if ($mysqli->connect_error) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Erreur de connexion à la base de données']);
+    echo json_encode([
+        'success' => false,
+        'error' => 'DB connection failed',
+        'details' => $mysqli->connect_error
+    ]);
     exit;
 }
 
