@@ -16,9 +16,9 @@ if ($mysqli->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Erreur de connexion DB: ' . $mysqli->connect_error]);
     exit;
 }
-$data = json_decode(file_get_contents("php://input"), true);
-$username = $data['username'] ?? '';
-$password = $data['password'] ?? '';
+parse_str(file_get_contents("php://input"), $postData);
+$username = $postData['username'] ?? '';
+$password = $postData['password'] ?? '';
 
 
 if (!$username || !$password) {
