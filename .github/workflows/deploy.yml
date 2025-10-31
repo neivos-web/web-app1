@@ -12,19 +12,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: Deploy via FTP to cPanel public_html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: outsdrs.com
-          port: 22
           username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          local_path: "./*"
-          remote_path: "/public_html/"
+          password: ${{ secrets.FTP_PASS}}
+          local-dir: ./             
+          server-dir: ./              
           exclude: |
             **/.git*
             **/.github*
             **/node_modules/**
             **/.DS_Store
             **/README.md
-
