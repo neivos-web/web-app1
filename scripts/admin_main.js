@@ -295,15 +295,7 @@ function showAddBlockButton(){
 
 function hideAddBlockButton(){ if(!addBlockBtn) return; addBlockBtn.remove(); addBlockBtn=null; }
 
-// ======================= ADMIN / VISITOR MODE =======================
-function enableEditingForAdmin(){
-  document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn').forEach(b=>b.style.display='inline-block');
-  document.querySelectorAll('[data-editable]').forEach(el=>el.setAttribute('contenteditable','true'));
-  enableEditingForStaticElements();
-  setupMenuLinkEditing();
-  showAddBlockButton();
-  enableDragAndDrop();
-}
+
 
 function disableEditingForVisitors(){
   document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn').forEach(b=>b.style.display='none');
