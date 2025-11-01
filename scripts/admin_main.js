@@ -347,11 +347,6 @@ function showAddBlockButton() {
 
 function hideAddBlockButton() { if (!addBlockBtn) return; addBlockBtn.remove(); addBlockBtn = null; }
 
-function disableEditingForVisitors() {
-  document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn').forEach(b => b.style.display = 'none');
-  document.querySelectorAll('[contenteditable="true"]').forEach(el => el.setAttribute('contenteditable', 'false'));
-  hideAddBlockButton();
-}
 
 // ======================= DRAG & DROP =======================
 function enableDragAndDrop() {
