@@ -51,11 +51,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
 
 </head>
-<body class="bg-gray-100 text-brand-dark" data-page="mission" class="is-admin">
-  <select id="language-selector">
-    <option value="fr">Français</option>
-    <option value="en">English</option>
-  </select>
+<body class="bg-gray-100 text-brand-dark">
     
     <!-- =========== En-tête du site =========== -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
@@ -64,11 +60,12 @@ header('Content-Type: text/html; charset=UTF-8');
             <!-- Logo -->
             <div class="flex items-center space-x-3">
                 <div class="nav-item-wrapper">
-                    <button class="edit-btn">✎</button>
-                    <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
-                        <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-                    </a>
-                </div>
+                        <button class="edit-btn">📷</button>        
+                        <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
+                        
+                            <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                        </a>
+                    </div>
             </div>
 
             <!-- Bouton hamburger (mobile) -->
@@ -119,7 +116,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
 
                 <div data-editable data-key="nav_research" class="flex items-center space-x-1">
-                    <a href="recherche.html" class="hover:text-brand-blue">Rechercheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</a>
+                    <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
                     <button class="edit-btn">✎</button>
                 </div>
 
@@ -165,11 +162,11 @@ header('Content-Type: text/html; charset=UTF-8');
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-image">
             <div class="absolute inset-0">
-                <button class="edit-btn absolute top-4 right-4 z-50">✎</button>
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
-                <div class="absolute inset-0 bg-black opacity-40"></div>
 
-            </div>
+                    <button class="edit-btn">📷</button>
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
+                    <div class="absolute inset-0 bg-black opacity-40"></div>
+                </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
                 <button class="edit-btn">✎</button>
                 <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue dans notre section actualités et blogs</h1>
@@ -349,6 +346,8 @@ header('Content-Type: text/html; charset=UTF-8');
         </div>
     </footer>
     <script src="js/dropdown.js"></script>
+
+
     <script type="module" src="scripts/admin_main.js"></script>
     <script type="module" src="/js/lang.js"></script>
     <script src="/js/translations.js"></script>
