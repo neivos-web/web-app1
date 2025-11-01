@@ -236,6 +236,58 @@ function enableEditingForStaticElements() {
 }
 
 // ======================= CONTENT BOXES =======================
+
+function enableHoverImageUploads() {
+  document.querySelectorAll("img[data-editable]").forEach(img => {
+    if (img.dataset.hoverUploadAttached) return;
+    img.dataset.hoverUploadAttached = "true";
+
+    // Wrap img in a relative container if not already wrapped
+    const wrapper = document.createElement("div");
+    wrapper.className = "image-edit-hover-wrapper";
+    img.parentNode.insertBefore(wrapper, img);
+    wrapper.appendChild(img);
+
+    // Create upload button + hidden file input
+    const btn = document.createElement("button");
+    btn.className = "image-upload-btn";
+    btn.innerHTML = "📷";
+    wrapper.appendChild(btn);
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.className = "hidden";
+    wrapper.appendChild(fileInput);
+
+    // Only show button for admin
+    btn.style.display = isAdmin ? "flex" : "none";
+
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    fileInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const key = generateKey(img);
+      const pageFolder = currentPageFolder();
+
+      try {
+        const uploadedUrl = await uploadFileToServer(file, key, pageFolder);
+        img.src = uploadedUrl;
+        await saveSiteContent();
+        showTooltip("Image mise à jour");
+      } catch (err) {
+        console.error(err);
+        alert("Erreur upload image");
+      }
+    });
+  });
+}
+
 function attachContentBoxBehaviors(box) {
   if (box.dataset.behaviorsAttached) return;
   box.dataset.behaviorsAttached = "true";
@@ -380,6 +432,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     addBlockBtn.addEventListener("click", () => {
       const box = createNewContentBox();
       pageContainer.appendChild(box);
+      enableHoverImageUploads();
+
     });
   }
 });
