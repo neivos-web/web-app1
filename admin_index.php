@@ -60,7 +60,7 @@ session_start()
             <div class="flex items-center space-x-3">
                 <div class="nav-item-wrapper">
                     <button class="edit-btn">✎</button>
-                    <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
+                    <a href="admin_index.html" data-editable data-key="logo_text" class="flex items-center space-x-2">
                         <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
                         <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue">Outsiders</span>
                         <button class="edit-btn">✎</button>
