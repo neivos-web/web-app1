@@ -445,12 +445,18 @@ document.addEventListener("click", (e) => {
     handleLogoutClick(e);
   }
 });
-
-// Make sure admin mode re-attaches handler if button appears
 function enableEditingForAdmin() {
   isAdmin = true;
-  document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn, #logout-button').forEach(b => b.style.display = 'inline-block');
+
+  // Show all admin buttons
+  document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn, #logout-button').forEach(b => {
+    if (b) b.style.display = 'inline-block';
+  });
+
+  // Make all editable elements truly editable
   document.querySelectorAll('[data-editable]').forEach(el => el.setAttribute('contenteditable', 'true'));
+
+  // Setup behaviors
   enableEditingForStaticElements();
   setupMenuLinkEditing();
   showAddBlockButton();
@@ -458,12 +464,21 @@ function enableEditingForAdmin() {
   attachLogoutHandlerOnce();
 }
 
+
 function disableEditingForVisitors() {
   isAdmin = false;
-  document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn, #logout-button').forEach(b => b.style.display = 'none');
+
+  document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn, #logout-button').forEach(b => {
+    if (b) b.style.display = 'none';
+  });
+
   document.querySelectorAll('[data-editable]').forEach(el => el.removeAttribute('contenteditable'));
+
   hideAddBlockButton();
 }
+
+
+
 
 // ======================= MUTATION OBSERVER =======================
 new MutationObserver(mutations => {
@@ -477,13 +492,13 @@ new MutationObserver(mutations => {
 }).observe(document.body, { childList: true, subtree: true });
 
 // ======================= AUTH STATE ON LOAD =======================
+
+
+// Ensure buttons show after DOMContentLoaded if logged in
 document.addEventListener("DOMContentLoaded", async () => {
   const logged = await checkSession();
-  // set UI based on session
   if (logged) enableEditingForAdmin();
   else disableEditingForVisitors();
-  // load site content afterwards
   await loadSiteContent();
-  // ensure logout handler present
   attachLogoutHandlerOnce();
 });
