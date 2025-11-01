@@ -15,7 +15,7 @@ async function checkSession() {
     // Set global flag
     isAdmin = data.logged_in === true || data.logged_in === "true";
 
-    return data.logged_in === true || data.logged_in === "true";
+    return isAdmin;
   } catch (err) {
     console.error("Error checking session:", err);
     isAdmin = false;
@@ -55,18 +55,6 @@ function showTooltip(msg) {
   setTimeout(() => tip.remove(), 2500);
 }
 
-// ======================= SESSION CHECK =======================
-async function checkSession() {
-  try {
-    const res = await fetch("/php/check_session.php", { credentials: "include" });
-    if (!res.ok) throw new Error("Network response not ok");
-    const data = await res.json();
-    return data.logged_in === true || data.logged_in === "true";
-  } catch (err) {
-    console.error("Error checking session:", err);
-    return false;
-  }
-}
 
 // ======================= SAVE & LOAD =======================
 async function saveSiteContent() {
