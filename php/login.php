@@ -2,7 +2,10 @@
 session_start();
 
 // Headers
+
 header("Access-Control-Allow-Origin: https://outsdrs.com");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
 
@@ -15,6 +18,7 @@ if ($mysqli->connect_error) {
 }
 
 // Lire POST
+
 $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';
 
@@ -35,6 +39,15 @@ if ($stmt->num_rows === 1) {
 
     if (password_verify($password, $hash) || $password === $hash) {
         $_SESSION['admin'] = $username;
+        
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => 'outsdrs.com',  // must match your frontend domain
+            'secure' => true,            // only if using HTTPS
+            'httponly' => true,
+            'samesite' => 'None'         // must be 'None' for cross-site requests with credentials
+        ]);
         echo json_encode(['success'=>true]);
         exit;
     }
@@ -43,3 +56,4 @@ if ($stmt->num_rows === 1) {
 // Si échec
 echo json_encode(['success'=>false,'message'=>'Nom d’utilisateur ou mot de passe incorrect']);
 exit;
+
