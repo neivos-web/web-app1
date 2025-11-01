@@ -51,11 +51,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
 
 </head>
-<body class="bg-gray-100 text-brand-dark" data-page="mission" class="is-admin">
-  <select id="language-selector">
-    <option value="fr">Français</option>
-    <option value="en">English</option>
-  </select>
+<body class="bg-gray-100 text-brand-dark">
     
     <!-- =========== En-tête du site =========== -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
@@ -119,7 +115,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
 
                 <div data-editable data-key="nav_research" class="flex items-center space-x-1">
-                    <a href="recherche.html" class="hover:text-brand-blue">Rechercheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</a>
+                    <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
                     <button class="edit-btn">✎</button>
                 </div>
 
@@ -349,8 +345,9 @@ header('Content-Type: text/html; charset=UTF-8');
         </div>
     </footer>
     <script src="js/dropdown.js"></script>
+
+
     <script type="module" src="scripts/admin_main.js"></script>
-    <script src="/js/translations.js"></script>
 
 
 

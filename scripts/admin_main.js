@@ -55,6 +55,72 @@ function showTooltip(msg) {
   setTimeout(() => tip.remove(), 2500);
 }
 
+// ======================= SMALL HELPERS =======================
+
+// find the most appropriate editable element related to an edit button
+function findEditableTargetForButton(btn) {
+  // 1) previous sibling with data-editable
+  if (btn.previousElementSibling && btn.previousElementSibling.hasAttribute && btn.previousElementSibling.hasAttribute("data-editable")) {
+    return btn.previousElementSibling;
+  }
+  // 2) next sibling with data-editable
+  if (btn.nextElementSibling && btn.nextElementSibling.hasAttribute && btn.nextElementSibling.hasAttribute("data-editable")) {
+    return btn.nextElementSibling;
+  }
+  // 3) search in parent for a direct data-editable (useful for menu items where edit button sits next to control)
+  const parent = btn.parentElement;
+  if (parent) {
+    // prefer anchors, imgs, headings first
+    const prefer = parent.querySelector('a[data-editable], img[data-editable], h1[data-editable], h2[data-editable], p[data-editable], span[data-editable]');
+    if (prefer) return prefer;
+    const any = parent.querySelector('[data-editable]');
+    if (any) return any;
+  }
+  // 4) search previous siblings' descendants
+  let sib = btn.previousElementSibling;
+  while (sib) {
+    const found = sib.querySelector && sib.querySelector('[data-editable]');
+    if (found) return found;
+    sib = sib.previousElementSibling;
+  }
+  // 5) search next siblings' descendants
+  sib = btn.nextElementSibling;
+  while (sib) {
+    const found = sib.querySelector && sib.querySelector('[data-editable]');
+    if (found) return found;
+    sib = sib.nextElementSibling;
+  }
+  // 6) fallback - closest ancestor with data-editable
+  const anc = btn.closest('[data-editable]');
+  if (anc) return anc;
+  return null;
+}
+
+// rudimentary upload helper that matches your backend signature (assumes php/upload.php returns {"url":"..."} )
+async function uploadFileToServer(file, key, pageFolder) {
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    // attach metadata expected by your backend
+    const q = `?page=${encodeURIComponent(pageFolder)}&key=${encodeURIComponent(key)}`;
+    const url = `/php/upload.php${q}`;
+    const res = await fetch(url, { method: 'POST', body: fd, credentials: 'include' });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || json.message || 'Upload failed');
+    return json.url || json.data?.url || json.path || null;
+  } catch (err) {
+    console.error('Upload error', err);
+    throw err;
+  }
+}
+
+// ensure pageFolder string used for upload endpoint
+function currentPageFolder() {
+  return window.location.pathname
+    .replace(/\//g, "_")
+    .replace(".html", "")
+    .replace(/^_+|_+$/g, "") || "general";
+}
 
 // ======================= SAVE & LOAD =======================
 async function saveSiteContent() {
@@ -119,7 +185,7 @@ async function loadSiteContent() {
         default: el.innerText = value; break;
       }
     });
-    showTooltip("Contenu chargé !");
+   // showTooltip("Contenu chargé !");
   } catch (err) {
     console.error(err);
   }
@@ -127,22 +193,36 @@ async function loadSiteContent() {
 
 // ======================= STATIC ELEMENT EDITING =======================
 function enableEditingForStaticElements() {
+  // attach to all edit buttons that are not image-edit
   document.querySelectorAll(".edit-btn:not(.image-edit)").forEach(btn => {
     if (btn.dataset.behaviorsAttached) return;
     btn.dataset.behaviorsAttached = "true";
 
     btn.addEventListener("click", async e => {
       e.stopPropagation();
-      const target = btn.nextElementSibling;
-      if (!target || !target.hasAttribute("data-editable")) return;
+
+      // find the right editable target (robust search)
+      const target = findEditableTargetForButton(btn);
+      if (!target) {
+        // if none found, and this button sits inside a dropdown item, try to open the dropdown (UX)
+        // if it's a menu toggle, try to toggle group visibility
+        const parent = btn.parentElement;
+        if (parent && parent.classList.contains('group')) {
+          // do nothing, but avoid error
+        }
+        return;
+      }
+
+      // make editable in place
       target.contentEditable = "true";
       target.focus();
       const r = document.createRange(); r.selectNodeContents(target);
       const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
 
+      // on blur - save and disable editing
       target.addEventListener("blur", async () => {
         target.contentEditable = "false";
-        await saveSiteContent();
+        try { await saveSiteContent(); showTooltip("Mis à jour"); } catch (err) { console.error(err); }
       }, { once: true });
     });
   });
@@ -153,6 +233,35 @@ function attachContentBoxBehaviors(box) {
   if (box.dataset.behaviorsAttached) return;
   box.dataset.behaviorsAttached = "true";
 
+  // ensure image-upload UI exists for static boxes (some static boxes had no file input / image-edit)
+  const img = box.querySelector("img[data-editable]");
+  let editBtn = box.querySelector(".image-edit");
+  let fileInput = box.querySelector(".file-input");
+
+  if (img && (!editBtn || !fileInput)) {
+    // create wrapper/button + hidden file input and insert before the img
+    fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.className = "hidden file-input";
+
+    editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "edit-btn image-edit absolute top-2 left-2 bg-gray-800 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-md";
+    editBtn.title = "Edit image";
+    editBtn.textContent = "📷";
+
+    // position: try to make the parent relatively positioned
+    const imgParent = img.parentElement;
+    if (imgParent && getComputedStyle(imgParent).position === 'static') {
+      imgParent.style.position = 'relative';
+    }
+
+    // insert the button and file input into DOM
+    imgParent.insertBefore(editBtn, imgParent.firstChild);
+    imgParent.insertBefore(fileInput, img);
+  }
+
   // DELETE BUTTON
   const delBtn = box.querySelector(".delete-btn");
   if (delBtn) delBtn.style.display = isAdmin ? "inline-flex" : "none";
@@ -161,25 +270,50 @@ function attachContentBoxBehaviors(box) {
     if (confirm("Supprimer ce bloc ?")) box.remove();
   });
 
-  // IMAGE UPLOAD
-  const editBtn = box.querySelector(".image-edit");
-  const fileInput = box.querySelector(".file-input");
-  const img = box.querySelector("img[data-editable]");
-  if (editBtn) editBtn.style.display = isAdmin ? "inline-flex" : "none";
-  if (editBtn && fileInput) {
+  // IMAGE UPLOAD wiring (use server uploader if available)
+  if (editBtn && fileInput && img) {
+    editBtn.style.display = isAdmin ? "inline-flex" : "none";
+
     editBtn.addEventListener("click", () => fileInput.click());
+
     fileInput.addEventListener("change", async e => {
       const file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => { if (img) img.src = reader.result; };
-      reader.readAsDataURL(file);
+
+      // try to upload to server
+      const key = generateKey(img);
+      const pageFolder = currentPageFolder();
+
+      try {
+        // attempt server upload (if your /php/upload.php returns {url: '...'})
+        const uploadedUrl = await uploadFileToServer(file, key, pageFolder).catch(err => null);
+        if (uploadedUrl) {
+          img.src = uploadedUrl;
+        } else {
+          // fallback to dataURL preview if upload failed / not available
+          const reader = new FileReader();
+          reader.onload = () => { img.src = reader.result; };
+          reader.readAsDataURL(file);
+        }
+        // save changes
+        await saveSiteContent();
+        showTooltip("Image mise à jour");
+      } catch (err) {
+        console.error("Upload failed:", err);
+        // fallback to local preview
+        const reader = new FileReader();
+        reader.onload = () => { img.src = reader.result; };
+        reader.readAsDataURL(file);
+      }
     });
   }
 
   // TEXT EDIT
   box.querySelectorAll("[data-editable]").forEach(el => {
     if (el.tagName === "IMG" || el.tagName === "VIDEO" || el.tagName === "A") return;
+    if (el.dataset.clickAttached) return;
+    el.dataset.clickAttached = "true";
+
     el.addEventListener("click", () => {
       const orig = el.innerText;
       const input = document.createElement(el.tagName === "H2" ? "input" : "textarea");
@@ -223,18 +357,10 @@ logoutBtn?.addEventListener("click", () => { window.location.href = "/php/logout
 document.addEventListener("DOMContentLoaded", async () => {
   const sessionValid = await checkSession();
 
-  // if (!sessionValid) {
-  //   showTooltip("Non connecté ! Redirection…");
-  //   setTimeout(() => window.location.href = "/admin.html", 1500);
-  //   return;
-  // }
-
-  // Force admin for everyone logged in
-  //isAdmin = true;
-  //showTooltip("Connecté en tant qu'admin");
-
-  // Load content
+  // Load content regardless — session check just sets isAdmin
   await loadSiteContent();
+
+  // enable editing UI and behavior
   enableEditingForStaticElements();
 
   // Attach behaviors to existing content boxes
@@ -243,7 +369,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Show and attach Add Block button
   addBlockBtn = document.getElementById("add-block");
   if (addBlockBtn) {
-    addBlockBtn.style.display = "inline-block"; // now visible
+    addBlockBtn.style.display = isAdmin ? "inline-block" : "none";
     addBlockBtn.addEventListener("click", () => {
       const box = createNewContentBox();
       pageContainer.appendChild(box);
