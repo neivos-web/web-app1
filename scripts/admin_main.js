@@ -497,6 +497,141 @@ function ensureEditButtons() {
   });
 }
 
+// ---------- Extra wiring for existing buttons & dropdowns ----------
+
+/**
+ * Ensure every .image-edit button has an associated hidden file input and a click handler.
+ * If the button already has a sibling input[type=file].file-input we reuse it.
+ */
+function wireImageEditButtons() {
+  document.querySelectorAll('.image-edit').forEach(btn => {
+    // don't wire twice
+    if (btn.dataset.wired === 'true') return;
+    btn.dataset.wired = 'true';
+
+    // find nearest image target (following sibling, parent, or next data-editable image)
+    const parent = btn.parentElement;
+    let img = null;
+    // common patterns: button is before the <img> or inside same parent
+    if (btn.nextElementSibling && btn.nextElementSibling.tagName === 'IMG') img = btn.nextElementSibling;
+    if (!img && parent) img = parent.querySelector && parent.querySelector('img[data-editable]');
+    if (!img) {
+      // fallback: search nearby
+      img = document.querySelector('img[data-editable]'); // last resort
+    }
+
+    // find or create file input
+    let fileInput = parent && parent.querySelector('input[type="file"].file-input');
+    if (!fileInput) {
+      fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.className = 'hidden file-input';
+      // insert after the button (so fileInput is near the button)
+      if (btn.nextElementSibling) btn.parentNode.insertBefore(fileInput, btn.nextElementSibling);
+      else btn.parentNode.appendChild(fileInput);
+    }
+
+    // show/hide depending on isAdmin state
+    btn.style.display = (typeof isAdmin !== 'undefined' && isAdmin) ? 'inline-flex' : 'none';
+
+    // click -> open file picker
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!fileInput) return;
+      fileInput.click();
+    });
+
+    // when a file is selected, upload and update the img.src
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      // prefer to generate a key from the img or fallback to a path generated from location
+      const key = img ? generateKey(img) : (`image_${Date.now()}`);
+      const pageFolder = currentPageFolder();
+      try {
+        const uploadedUrl = await uploadFileToServer(file, key, pageFolder).catch(err => null);
+        if (uploadedUrl && img) {
+          img.src = uploadedUrl;
+        } else if (img) {
+          // fallback to local preview if upload not available
+          const reader = new FileReader();
+          reader.onload = () => { img.src = reader.result; };
+          reader.readAsDataURL(file);
+        }
+        await saveSiteContent();
+        showTooltip('Image mise à jour');
+      } catch (err) {
+        console.error('Upload error (wired button):', err);
+        alert('Erreur upload image');
+      }
+    });
+  });
+}
+
+/**
+ * Make menu dropdowns toggle on click (useful for mobile / touch).
+ * Example: #dropdownButtonPortefeuille toggles #dropdownMenuPortefeuille
+ */
+function wireDropdownToggles() {
+  const mapping = [
+    { button: document.getElementById('dropdownButtonPortefeuille'), menu: document.getElementById('dropdownMenuPortefeuille') },
+    // add other dropdown button/menu pairs if you have them (e.g. training dropdown)
+  ];
+
+  mapping.forEach(pair => {
+    if (!pair.button || !pair.menu) return;
+    pair.button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      pair.menu.classList.toggle('hidden');
+      pair.menu.classList.toggle('block'); // ensure it can show (block) when not hidden
+      // if you're using absolute positioning, remove any inline transform that blocks visibility
+    });
+  });
+
+  // close dropdowns when clicking outside
+  document.addEventListener('click', () => {
+    mapping.forEach(pair => {
+      if (!pair.menu) return;
+      pair.menu.classList.add('hidden');
+      pair.menu.classList.remove('block');
+    });
+  });
+
+  // also close when resizing (avoid stuck open dropdown)
+  window.addEventListener('resize', () => {
+    mapping.forEach(pair => {
+      if (!pair.menu) return;
+      pair.menu.classList.add('hidden');
+      pair.menu.classList.remove('block');
+    });
+  });
+}
+
+/**
+ * Make sure edit buttons are visible/hide after session check (call after isAdmin final value)
+ */
+function refreshAdminVisibility() {
+  const show = typeof isAdmin !== 'undefined' ? isAdmin : false;
+  document.querySelectorAll('.edit-btn, .image-edit, .menu-edit, .submenu-edit, .image-upload-btn, .delete-btn, #add-block').forEach(el => {
+    el.style.display = show ? 'inline-flex' : 'none';
+  });
+
+  // ensure file inputs created and wired
+  wireImageEditButtons();
+}
+
+// call these when DOM ready and after you determine isAdmin
+document.addEventListener('DOMContentLoaded', () => {
+  // initial wiring (in case your other init code already ran)
+  wireImageEditButtons();
+  wireDropdownToggles();
+});
+
+// also expose refresh function so you can call it after checkSession resolves
+window.__refreshAdminVisibility = refreshAdminVisibility;
+
 // ======================= EVENT LISTENERS =======================
 saveBtn?.addEventListener("click", saveSiteContent);
 logoutBtn?.addEventListener("click", () => { window.location.href = "/php/logout.php"; });
@@ -513,7 +648,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Attach behaviors to existing content boxes
   document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
-  applyAdminVisibility();
+  refreshAdminVisibility();
   // Show and attach Add Block button
   addBlockBtn = document.getElementById("add-block");
   if (addBlockBtn) {
