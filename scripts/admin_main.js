@@ -56,7 +56,7 @@ async function saveContent() {
     });
 
     if (!res.ok) console.error(await res.text());
-    else console.log("✅ Content saved");
+    else console.log(" Content saved");
 }
 
 // ======================= LOAD CONTENT =======================
@@ -79,67 +79,67 @@ async function loadSiteContent() {
             }
         });
 
-        console.log("✅ Content loaded for page:", page);
+        console.log("Content loaded for page:", page);
     } catch (err) {
         console.error(err);
     }
 }
 
 // ======================= EDIT BUTTON =======================
-function addEditButton(el) {
-    if (!isAdmin) return;
-    if (el.dataset.hasEditBtn) return;
-    el.dataset.hasEditBtn = "true";
+// function addEditButton(el) {
+//     if (!isAdmin) return;
+//     if (el.dataset.hasEditBtn) return;
+//     el.dataset.hasEditBtn = "true";
 
-    const btn = document.createElement("button");
-    btn.className = "edit-btn";
-    btn.innerHTML = "✏️";
-    btn.title = "Modifier";
+//     const btn = document.createElement("button");
+//     btn.className = "edit-btn";
+//     btn.innerHTML = "✏️";
+//     btn.title = "Modifier";
 
-    btn.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        e.preventDefault();
+//     btn.addEventListener("click", async (e) => {
+//         e.stopPropagation();
+//         e.preventDefault();
 
-        if (el.tagName === "IMG") {
-            const fileInput = document.createElement("input");
-            fileInput.type = "file";
-            fileInput.accept = "image/*";
-            fileInput.style.display = "none";
-            document.body.appendChild(fileInput);
-            fileInput.click();
-            fileInput.addEventListener("change", async (ev) => {
-                const file = ev.target.files[0];
-                if (!file) return;
-                const key = generateKey(el);
-                const page = window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
-                const fd = new FormData();
-                fd.append("file", file);
-                const res = await fetch(`/php/upload.php?page=${page}&key=${key}`, { method: "POST", body: fd, credentials: "include" });
-                const json = await res.json();
-                if (json.url) el.src = json.url;
-                await saveContent();
-                fileInput.remove();
-            });
-        } else {
-            const input = el.tagName === "A" ? document.createElement("input") : document.createElement("textarea");
-            input.value = el.innerText.trim();
-            input.style.width = "100%";
-            input.style.minHeight = "20px";
-            input.style.zIndex = "9999";
-            el.replaceWith(input);
-            input.focus();
+//         if (el.tagName === "IMG") {
+//             const fileInput = document.createElement("input");
+//             fileInput.type = "file";
+//             fileInput.accept = "image/*";
+//             fileInput.style.display = "none";
+//             document.body.appendChild(fileInput);
+//             fileInput.click();
+//             fileInput.addEventListener("change", async (ev) => {
+//                 const file = ev.target.files[0];
+//                 if (!file) return;
+//                 const key = generateKey(el);
+//                 const page = window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
+//                 const fd = new FormData();
+//                 fd.append("file", file);
+//                 const res = await fetch(`/php/upload.php?page=${page}&key=${key}`, { method: "POST", body: fd, credentials: "include" });
+//                 const json = await res.json();
+//                 if (json.url) el.src = json.url;
+//                 await saveContent();
+//                 fileInput.remove();
+//             });
+//         } else {
+//             const input = el.tagName === "A" ? document.createElement("input") : document.createElement("textarea");
+//             input.value = el.innerText.trim();
+//             input.style.width = "100%";
+//             input.style.minHeight = "20px";
+//             input.style.zIndex = "9999";
+//             el.replaceWith(input);
+//             input.focus();
 
-            input.addEventListener("blur", async () => {
-                el.innerText = input.value.trim();
-                input.replaceWith(el);
-                await saveContent();
-            });
-        }
-    });
+//             input.addEventListener("blur", async () => {
+//                 el.innerText = input.value.trim();
+//                 input.replaceWith(el);
+//                 await saveContent();
+//             });
+//         }
+//     });
 
-    // Insert button right next to the element
-    el.insertAdjacentElement("afterend", btn);
-}
+//     // Insert button right next to the element
+//     el.insertAdjacentElement("afterend", btn);
+// }
 
 // ======================= CONTENT BOXES =======================
 function createNewContentBox() {
@@ -157,10 +157,10 @@ function createNewContentBox() {
     return box;
 }
 
-function attachContentBoxBehaviors(box) {
-    box.querySelectorAll("[data-editable], img, a").forEach(addEditButton);
-    addAddBlockButtonToBox(box);
-}
+// function attachContentBoxBehaviors(box) {
+//     box.querySelectorAll("[data-editable], img, a").forEach(addEditButton);
+//     addAddBlockButtonToBox(box);
+// }
 
 function addAddBlockButtonToBox(box) {
     if (!isAdmin) return;
@@ -178,29 +178,131 @@ function addAddBlockButtonToBox(box) {
     });
 }
 
+// ======================= ATTACH EXISTING BUTTONS =======================
+function attachExistingEditButtons() {
+    if (!isAdmin) return;
+
+    // For text / link edits
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        if (btn.dataset.attached) return;
+        btn.dataset.attached = "true";
+
+        const target = btn.previousElementSibling || btn.parentNode.querySelector("[data-editable]");
+        if (!target) return;
+
+        btn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (target.tagName === "A") {
+                const input = document.createElement("input");
+                input.value = target.innerText.trim();
+                input.style.width = "100%";
+                target.replaceWith(input);
+                input.focus();
+                input.addEventListener("blur", async () => {
+                    target.innerText = input.value.trim();
+                    input.replaceWith(target);
+                    await saveContent();
+                });
+            } else {
+                const textarea = document.createElement("textarea");
+                textarea.value = target.innerText.trim();
+                textarea.style.width = "100%";
+                textarea.style.minHeight = "20px";
+                target.replaceWith(textarea);
+                textarea.focus();
+                textarea.addEventListener("blur", async () => {
+                    target.innerText = textarea.value.trim();
+                    textarea.replaceWith(target);
+                    await saveContent();
+                });
+            }
+        });
+    });
+
+    // For image edits
+    document.querySelectorAll(".image-edit").forEach(btn => {
+        if (btn.dataset.attached) return;
+        btn.dataset.attached = "true";
+
+        const target = btn.nextElementSibling || btn.parentNode.querySelector("img[data-editable]");
+        if (!target) return;
+
+        btn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "image/*";
+            fileInput.style.display = "none";
+            document.body.appendChild(fileInput);
+            fileInput.click();
+
+            fileInput.addEventListener("change", async (ev) => {
+                const file = ev.target.files[0];
+                if (!file) return;
+
+                const key = generateKey(target);
+                const page = window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
+
+                const fd = new FormData();
+                fd.append("file", file);
+
+                const res = await fetch(`/php/upload.php?page=${page}&key=${key}`, { method: "POST", body: fd, credentials: "include" });
+                const json = await res.json();
+                if (json.url) target.src = json.url;
+
+                await saveContent();
+                fileInput.remove();
+            });
+        });
+    });
+}
+
+
 // ======================= INITIALIZATION =======================
 async function initAdminEditing() {
     await checkAdminSession();
     if (!isAdmin) return;
 
     await loadSiteContent();
+    attachExistingEditButtons();
 
-    document.querySelectorAll("[data-editable], img, a").forEach(addEditButton);
+    //document.querySelectorAll("[data-editable], img, a").forEach(addEditButton);
     document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
-    document.querySelectorAll("nav a, nav ul li a").forEach(addEditButton);
+   // document.querySelectorAll("nav a, nav ul li a").forEach(addEditButton);
 
     // Fix dropdown menu visibility
+    // Dropdown toggle on click
     const dropdowns = document.querySelectorAll("nav ul li");
     dropdowns.forEach(li => {
-        li.addEventListener("mouseenter", () => {
-            const submenu = li.querySelector("ul");
-            if (submenu) submenu.style.display = "block";
-        });
-        li.addEventListener("mouseleave", () => {
-            const submenu = li.querySelector("ul");
-            if (submenu) submenu.style.display = "none";
+        const submenu = li.querySelector("ul");
+        if (!submenu) return;
+
+        // Hide initially
+        submenu.style.display = "none";
+
+        // Create a toggle button
+        const toggleBtn = document.createElement("button");
+        toggleBtn.className = "dropdown-toggle px-2 py-1 ml-2 text-sm";
+        toggleBtn.textContent = "▼"; // arrow icon
+        toggleBtn.style.background = "transparent";
+        toggleBtn.style.border = "none";
+        toggleBtn.style.cursor = "pointer";
+
+        // Add button to the menu item
+        li.insertBefore(toggleBtn, li.querySelector("ul"));
+
+        // Toggle submenu on click
+        toggleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            submenu.style.display = submenu.style.display === "block" ? "none" : "block";
         });
     });
+
 }
 
 document.addEventListener("DOMContentLoaded", initAdminEditing);
