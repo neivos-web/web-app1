@@ -139,7 +139,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
 
                 <div data-editable data-key="nav_contact" class="flex items-center space-x-1">
-                    <a href="contact.html" class="hover:text-brand-blue">Contact</a>
+                    <a href="contact.html" class="hover:text-brand-blue" data-editable>Contact</a>
                     <button class="edit-btn">✎</button>
                 </div>
 
@@ -149,6 +149,17 @@ header('Content-Type: text/html; charset=UTF-8');
                         <option value="en">🇬🇧 English</option>
                     </select>
                 </div>
+            </div>
+            <div class="extra-right-buttons">
+                <!-- Save Button -->
+                <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
+                    Publier 
+                </button>
+
+                <!-- Déconnexion Button -->
+                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
+                    ⏻
+                </button>
             </div>
         </nav>
     </header>
@@ -293,17 +304,6 @@ header('Content-Type: text/html; charset=UTF-8');
                 
             </div>
 
-            <div class="content-box bg-white shadow-md rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-6">
-                <div class="content-image flex-1">
-                    <img src="https://placehold.co/600x400" alt="Image d'exemple" data-editable>
-                </div>
-                <div class="content flex-1">
-                    <h2 data-editable contenteditable="true" class="text-2xl font-bold">Titre exemple</h2>
-                    <p data-editable contenteditable="true" class="text-gray-700">
-                    Exemple de contenu modifiable. Vous pouvez éditer ce texte.
-                    </p>
-                </div>
-            </div>
         </section>
     </main>
 
