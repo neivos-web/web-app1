@@ -63,8 +63,6 @@ header('Content-Type: text/html; charset=UTF-8');
                     <button class="edit-btn">✎</button>
                     <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
                         <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-                        <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue">Outsiders</span>
-                        <button class="edit-btn">✎</button>
                     </a>
                 </div>
             </div>
