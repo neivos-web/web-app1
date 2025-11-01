@@ -119,7 +119,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
 
                 <div data-editable data-key="nav_research" class="flex items-center space-x-1">
-                    <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
+                    <a href="recherche.html" class="hover:text-brand-blue">Rechercheeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</a>
                     <button class="edit-btn">✎</button>
                 </div>
 
