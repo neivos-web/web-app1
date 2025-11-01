@@ -385,10 +385,15 @@ async function handleFileUpload(file, targetEl){
 
 
 // ======================= EVENT LISTENERS =======================
-if(saveBtn) saveBtn.addEventListener("click",async e=>{ e.preventDefault(); await saveSiteContent(); enableEditingForStaticElements(); setupMenuLinkEditing(); });
-
+if(saveBtn) saveBtn.addEventListener("click", async e=>{
+  e.preventDefault();
+  await saveSiteContent();
+  enableEditingForStaticElements();
+  setupMenuLinkEditing();
+});
 
 document.addEventListener("DOMContentLoaded", checkAdminSession);
+attachLogoutHandlerOnce();
 
 // ================== LOGOUT (robust) ==================
 async function handleLogoutClick(e){

@@ -6,6 +6,10 @@ if (!isset($_SESSION['admin'])) {
     exit;
 }
 header('Content-Type: text/html; charset=UTF-8');
+
+ini_set('session.cookie_samesite', 'None');
+ini_set('session.cookie_secure', '1');
+session_start()
 ?>
 
 
