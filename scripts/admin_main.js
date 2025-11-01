@@ -95,14 +95,21 @@ function addEditButton(el) {
 
     if (el.classList.contains("add-block-btn")) return;
 
+    // Wrap block-level elements to make button inline
+    const displayStyle = getComputedStyle(el).display;
+    if (["block", "flex", "grid"].includes(displayStyle)) {
+        const wrapper = document.createElement("span");
+        wrapper.style.display = "inline-block";
+        el.before(wrapper);
+        wrapper.appendChild(el);
+    }
+
     const btn = document.createElement("button");
-    btn.className = "edit-btn absolute top-0 right-0 bg-blue-600 text-white rounded px-2 py-1 text-xs z-50";
+    btn.className = "edit-btn bg-blue-600 text-white rounded px-2 py-1 text-xs ml-2";
     btn.textContent = "✏️";
     btn.style.cursor = "pointer";
 
-    const parent = el.parentElement;
-    if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
-    parent.appendChild(btn);
+    el.after(btn);
 
     btn.addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -136,11 +143,8 @@ function addEditButton(el) {
             input.focus();
 
             input.addEventListener("blur", async () => {
-                if (el.tagName === "A") {
-                    el.innerText = input.value;
-                } else {
-                    el.innerText = input.value;
-                }
+                if (el.tagName === "A") el.innerText = input.value;
+                else el.innerText = input.value;
                 input.replaceWith(el);
                 await saveContent();
             });
