@@ -169,7 +169,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
                 <button class="edit-btn">✎</button>
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue dans notre section actualités et blogs</h1>
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue danns Outsiders</h1>
                 <button class="edit-btn">✎</button>
                 <p class="text-lg max-w-3xl mx-auto" data-editable>Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.</p>
             </div>
