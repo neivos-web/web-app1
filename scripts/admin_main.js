@@ -95,21 +95,21 @@ function addEditButton(el) {
 
     if (el.classList.contains("add-block-btn")) return;
 
-    // Wrap block-level elements to make button inline
-    const displayStyle = getComputedStyle(el).display;
-    if (["block", "flex", "grid"].includes(displayStyle)) {
-        const wrapper = document.createElement("span");
-        wrapper.style.display = "inline-block";
-        el.before(wrapper);
-        wrapper.appendChild(el);
-    }
+    // Ensure parent is relative
+    const parent = el.parentElement;
+    if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
 
+    // Create small button
     const btn = document.createElement("button");
-    btn.className = "edit-btn bg-blue-600 text-white rounded px-2 py-1 text-xs ml-2";
     btn.textContent = "✏️";
+    btn.className = "edit-btn absolute top-0 right-0 text-xs px-1 py-0.5 bg-blue-600 text-white rounded opacity-0 transition-opacity";
     btn.style.cursor = "pointer";
 
-    el.after(btn);
+    // Show on hover
+    el.addEventListener("mouseenter", () => btn.style.opacity = "1");
+    el.addEventListener("mouseleave", () => btn.style.opacity = "0");
+
+    parent.appendChild(btn);
 
     btn.addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -197,7 +197,7 @@ async function initAdminEditing() {
 
     await loadSiteContent();
 
-    // Add edit buttons to all elements except scripts/styles/AddBlock
+    // Add edit buttons to all content elements
     Array.from(document.body.querySelectorAll("*")).forEach(addEditButton);
 
     // Attach behaviors to existing content-boxes
