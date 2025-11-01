@@ -1,21 +1,9 @@
-// ======================= ADMIN EDITING =======================
-let isAdmin = false;
+// ======================= ADMIN MAIN =======================
+let isAdmin = true; // session check is done in PHP
 
-// Check session from backend
-async function checkAdminSession() {
-    try {
-        const res = await fetch("/php/check_session.php", { credentials: "include" });
-        if (!res.ok) throw new Error("Session check failed");
-        const data = await res.json();
-        isAdmin = data.logged_in === true || data.logged_in === "true";
-    } catch (err) {
-        console.error(err);
-        isAdmin = false;
-    }
-}
-
-// Generate a unique key based on DOM path
+// ======================= HELPER FUNCTIONS =======================
 function generateKey(el) {
+    if (el.dataset.key) return el.dataset.key;
     const path = [];
     let curr = el;
     while (curr && curr.tagName !== "BODY") {
@@ -27,25 +15,23 @@ function generateKey(el) {
     return path.join("/");
 }
 
-// ======================= SAVE CONTENT =======================
 async function saveContent() {
-    const elements = Array.from(document.body.querySelectorAll("*")).filter(el =>
-        !["SCRIPT", "STYLE"].includes(el.tagName) &&
-        !el.classList.contains("add-block-btn")
-    );
-
+    const elements = Array.from(document.querySelectorAll("[data-editable]"));
     const data = [];
     const page = window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
 
     elements.forEach(el => {
-        const key = generateKey(el);
-        let type = "text";
-        let value = el.innerText || "";
+        let value;
+        if (el.tagName === "IMG") value = el.src;
+        else if (el.tagName === "A") value = JSON.stringify({ text: el.innerText, href: el.href });
+        else value = el.innerText;
 
-        if (el.tagName === "IMG") { type = "image"; value = el.src; }
-        else if (el.tagName === "A") { type = "link"; value = JSON.stringify({ text: el.innerText, href: el.href }); }
-
-        data.push({ page, key, type, value });
+        data.push({
+            page,
+            key: generateKey(el),
+            type: el.tagName.toLowerCase(),
+            value
+        });
     });
 
     const res = await fetch("/php/save_content.php", {
@@ -54,121 +40,98 @@ async function saveContent() {
         body: JSON.stringify(data),
         credentials: "include"
     });
-
     if (!res.ok) console.error(await res.text());
     else console.log("Content saved");
 }
 
-// ======================= LOAD CONTENT PER PAGE =======================
 async function loadSiteContent() {
     const page = window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
-
     try {
         const res = await fetch(`/php/load_content.php?page=${page}`, { credentials: "include" });
         if (!res.ok) throw new Error("Failed to load content");
         const data = await res.json();
 
         data.forEach(item => {
-            const el = document.querySelector(`[data-editable="${item.key}"]`);
+            const el = document.querySelector(`[data-key="${item.key}"]`) || document.querySelector(`[data-editable]`);
             if (!el) return;
 
-            if (item.type === "text") el.innerText = item.value;
-            else if (item.type === "image") el.src = item.value;
-            else if (item.type === "link") {
+            if (item.type === "img") el.src = item.value;
+            else if (item.type === "a") {
                 const linkData = JSON.parse(item.value);
                 el.innerText = linkData.text;
                 el.href = linkData.href;
-            }
+            } else el.innerText = item.value;
         });
 
         console.log("Content loaded for page:", page);
-    } catch (err) {
-        console.error(err);
-    }
+    } catch (err) { console.error(err); }
 }
 
-// ======================= ADD / EDIT BUTTONS =======================
+// ======================= BUTTONS HANDLING =======================
 function addEditButton(el) {
-    if (!isAdmin) return;
-    if (el.dataset.hasEditBtn) return;
+    if (!isAdmin || el.dataset.hasEditBtn) return;
     el.dataset.hasEditBtn = "true";
 
-    if (el.classList.contains("add-block-btn")) return;
+    if (el.tagName === "IMG") return; // image handled separately
 
-    // Create small inline button
     const btn = document.createElement("button");
-    btn.textContent = "✏️";
-    btn.className = "edit-btn text-xs ml-1 px-1 py-0.5 bg-blue-600 text-white rounded";
-    btn.style.cursor = "pointer";
-
-    // Insert button right after the element
+    btn.textContent = "✎";
+    btn.className = "edit-btn";
+    btn.style.marginLeft = "4px";
     el.insertAdjacentElement("afterend", btn);
 
-    btn.addEventListener("click", async (e) => {
-        e.stopPropagation();
+    btn.addEventListener("click", () => {
+        const input = document.createElement(el.tagName === "A" ? "input" : "textarea");
+        input.value = el.innerText;
+        input.style.minWidth = "50px";
+        input.style.font = "inherit";
+        input.style.display = "inline-block";
 
-        if (el.tagName === "IMG") {
+        el.replaceWith(input);
+        input.focus();
+
+        input.addEventListener("blur", async () => {
+            el.innerText = input.value;
+            input.replaceWith(el);
+            await saveContent();
+        });
+    });
+}
+
+function addImageEditButton(el) {
+    if (!isAdmin) return;
+    if (el.dataset.hasImageEditBtn) return;
+    el.dataset.hasImageEditBtn = "true";
+
+    const btns = el.parentNode.querySelectorAll(".image-edit");
+    btns.forEach(btn => {
+        btn.addEventListener("click", () => {
             const fileInput = document.createElement("input");
             fileInput.type = "file";
             fileInput.accept = "image/*";
             fileInput.className = "hidden";
             document.body.appendChild(fileInput);
             fileInput.click();
+
             fileInput.addEventListener("change", async (ev) => {
                 const file = ev.target.files[0];
                 if (!file) return;
-                const key = generateKey(el);
-                const page = window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
                 const fd = new FormData();
                 fd.append("file", file);
+                const key = generateKey(el);
+                const page = window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
                 const res = await fetch(`/php/upload.php?page=${page}&key=${key}`, { method: "POST", body: fd, credentials: "include" });
                 const json = await res.json();
                 if (json.url) el.src = json.url;
                 await saveContent();
                 fileInput.remove();
             });
-        } else {
-            const input = el.tagName === "A" ? document.createElement("input") : document.createElement("textarea");
-            input.value = el.innerText;
-            input.style.width = "auto";
-            input.style.minWidth = "50px";
-            input.style.font = "inherit";
-            input.style.display = "inline-block";
-            el.replaceWith(input);
-            input.focus();
-
-            input.addEventListener("blur", async () => {
-                el.innerText = input.value;
-                input.replaceWith(el);
-                await saveContent();
-            });
-        }
+        });
     });
 }
 
-// ======================= CONTENT BOXES / ADD BLOCK =======================
-function createNewContentBox() {
-    const box = document.createElement("div");
-    box.className = "content-box bg-white rounded shadow-md p-6 mt-6";
-
-    box.innerHTML = `
-        <div class="content-image">
-            <img src="https://via.placeholder.com/400x200" alt="Nouvelle image">
-        </div>
-        <div class="content">
-            <h2 data-editable="new_title">Nouveau titre</h2>
-            <p data-editable="new_paragraph">Nouveau paragraphe...</p>
-        </div>
-    `;
-    return box;
-}
-
-function attachContentBoxBehaviors(box) {
-    box.querySelectorAll("[data-editable], img").forEach(addEditButton);
-    addAddBlockButtonToBox(box);
-}
-
-function addAddBlockButtonToBox(box) {
+// ======================= CONTENT BOX / ADD BLOCK =======================
+function addAddBlockButton(box) {
     if (!isAdmin) return;
     if (box.querySelector(".add-block-btn")) return;
 
@@ -184,22 +147,39 @@ function addAddBlockButtonToBox(box) {
     });
 }
 
+function createNewContentBox() {
+    const box = document.createElement("div");
+    box.className = "content-box bg-white rounded shadow-md p-6 mt-6";
+    box.innerHTML = `
+        <div class="content-image">
+            <button class="image-edit">📷</button>
+            <img src="https://via.placeholder.com/400x200" data-editable alt="Nouvelle image">
+        </div>
+        <div class="content">
+            <h2 data-editable>Nouveau titre</h2>
+            <p data-editable>Nouveau paragraphe...</p>
+        </div>
+    `;
+    return box;
+}
+
+function attachContentBoxBehaviors(box) {
+    box.querySelectorAll("[data-editable]").forEach(addEditButton);
+    box.querySelectorAll("img").forEach(addImageEditButton);
+    addAddBlockButton(box);
+}
+
 // ======================= INITIALIZATION =======================
-async function initAdminEditing() {
-    await checkAdminSession();
+document.addEventListener("DOMContentLoaded", async () => {
     if (!isAdmin) return;
 
     await loadSiteContent();
 
-    // Add edit buttons to all elements
-    Array.from(document.body.querySelectorAll("*")).forEach(addEditButton);
-
-    // Attach behaviors to existing content boxes
+    document.querySelectorAll("[data-editable]").forEach(addEditButton);
+    document.querySelectorAll("img").forEach(addImageEditButton);
     document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
 
-    // Add edit buttons to menu/submenu links
-    document.querySelectorAll("nav a").forEach(addEditButton);
-}
-
-// Run on DOM ready
-document.addEventListener("DOMContentLoaded", initAdminEditing);
+    // Save & Logout
+    document.getElementById("save-btn")?.addEventListener("click", saveContent);
+    document.getElementById("logout-btn")?.addEventListener("click", () => window.location.href = "/php/logout.php");
+});
