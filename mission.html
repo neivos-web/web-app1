@@ -18,16 +18,16 @@
     <!-- =========== En-tête du site =========== -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            
             <!-- Logo -->
             <div class="flex items-center space-x-3">
-                <a href="index.html" data-editable data-key="logo_text" class="flex items-center space-x-2">
-                    <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-                    <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue">Outsiders</span>
-                    <button class="edit-btn">✎</button>
-                </a>
+                <div class="nav-item-wrapper">
+                        <button class="edit-btn">📷</button>        
+                        <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
+                        
+                            <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                        </a>
+                    </div>
             </div>
-
             <!-- Bouton hamburger (mobile) -->
             <button id="menu-toggle" class="md:hidden flex items-center text-gray-700 hover:text-brand-blue focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -204,6 +204,7 @@
     <script src="js/dropdown.js"></script>
     <script type="module" src="scripts/admin_main.js"></script>
     <script type="module" src="js/lang.js"></script>
+    <!-- Script pour le menu mobile -->
     <script>
     document.getElementById('menu-toggle').addEventListener('click', function () {
         document.getElementById('menu').classList.toggle('hidden');

@@ -293,9 +293,7 @@ header('Content-Type: text/html; charset=UTF-8');
                         le choix d'une profession et formation pour les personnes atteintes de d'améliorer le spectre de l'autisme. 
                         Nous soutenons leur intégration active sur le marché du travail et contribue ainsi une contribution à une société plus inclusive.
                     </p>                    
-                </div>
-
-                
+                </div>     
             </div>
 
         </section>
@@ -351,6 +349,12 @@ header('Content-Type: text/html; charset=UTF-8');
     <script type="module" src="scripts/admin_main.js"></script>
     <script type="module" src="/js/lang.js"></script>
     <script src="/js/translations.js"></script>
+    <!-- Script pour le menu mobile -->
+    <script>
+    document.getElementById('menu-toggle').addEventListener('click', function () {
+        document.getElementById('menu').classList.toggle('hidden');
+    });
+    </script>
 
 
 
