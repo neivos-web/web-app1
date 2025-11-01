@@ -2,7 +2,8 @@
 header("Access-Control-Allow-Origin: *"); // Replace * with your domain in production
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Content-Type: application/json");
+header("Content-Type: application/json; charset=utf-8");
+
 // =========================
 // CONFIGURATION
 // =========================
@@ -10,8 +11,6 @@ $host = "localhost";
 $db_user = "outsdrsc_outsiders";
 $db_pass = "AQW8759mlouK123vgyhn";
 $db_name = "outsdrsc_cms_site";
-
-header('Content-Type: application/json; charset=utf-8');
 
 // =========================
 // CONNECT TO DATABASE
@@ -42,42 +41,27 @@ if (!$result) {
 }
 
 // =========================
-// FORMAT DATA
+// FLATTEN DATA TO ARRAY OF OBJECTS
 // =========================
-$data = [
-    'contentBoxes' => [],
-    'other' => []
-];
+$data = [];
 
 while ($row = $result->fetch_assoc()) {
     $key = $row['element_key'];
     $type = $row['type'];
     $value = $row['value'];
 
-    // Detect content boxes by key pattern: page_index_key
-    if (preg_match('/^' . preg_quote($page, '/') . '_(\d+)_(.+)$/', $key, $matches)) {
-        $index = intval($matches[1]);
-        $subKey = $matches[2];
-
-        if (!isset($data['contentBoxes'][$index])) {
-            $data['contentBoxes'][$index] = ['title' => '', 'paragraphs' => [], 'image' => null];
-        }
-
-        if ($subKey === 'title') {
-            $data['contentBoxes'][$index]['title'] = $value;
-        } elseif (strpos($subKey, 'paragraph_') === 0) {
-            $data['contentBoxes'][$index]['paragraphs'][] = $value;
-        } elseif ($subKey === 'image') {
-            $data['contentBoxes'][$index]['image'] = $value;
-        }
-    } else {
-        // Static elements
-        if ($type === 'link') {
-            $data['other'][$key] = ['type' => $type, 'value' => json_decode($value, true)];
-        } else {
-            $data['other'][$key] = ['type' => $type, 'value' => $value];
-        }
+    // Decode links if necessary
+    if ($type === 'link') {
+        $decoded = json_decode($value, true);
+        if ($decoded !== null) $value = $decoded;
     }
+
+    $data[] = [
+        'page' => $page,
+        'key'  => $key,
+        'type' => $type,
+        'value'=> $value
+    ];
 }
 
 // =========================
