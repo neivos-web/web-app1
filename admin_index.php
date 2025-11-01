@@ -168,7 +168,7 @@ header('Content-Type: text/html; charset=UTF-8');
             <div class="absolute inset-0">
 
                     <button class="image-edit">📷</button>
-                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" >
                     <div class="absolute inset-0 bg-black opacity-40"></div>
                 </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
