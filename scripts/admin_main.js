@@ -624,7 +624,7 @@ function refreshAdminVisibility() {
 document.addEventListener('DOMContentLoaded', () => {
   // initial wiring (in case your other init code already ran)
   wireImageEditButtons();
-  wireDropdownToggles();
+  //wireDropdownToggles();
 });
 
 // also expose refresh function so you can call it after checkSession resolves
@@ -648,7 +648,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Attach behaviors to existing content boxes
   document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
-  refreshAdminVisibility();
+  //refreshAdminVisibility();
 
   // Show and attach Add Block button
   addBlockBtn = document.getElementById("add-block");
