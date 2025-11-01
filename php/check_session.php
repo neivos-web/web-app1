@@ -7,7 +7,7 @@ header("Content-Type: application/json");
 header('Content-Type: application/json');
 
 if(!empty($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true){
-    echo json_encode(['loggedIn' => true]);
+    echo json_encode(['logged_in' => true]);
 } else {
-    echo json_encode(['loggedIn' => false]);
+    echo json_encode(['logged_in' => false]);
 }
