@@ -13,7 +13,7 @@ function pageId() {
   return window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
 }
 
-// Prefer element's data-key if provided; else compute stable DOM path
+// Prefer element's data-editable if provided; else compute stable DOM path
 function generateKey(el) {
   if (!el) return null;
   if (el.dataset && el.dataset.key) return el.dataset.key;
@@ -85,8 +85,8 @@ async function loadSiteContent() {
     // payload expected to be array of items { key, type, value } or object - support both
     const items = Array.isArray(payload) ? payload : (payload.other || []);
     items.forEach(item => {
-      // Try to find element by data-key first
-      let el = document.querySelector(`[data-key="${item.key}"]`);
+      // Try to find element by data-editable first
+      let el = document.querySelector(`[data-editable="${item.key}"]`);
       if (!el) {
         // fallback: try to find element whose generated key matches
         el = Array.from(document.querySelectorAll("[data-editable]")).find(e => generateKey(e) === item.key);
@@ -213,8 +213,8 @@ function attachEditButtons() {
       const doSave = async () => {
         const newEl = document.createElement(original.tagName);
         newEl.innerHTML = input.value;
-        // keep original attributes (data-key etc)
-        if (original.getAttribute("data-key")) newEl.setAttribute("data-key", original.getAttribute("data-key"));
+        // keep original attributes (data-editable etc)
+        if (original.getAttribute("data-editable")) newEl.setAttribute("data-editable", original.getAttribute("data-editable"));
         if (original.className) newEl.className = original.className;
         newEl.setAttribute("data-editable", original.getAttribute("data-editable") || "");
         input.replaceWith(newEl);
