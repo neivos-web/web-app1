@@ -746,3 +746,13 @@ nav {
   .edit-btn:hover {
     transform: scale(1.2);
   }
+
+
+  .edit-btn,
+  .delete-btn,
+  #save-btn,
+  #logout-btn,
+  #logout-button,
+  #add-block-admin-btn {
+      display: none !important;
+  }

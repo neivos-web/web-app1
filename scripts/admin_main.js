@@ -387,6 +387,9 @@ async function handleFileUpload(file, targetEl){
 // ======================= EVENT LISTENERS =======================
 if(saveBtn) saveBtn.addEventListener("click",async e=>{ e.preventDefault(); await saveSiteContent(); enableEditingForStaticElements(); setupMenuLinkEditing(); });
 
+
+document.addEventListener("DOMContentLoaded", checkAdminSession);
+
 // ================== LOGOUT (robust) ==================
 async function handleLogoutClick(e){
   e.preventDefault();
@@ -423,17 +426,21 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// Make sure admin mode re-attaches handler if button appears
+
 function enableEditingForAdmin(){
+  console.log("Admin mode enabled");
+
+  isAdmin = true; // make sure flag is set
   document.querySelectorAll('.edit-btn, .delete-btn, #save-btn, #logout-btn, #logout-button')
-    .forEach(b=>b.style.display='inline-block');
-  document.querySelectorAll('[data-editable]').forEach(el=>el.setAttribute('contenteditable','true'));
-  enableEditingForStaticElements();
-  setupMenuLinkEditing();
-  showAddBlockButton();
-  enableDragAndDrop();
-  attachLogoutHandlerOnce(); // ensure logout handler bound
+      .forEach(b=>b.style.display='inline-block');
+    document.querySelectorAll('[data-editable]').forEach(el=>el.setAttribute('contenteditable','true'));
+    enableEditingForStaticElements();
+    setupMenuLinkEditing();
+    showAddBlockButton();
+    enableDragAndDrop();
+    attachLogoutHandlerOnce(); 
 }
+
 
 // ======================= MUTATION OBSERVER =======================
 new MutationObserver(mutations=>{
@@ -451,7 +458,8 @@ new MutationObserver(mutations=>{
 document.addEventListener("DOMContentLoaded", () => {
   const btns = document.querySelectorAll("#dropdownButtonPortefeuille");
   const menu = document.getElementById("dropdownMenuPortefeuille");
-  
+
+
   if (!btns.length || !menu) return; // Skip if elements not found
 
   btns.forEach(btn => {
@@ -493,4 +501,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   await checkAdminSession();   // Check admin first
   await loadSiteContent();     // Then load content
   if (isAdmin) enableEditingForAdmin(); // Ensure admin mode activates
+});
+
+
+// ======================= INIT =======================
+document.addEventListener("DOMContentLoaded", () => {
+  checkAdminSession();   // Check if admin is logged in
+  loadSiteContent();     // Load saved content from DB
 });
