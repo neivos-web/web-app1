@@ -16,14 +16,13 @@ async function checkSession() {
     isAdmin = false;
   }
 
-  applyAdminVisibility(); // <-- update buttons immediately
   return isAdmin;
 }
 
 
 
-function applyAdminVisibility() {
-  isAdmin = checkSession() ;
+async function applyAdminVisibility() {
+  await checkSession();  // wait for real isAdmin value
   const selectors = [
     ".edit-btn",
     ".image-edit",
@@ -635,24 +634,20 @@ window.__refreshAdminVisibility = refreshAdminVisibility;
 saveBtn?.addEventListener("click", saveSiteContent);
 logoutBtn?.addEventListener("click", () => { window.location.href = "/php/logout.php"; });
 
+
 document.addEventListener("DOMContentLoaded", async () => {
- isAdmin= await checkSession();
-  applyAdminVisibility();
-  // Load content regardless — session check just sets isAdmin
-  // enable editing UI and behavior
+  await checkSession();           
+  applyAdminVisibility();         
   enableEditingForStaticElements();
   enableHoverImageUploads();
   wireDropdownToggles();
-  //ensureEditButtons();
+  ensureEditButtons();
   loadSiteContent();
-
-
 
   // Attach behaviors to existing content boxes
   document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
-  refreshAdminVisibility();
 
-  // Show and attach Add Block button
+  // Add block button
   addBlockBtn = document.getElementById("add-block");
   if (addBlockBtn) {
     addBlockBtn.style.display = isAdmin ? "inline-block" : "none";
@@ -660,7 +655,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const box = createNewContentBox();
       pageContainer.appendChild(box);
       enableHoverImageUploads();
-
     });
   }
 });
