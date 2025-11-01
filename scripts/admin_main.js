@@ -76,10 +76,11 @@ function findEditableTargetForButton(btn) {
   // 3) search in parent for a direct data-editable (useful for menu items where edit button sits next to control)
   const parent = btn.parentElement;
   if (parent) {
-    // prefer anchors, imgs, headings first
-    const prefer = parent.querySelector('a[data-editable], img[data-editable], h1[data-editable], h2[data-editable], p[data-editable], span[data-editable]');
+    const prefer = parent.querySelector('> a[data-editable], > img[data-editable], > h1[data-editable], > h2[data-editable], > p[data-editable], > span[data-editable]');
     if (prefer) return prefer;
-    const any = parent.querySelector('[data-editable]');
+
+    // find only direct child editable elements (ignore submenu)
+    const any = [...parent.children].find(el => el.hasAttribute && el.hasAttribute("data-editable"));
     if (any) return any;
   }
   // 4) search previous siblings' descendants
