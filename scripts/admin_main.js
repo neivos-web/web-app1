@@ -624,7 +624,7 @@ function refreshAdminVisibility() {
 document.addEventListener('DOMContentLoaded', () => {
   // initial wiring (in case your other init code already ran)
   wireImageEditButtons();
-  //wireDropdownToggles();
+  wireDropdownToggles();
 });
 
 // also expose refresh function so you can call it after checkSession resolves
@@ -635,13 +635,13 @@ saveBtn?.addEventListener("click", saveSiteContent);
 logoutBtn?.addEventListener("click", () => { window.location.href = "/php/logout.php"; });
 
 document.addEventListener("DOMContentLoaded", async () => {
- isAdmin= await checkSession();
+  await checkSession();
   applyAdminVisibility();
   // Load content regardless — session check just sets isAdmin
   // enable editing UI and behavior
   enableEditingForStaticElements();
   enableHoverImageUploads();
-  //ensureEditButtons();
+  ensureEditButtons();
   loadSiteContent();
 
 
