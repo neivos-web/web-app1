@@ -6,6 +6,23 @@ const pageContainer = document.querySelector("main") || document.body;
 let addBlockBtn = null;
 let isAdmin = true; // admin flag from session check (PHP)
 
+async function checkSession() {
+  try {
+    const res = await fetch("/php/check_session.php", { credentials: "include" });
+    if (!res.ok) throw new Error("Network response not ok");
+    const data = await res.json();
+    
+    // Set global flag
+    isAdmin = data.logged_in === true || data.logged_in === "true";
+
+    return data.logged_in === true || data.logged_in === "true";
+  } catch (err) {
+    console.error("Error checking session:", err);
+    isAdmin = false;
+    return false;
+  }
+}
+
 // ======================= UTILITY =======================
 function allEditableElements() {
   return document.querySelectorAll("[data-editable]");
@@ -160,7 +177,7 @@ function attachContentBoxBehaviors(box) {
   const editBtn = box.querySelector(".image-edit");
   const fileInput = box.querySelector(".file-input");
   const img = box.querySelector("img[data-editable]");
-
+  if (editBtn) editBtn.style.display = isAdmin ? "inline-flex" : "none";
   if (editBtn && fileInput) {
     editBtn.addEventListener("click", () => fileInput.click());
     fileInput.addEventListener("change", async e => {
@@ -227,6 +244,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // add new block
   addBlockBtn = document.getElementById("add-block");
   if (addBlockBtn) {
+      addBlockBtn.style.display = isAdmin ? "inline-block" : "none";
     addBlockBtn.addEventListener("click", () => {
       const box = createNewContentBox();
       pageContainer.appendChild(box);
