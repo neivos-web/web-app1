@@ -29,7 +29,11 @@ function generateKey(el) {
 
 // ======================= SAVE CONTENT =======================
 async function saveContent() {
-    const elements = document.querySelectorAll("[data-editable], img, a");
+    const elements = Array.from(document.body.querySelectorAll("*")).filter(el =>
+        !["SCRIPT", "STYLE"].includes(el.tagName) &&
+        !el.classList.contains("add-block-btn")
+    );
+
     const data = [];
     const page = window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
 
@@ -37,8 +41,10 @@ async function saveContent() {
         const key = generateKey(el);
         let type = "text";
         let value = el.innerText || "";
+
         if (el.tagName === "IMG") { type = "image"; value = el.src; }
         else if (el.tagName === "A") { type = "link"; value = JSON.stringify({ text: el.innerText, href: el.href }); }
+
         data.push({ page, key, type, value });
     });
 
@@ -63,7 +69,7 @@ async function loadSiteContent() {
         const data = await res.json();
 
         data.forEach(item => {
-            const el = document.querySelector(`[data-key="${item.key}"]`);
+            const el = document.querySelector(`[data-editable="${item.key}"]`);
             if (!el) return;
 
             if (item.type === "text") el.innerText = item.value;
@@ -87,7 +93,6 @@ function addEditButton(el) {
     if (el.dataset.hasEditBtn) return;
     el.dataset.hasEditBtn = "true";
 
-    // Skip Add Block buttons
     if (el.classList.contains("add-block-btn")) return;
 
     const btn = document.createElement("button");
@@ -123,8 +128,7 @@ function addEditButton(el) {
                 fileInput.remove();
             });
         } else {
-            // Inline text editing for text or links
-            const input = document.createElement(el.tagName === "A" ? "input" : "textarea");
+            const input = el.tagName === "A" ? document.createElement("input") : document.createElement("textarea");
             input.value = el.innerText;
             input.style.width = "100%";
             input.style.minHeight = "20px";
@@ -189,13 +193,13 @@ async function initAdminEditing() {
 
     await loadSiteContent();
 
-    // Make all content-boxes and editable elements editable
-    document.querySelectorAll("[data-editable], img, a").forEach(addEditButton);
+    // Add edit buttons to all elements except scripts/styles/AddBlock
+    Array.from(document.body.querySelectorAll("*")).forEach(addEditButton);
 
     // Attach behaviors to existing content-boxes
     document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
 
-    // Make nav menu items editable (exclude Add Block buttons)
+    // Add edit buttons to menu/submenu links
     document.querySelectorAll("nav a").forEach(addEditButton);
 }
 
