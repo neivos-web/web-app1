@@ -641,7 +641,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load content regardless — session check just sets isAdmin
   await loadSiteContent();
-  ensureEditButtons();
+  //ensureEditButtons();
 
   // enable editing UI and behavior
   enableEditingForStaticElements();
