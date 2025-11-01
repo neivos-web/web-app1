@@ -641,7 +641,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // enable editing UI and behavior
   enableEditingForStaticElements();
   enableHoverImageUploads();
-  ensureEditButtons();
+  //ensureEditButtons();
   loadSiteContent();
 
 
