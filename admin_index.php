@@ -1,8 +1,7 @@
 <?php
 // Secure session settings (must come BEFORE session_start)
-ini_set('session.cookie_samesite', 'None');
-ini_set('session.cookie_secure', '1');
-
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.cookie_secure', '0'); 
 session_start();
 
 if (!isset($_SESSION['admin'])) {
@@ -35,7 +34,7 @@ header('Content-Type: text/html; charset=UTF-8');
     <style>
         .edit-btn {
             font-size: 0.8rem;
-            background: #08B3E5;
+            background: #22e4ac;
             color: white;
             border-radius: 50%;
             width: 22px;
