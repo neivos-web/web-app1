@@ -223,11 +223,11 @@ logoutBtn?.addEventListener("click", () => { window.location.href = "/php/logout
 document.addEventListener("DOMContentLoaded", async () => {
   const sessionValid = await checkSession();
 
-  if (!sessionValid) {
-    showTooltip("Non connecté ! Redirection…");
-    setTimeout(() => window.location.href = "/admin.html", 1500);
-    return;
-  }
+  // if (!sessionValid) {
+  //   showTooltip("Non connecté ! Redirection…");
+  //   setTimeout(() => window.location.href = "/admin.html", 1500);
+  //   return;
+  // }
 
   // Force admin for everyone logged in
   isAdmin = true;
