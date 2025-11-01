@@ -648,7 +648,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Attach behaviors to existing content boxes
   document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
-  refreshAdminVisibility();
+  //refreshAdminVisibility();
+  applyAdminVisibility();
   // Show and attach Add Block button
   addBlockBtn = document.getElementById("add-block");
   if (addBlockBtn) {
