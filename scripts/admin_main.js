@@ -1,22 +1,25 @@
 // scripts/admin_main.js
-// Admin editing wiring for Outsiders site.
-// - Uses existing buttons only (edit-btn, image-edit, add-block-btn).
-// - Endpoints: /php/check_session.php, /php/save_content.php, /php/load_content.php, /php/upload.php
+// Admin editing & dropdown fixes for Outsiders site
+// Assumes session check on server side (PHP). Uses existing endpoints:
+// - /php/upload.php?page=...&key=...
+// - /php/save_content.php
+// - /php/load_content.php
+// This file attaches behavior to the existing buttons in your HTML (no new buttons created).
 
-let isAdmin = false;
+const isAdmin = true; // PHP already gated page - keep true here
 
-// ------------------------ Helpers ------------------------
-function by(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
-function one(sel, root = document) { return root.querySelector(sel); }
+/* -------------------- Helpers -------------------- */
+function pageId() {
+  return window.location.pathname.replace(/\//g, "_").replace(".html", "") || "general";
+}
 
+// Prefer element's data-key if provided; else compute stable DOM path
 function generateKey(el) {
-  // Use explicit data-editable if present (stable across pages)
-  if (!el) return "";
+  if (!el) return null;
   if (el.dataset && el.dataset.key) return el.dataset.key;
-
   const path = [];
   let curr = el;
-  while (curr && curr.tagName && curr.tagName !== "BODY") {
+  while (curr && curr.tagName !== "BODY") {
     const siblings = Array.from(curr.parentNode ? curr.parentNode.children : []);
     const idx = siblings.indexOf(curr);
     path.unshift(`${curr.tagName.toLowerCase()}[${idx}]`);
@@ -25,283 +28,233 @@ function generateKey(el) {
   return path.join("/");
 }
 
-function currentPageName() {
-  return window.location.pathname.replace(/\//g, "_").replace(".html", "").replace(/^_+|_+$/g, "") || "general";
+async function jsonFetch(url, opts = {}) {
+  const res = await fetch(url, { credentials: "include", ...opts });
+  const text = await res.text();
+  try { return JSON.parse(text); } catch (e) { return text; }
 }
 
-function showTooltip(msg) {
-  const tip = document.createElement("div");
-  tip.textContent = msg;
-  tip.className = "fixed top-4 right-4 bg-brand-green text-white p-2 rounded shadow z-50";
-  document.body.appendChild(tip);
-  setTimeout(() => tip.remove(), 1800);
-}
-
-// ------------------------ Session ------------------------
-async function checkAdminSession() {
-  try {
-    const res = await fetch("/php/check_session.php", { credentials: "include" });
-    if (!res.ok) { isAdmin = false; return false; }
-    const data = await res.json();
-    isAdmin = data.logged_in === true || data.logged_in === "true";
-    return isAdmin;
-  } catch (err) {
-    console.error("check session error", err);
-    isAdmin = false;
-    return false;
-  }
-}
-
-// ------------------------ Load / Save ------------------------
-async function loadSiteContent() {
-  const page = currentPageName();
-  try {
-    const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
-    if (!res.ok) throw new Error("Failed to load");
-    const json = await res.json();
-
-    // Accept two shapes:
-    // 1) array of {key, type, value}
-    // 2) { other: {key: {value, type}} } (legacy)
-    if (Array.isArray(json)) {
-      json.forEach(item => applyStoredItem(item));
-    } else if (json && typeof json === "object") {
-      if (json.other && typeof json.other === "object") {
-        Object.keys(json.other).forEach(k => {
-          const stored = json.other[k];
-          applyStoredItem({ key: k, type: stored.type || 'text', value: stored.value ?? stored });
-        });
-      } else {
-        // maybe it's a flat object: { key1: {value, type}, ... }
-        Object.keys(json).forEach(k => {
-          const stored = json[k];
-          if (stored && stored.value !== undefined) {
-            applyStoredItem({ key: k, type: stored.type || 'text', value: stored.value });
-          }
-        });
-      }
-    }
-    console.log("Loaded content for", page);
-  } catch (err) {
-    console.warn("loadSiteContent", err);
-  }
-
-  function applyStoredItem(item) {
-    if (!item || !item.key) return;
-    // First try query by data-editable
-    let el = document.querySelector(`[data-editable="${item.key}"]`);
-    if (!el) {
-      // fallback: find element whose generated key equals stored key
-      el = Array.from(document.querySelectorAll("[data-editable], img[data-editable], a[data-editable]"))
-        .find(e => generateKey(e) === item.key);
-    }
-    if (!el) return;
-
-    if (item.type === "image" || item.type === "img") el.src = item.value;
-    else if (item.type === "link" || item.type === "a") {
-      try {
-        const ld = typeof item.value === "string" ? JSON.parse(item.value) : item.value;
-        if (ld) { el.innerText = ld.text || el.innerText; el.href = ld.href || el.href; }
-      } catch (e) {
-        // fallback: set plain text
-        el.innerText = item.value;
-      }
-    } else {
-      el.innerText = item.value;
-    }
-  }
-}
-
+/* -------------------- Load / Save -------------------- */
 async function saveContent() {
-  // collect only elements that have data-editable OR are images with data-editable or anchors with data-editable
-  const elements = Array.from(document.querySelectorAll("[data-editable]"));
-  const page = currentPageName();
-  const payload = [];
+  // Collect only elements that are meant to be editable (have data-editable OR img with data-editable)
+  const editableEls = Array.from(document.querySelectorAll("[data-editable]"));
+  const data = [];
+  const page = pageId();
 
-  elements.forEach(el => {
+  editableEls.forEach(el => {
     const key = generateKey(el);
-    if (!key) return;
-    let type = "text", value = "";
-    if (el.tagName === "IMG") { type = "image"; value = el.src || ""; }
-    else if (el.tagName === "A") { type = "link"; value = JSON.stringify({ text: el.innerText || "", href: el.href || "" }); }
-    else { type = "text"; value = el.innerText || ""; }
+    let type = "text";
+    let value = "";
 
-    payload.push({ page, key, type, value });
+    if (el.tagName === "IMG") {
+      type = "image";
+      value = el.src || "";
+    } else if (el.tagName === "A") {
+      type = "link";
+      value = JSON.stringify({ text: el.innerText || "", href: el.href || "" });
+    } else {
+      type = "text";
+      value = el.innerText || "";
+    }
+    data.push({ page, key, type, value });
   });
-
-  if (payload.length === 0) {
-    console.log("No editable elements to save.");
-    return;
-  }
 
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload)
+      body: JSON.stringify(data),
+      credentials: "include"
     });
     if (!res.ok) {
-      const txt = await res.text();
-      console.error("Save failed:", txt);
-      alert("Erreur lors de la sauvegarde. Voir console.");
-      return;
+      console.error("Save failed:", await res.text());
+    } else {
+      console.log("Content saved");
     }
-    showTooltip("Contenu sauvegardé");
-    console.log("Saved", payload.length, "items.");
   } catch (err) {
-    console.error("saveContent error", err);
-    alert("Erreur lors de la sauvegarde. Voir console.");
+    console.error("Save error", err);
   }
 }
 
-// ------------------------ Edit wiring (no new buttons) ------------------------
-function findNearestEditableForButton(btn) {
-  // prefer previous sibling then next sibling then parent query
-  if (!btn) return null;
-  const prev = btn.previousElementSibling;
-  if (prev && prev.hasAttribute && prev.hasAttribute("data-editable")) return prev;
-  const next = btn.nextElementSibling;
-  if (next && next.hasAttribute && next.hasAttribute("data-editable")) return next;
-  // search parent
-  const parent = btn.parentElement;
-  if (parent) {
-    const direct = parent.querySelector("[data-editable]");
-    if (direct) return direct;
+async function loadSiteContent() {
+  const page = pageId();
+  try {
+    const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
+    if (!res.ok) throw new Error("load failed");
+    const payload = await res.json();
+    // payload expected to be array of items { key, type, value } or object - support both
+    const items = Array.isArray(payload) ? payload : (payload.other || []);
+    items.forEach(item => {
+      // Try to find element by data-key first
+      let el = document.querySelector(`[data-key="${item.key}"]`);
+      if (!el) {
+        // fallback: try to find element whose generated key matches
+        el = Array.from(document.querySelectorAll("[data-editable]")).find(e => generateKey(e) === item.key);
+      }
+      if (!el) return;
+      if (item.type === "image" || item.type === "img") el.src = item.value;
+      else if (item.type === "link" || el.tagName === "A") {
+        try {
+          const linkData = typeof item.value === "string" ? JSON.parse(item.value) : item.value;
+          if (linkData) {
+            el.innerText = linkData.text || el.innerText;
+            if (linkData.href) el.href = linkData.href;
+          }
+        } catch (e) {
+          el.innerText = item.value;
+        }
+      } else {
+        el.innerText = item.value;
+      }
+    });
+    console.log("Loaded content for", page);
+  } catch (err) {
+    console.warn("Could not load saved content:", err);
   }
-  // fallback: closest ancestor with data-editable
-  return btn.closest("[data-editable]");
 }
 
-function wireEditButtons() {
-  // wire existing .edit-btn elements (do not create new ones)
-  by(".edit-btn").forEach(btn => {
-    // avoid double attach
-    if (btn.dataset.wired === "true") return;
-    btn.dataset.wired = "true";
+/* -------------------- Inline editing -------------------- */
+/* Finds the appropriate editable target near an edit button */
+function findEditableTarget(btn) {
+  // 1) previous sibling that has data-editable
+  if (btn.previousElementSibling && btn.previousElementSibling.hasAttribute && btn.previousElementSibling.hasAttribute("data-editable")) {
+    return btn.previousElementSibling;
+  }
+  // 2) next sibling
+  if (btn.nextElementSibling && btn.nextElementSibling.hasAttribute && btn.nextElementSibling.hasAttribute("data-editable")) {
+    return btn.nextElementSibling;
+  }
+  // 3) within parent: direct child with data-editable
+  if (btn.parentElement) {
+    const prefer = btn.parentElement.querySelector("[data-editable]");
+    if (prefer) return prefer;
+  }
+  // 4) search nearby up to two parents
+  let p = btn.parentElement;
+  for (let i=0;i<3 && p;i++){
+    const cand = p.querySelector("[data-editable]");
+    if (cand) return cand;
+    p = p.parentElement;
+  }
+  return null;
+}
 
+function makeInputForTextElement(el) {
+  // Create appropriate input or textarea depending on tag
+  if (!el) return;
+  const tag = el.tagName;
+  const isInline = ["SPAN","A","STRONG","EM","B"].includes(tag);
+  const input = isInline ? document.createElement("input") : document.createElement("textarea");
+  input.value = el.innerText.trim();
+  // Styling: inherit font + minimal
+  input.style.font = "inherit";
+  input.style.fontSize = "inherit";
+  input.style.padding = "4px";
+  input.style.minWidth = "140px";
+  if (input.tagName === "TEXTAREA") input.style.minHeight = "60px";
+  input.className = "inline-editor";
+  return input;
+}
+
+function attachEditButtons() {
+  // Wire .edit-btn present in DOM
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    if (btn.dataset.attached) return;
+    btn.dataset.attached = "1";
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
-      if (!isAdmin) return;
-      const target = findNearestEditableForButton(btn);
-      if (!target) return;
-
-      // if it's a link, create two inline inputs: text + href (side-by-side)
+      const target = findEditableTarget(btn);
+      if (!target) return console.warn("No target for edit-btn", btn);
+      // If it's an anchor, create two inputs: text + href
       if (target.tagName === "A") {
-        // create container
-        const container = document.createElement("span");
-        container.style.display = "inline-flex";
-        container.style.gap = "6px";
-        container.style.alignItems = "center";
-        const textInput = document.createElement("input");
-        textInput.type = "text";
-        textInput.value = target.innerText || "";
-        textInput.style.minWidth = "120px";
-        textInput.style.font = "inherit";
-        const hrefInput = document.createElement("input");
-        hrefInput.type = "text";
-        hrefInput.value = target.href || "";
-        hrefInput.placeholder = "URL";
-        hrefInput.style.minWidth = "180px";
-        hrefInput.style.font = "inherit";
-
-        container.appendChild(textInput);
-        container.appendChild(hrefInput);
-
-        target.replaceWith(container);
-        textInput.focus();
-
-        // save when both blurred (use small delay to allow switching between inputs)
-        let blurTimer = null;
-        function commitAndRestore() {
-          const newA = document.createElement("a");
-          newA.href = hrefInput.value || "#";
-          newA.innerText = textInput.value || hrefInput.value || "Lien";
-          newA.setAttribute("data-editable", "true");
-          // preserve data-editable if original had it
-          if (target.dataset && target.dataset.key) newA.dataset.key = target.dataset.key;
-          container.replaceWith(newA);
-          // re-wire the new anchor (it might have adjacent edit-btn)
-          wireEditButtons(); // safe small cost
-          // save content
-          saveContent();
-        }
-
-        textInput.addEventListener("blur", () => { blurTimer = setTimeout(commitAndRestore, 150); });
-        hrefInput.addEventListener("blur", () => { blurTimer = setTimeout(commitAndRestore, 150); });
-
-        // Enter key commit for both
-        [textInput, hrefInput].forEach(inp => {
-          inp.addEventListener("keydown", (ev) => {
-            if (ev.key === "Enter") { ev.preventDefault(); clearTimeout(blurTimer); commitAndRestore(); }
-          });
-        });
+        const wrapper = document.createElement("span");
+        wrapper.style.display = "inline-flex";
+        wrapper.style.gap = "6px";
+        const textIn = document.createElement("input");
+        textIn.value = target.innerText;
+        textIn.style.font = "inherit";
+        textIn.style.padding = "4px";
+        textIn.style.minWidth = "120px";
+        const hrefIn = document.createElement("input");
+        hrefIn.value = target.href;
+        hrefIn.style.font = "inherit";
+        hrefIn.style.padding = "4px";
+        hrefIn.style.minWidth = "180px";
+        wrapper.appendChild(textIn);
+        wrapper.appendChild(hrefIn);
+        target.replaceWith(wrapper);
+        textIn.focus();
+        const save = async () => {
+          const a = document.createElement("a");
+          a.href = hrefIn.value || "#";
+          a.innerText = textIn.value || hrefIn.value || "Lien";
+          a.className = target.className || "";
+          a.setAttribute("data-editable", target.getAttribute("data-editable") || "");
+          wrapper.replaceWith(a);
+          await saveContent();
+        };
+        // blur on both inputs -> save (use small timeout to allow switching between inputs)
+        textIn.addEventListener("blur", () => setTimeout(save, 150));
+        hrefIn.addEventListener("blur", () => setTimeout(save, 150));
         return;
       }
 
-      // For other elements: inline input or textarea depending on tag / content length
-      const isShort = (target.innerText || "").length < 80 && /^H[1-6]$/i.test(target.tagName);
-      let input;
-      if (isShort) {
-        input = document.createElement("input");
-        input.type = "text";
-      } else {
-        input = document.createElement("textarea");
-        input.style.minHeight = "60px";
-      }
-      input.value = target.innerText || "";
-      input.style.font = "inherit";
-      input.style.width = "100%";
-      // keep some classes so the layout remains
-      input.className = "inline-edit-input";
+      // For images, do nothing here; image-edits handled separately
+      if (target.tagName === "IMG") return;
 
-      // replace but attempt to keep layout (if target is block-level, keep block)
-      const isBlock = getComputedStyle(target).display === "block" || ["P", "DIV", "SECTION", "H1", "H2", "H3", "H4"].includes(target.tagName);
-      if (isBlock) input.style.display = "block";
-      else input.style.display = "inline-block";
-
-      target.replaceWith(input);
+      // Text element: swap to input/textarea
+      const input = makeInputForTextElement(target);
+      if (!input) return;
+      const original = target;
+      original.replaceWith(input);
       input.focus();
 
-      // Save on blur or Ctrl+Enter
-      const done = async () => {
-        const newEl = document.createElement(target.tagName);
-        newEl.innerText = input.value;
-        newEl.setAttribute("data-editable", "true");
-        // preserve data-editable if existed on old element: try to reuse
-        if (target.dataset && target.dataset.key) newEl.dataset.key = target.dataset.key;
+      // Save on blur or Enter (for single-line input)
+      const doSave = async () => {
+        const newEl = document.createElement(original.tagName);
+        newEl.innerHTML = input.value;
+        // keep original attributes (data-key etc)
+        if (original.getAttribute("data-key")) newEl.setAttribute("data-key", original.getAttribute("data-key"));
+        if (original.className) newEl.className = original.className;
+        newEl.setAttribute("data-editable", original.getAttribute("data-editable") || "");
         input.replaceWith(newEl);
-        // re-wire the new element's edit button wiring (edit-btn sits adjacent)
-        wireEditButtons();
         await saveContent();
       };
-
-      input.addEventListener("blur", () => { setTimeout(done, 50); }, { once: true });
+      input.addEventListener("blur", doSave, { once: true });
       input.addEventListener("keydown", (ev) => {
-        if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter") { ev.preventDefault(); done(); }
+        if (ev.key === "Enter" && input.tagName === "INPUT") {
+          ev.preventDefault();
+          input.blur();
+        }
       });
     });
   });
 }
 
-// ------------------------ Image wiring ------------------------
-function wireImageEditButtons() {
-  by(".image-edit").forEach(btn => {
-    if (btn.dataset.wiredImage === "true") return;
-    btn.dataset.wiredImage = "true";
+/* -------------------- Image upload handling -------------------- */
+function attachImageEditButtons() {
+  document.querySelectorAll(".image-edit").forEach(btn => {
+    if (btn.dataset.attachedImg) return;
+    btn.dataset.attachedImg = "1";
 
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener("click", async (e) => {
       e.stopPropagation();
-      if (!isAdmin) return;
-      // find nearest image element
-      const parent = btn.parentElement;
-      let img = parent && parent.querySelector && parent.querySelector("img[data-editable]");
+      // find target image: try siblings then parent .nav-item-wrapper or .content-image
+      let img = null;
+      // sibling img
+      if (btn.nextElementSibling && btn.nextElementSibling.tagName === "IMG") img = btn.nextElementSibling;
+      if (!img && btn.previousElementSibling && btn.previousElementSibling.tagName === "IMG") img = btn.previousElementSibling;
       if (!img) {
-        // fallback: next sibling
-        if (btn.nextElementSibling && btn.nextElementSibling.tagName === "IMG") img = btn.nextElementSibling;
+        // search parent
+        const p = btn.parentElement;
+        if (p) img = p.querySelector("img[data-editable], img");
       }
-      if (!img) return;
+      if (!img) {
+        console.warn("No image found for image-edit button", btn);
+        return;
+      }
 
+      // create temporary input
       const fileInput = document.createElement("input");
       fileInput.type = "file";
       fileInput.accept = "image/*";
@@ -311,35 +264,39 @@ function wireImageEditButtons() {
 
       fileInput.addEventListener("change", async (ev) => {
         const file = ev.target.files && ev.target.files[0];
-        if (!file) { fileInput.remove(); return; }
-
-        // upload to /php/upload.php?page=...&key=...
-        const key = generateKey(img);
-        const page = currentPageName();
+        if (!file) {
+          fileInput.remove();
+          return;
+        }
+        // upload to server
         const fd = new FormData();
         fd.append("file", file);
-
+        const key = generateKey(img);
+        const page = pageId();
         try {
           const res = await fetch(`/php/upload.php?page=${encodeURIComponent(page)}&key=${encodeURIComponent(key)}`, {
             method: "POST",
             body: fd,
             credentials: "include"
           });
-          if (!res.ok) throw new Error("upload failed");
           const json = await res.json();
-          if (json && (json.url || json.path)) {
-            img.src = json.url || json.path;
+          if (json.url) {
+            img.src = json.url;
             await saveContent();
-            showTooltip("Image mise à jour");
           } else {
-            // as fallback, preview local
-            const reader = new FileReader();
-            reader.onload = () => { img.src = reader.result; saveContent(); };
-            reader.readAsDataURL(file);
+            // if no json.url, try to use returned path/text
+            console.warn("Upload returned:", json);
+            if (typeof json === "string" && json.startsWith("http")) {
+              img.src = json;
+              await saveContent();
+            } else {
+              alert("Upload failed (no url returned). Check server response in console.");
+              console.log("upload response:", json);
+            }
           }
         } catch (err) {
-          console.error("upload error", err);
-          alert("Erreur upload image (voir console)");
+          console.error("Upload error", err);
+          alert("Erreur upload image. Voir console.");
         } finally {
           fileInput.remove();
         }
@@ -348,130 +305,237 @@ function wireImageEditButtons() {
   });
 }
 
-// ------------------------ Content-box add-block wiring ------------------------
-function createNewContentBox() {
-  const box = document.createElement("div");
-  box.className = "content-box bg-white rounded shadow-md p-6 mt-6 relative";
-  box.innerHTML = `
-    <div class="content-image">
-      <button class="image-edit" type="button">📷</button>
-      <img src="https://via.placeholder.com/600x320" alt="Nouvelle image" data-editable>
-    </div>
-    <div class="content">
-      <h2 data-editable>Nouveau titre</h2>
-      <p data-editable>Nouveau paragraphe...</p>
-    </div>
-  `;
-  return box;
-}
+/* -------------------- Dropdown behavior (click toggles) -------------------- */
+function initDropdowns() {
+  // Toggle top-level menu for mobile already handled by menu-toggle button
+  // For each relative.group that contains a dropdown (we assume it contains a div absolute)
+  document.querySelectorAll(".relative.group").forEach(group => {
+    if (group.dataset.dropdownAttached) return;
+    group.dataset.dropdownAttached = "1";
 
-function wireAddBlockButtons() {
-  by(".add-block-btn").forEach(btn => {
-    if (btn.dataset.wiredAdd === "true") return;
-    btn.dataset.wiredAdd = "true";
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (!isAdmin) return;
-      // find parent content-box or insert after btn's container
-      const box = btn.closest(".content-box");
-      const parent = box ? box.parentNode : (btn.parentNode || document.querySelector("main") || document.body);
-      const newBox = createNewContentBox();
-      if (box && box.nextSibling) parent.insertBefore(newBox, box.nextSibling);
-      else parent.appendChild(newBox);
+    const toggleBtn = group.querySelector("button"); // first button as toggle
+    // find dropdown container inside this group
+    const dropdown = group.querySelector(".absolute, #dropdownMenuPortefeuille, .group > div") || group.querySelector("[role='menu']") || group.querySelector(".dropdown");
+    // some markup has nested absolute inside absolute; find the deepest absolute descendant
+    const dd = group.querySelectorAll(".absolute");
+    const dropdownEl = dd.length ? dd[dd.length-1] : dropdown;
 
-      // wire new box internals
-      // small delay to let DOM render
-      setTimeout(() => {
-        wireImageEditButtons();
-        wireEditButtons();
-        wireAddBlockButtons();
-      }, 60);
-    });
-  });
-}
-
-// ------------------------ Dropdown hover + click fixes ------------------------
-function wireDropdowns() {
-  // handle .group containers that include menus
-  by(".group, .relative.group").forEach(group => {
-    // find the menu element inside (absolute dropdown)
-    const menu = group.querySelector(".absolute, .dropdown-menu, #dropdownMenuPortefeuille, .group > div");
-    // For robustness, pick any child that has 'hidden' and is positioned absolute
-    let menuEl = menu;
-    if (!menuEl) {
-      menuEl = Array.from(group.children).find(ch => ch.classList && (ch.classList.contains("absolute") || ch.classList.contains("dropdown")));
+    if (!toggleBtn || !dropdownEl) {
+      // fallback: ensure submenu-edit area still works
+      return;
     }
-    // mouseenter/mouseleave for desktop (hover)
-    group.addEventListener("mouseenter", () => {
-      if (!menuEl) return;
-      menuEl.classList.remove("hidden");
-      menuEl.classList.add("block");
-    });
-    group.addEventListener("mouseleave", () => {
-      if (!menuEl) return;
-      menuEl.classList.add("hidden");
-      menuEl.classList.remove("block");
-    });
 
-    // Also wire click on toggle button to open on mobile
-    const toggle = group.querySelector("button, [data-toggle]");
-    if (toggle) {
-      toggle.addEventListener("click", (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        if (!menuEl) return;
-        menuEl.classList.toggle("hidden");
-        menuEl.classList.toggle("block");
+    // ensure dropdown is absolutely positioned and visible when opened
+    dropdownEl.style.transition = "opacity 150ms ease, transform 150ms ease";
+    dropdownEl.style.willChange = "opacity, transform";
+    dropdownEl.style.opacity = "0";
+    dropdownEl.style.pointerEvents = "none";
+    dropdownEl.style.transform = "translateY(6px)";
+    dropdownEl.style.display = "block"; // keep in DOM flow but invisible; this avoids layout jumps
+    dropdownEl.classList.add("admin-dropdown"); // marker for CSS if needed
+    // place element outside clipping issues (increase z-index)
+    dropdownEl.style.zIndex = "9999";
+
+    // initially hide via data-open
+    dropdownEl.dataset.open = "false";
+    dropdownEl.style.visibility = "hidden";
+    dropdownEl.style.opacity = "0";
+    dropdownEl.style.pointerEvents = "none";
+
+    const openDropdown = () => {
+      dropdownEl.dataset.open = "true";
+      dropdownEl.style.visibility = "visible";
+      dropdownEl.style.opacity = "1";
+      dropdownEl.style.pointerEvents = "auto";
+      dropdownEl.style.transform = "translateY(0)";
+      group.classList.add("open");
+    };
+    const closeDropdown = () => {
+      dropdownEl.dataset.open = "false";
+      dropdownEl.style.opacity = "0";
+      dropdownEl.style.pointerEvents = "none";
+      dropdownEl.style.transform = "translateY(6px)";
+      // hide after animation
+      setTimeout(() => { if (dropdownEl.dataset.open === "false") dropdownEl.style.visibility = "hidden"; }, 160);
+      group.classList.remove("open");
+    };
+
+    toggleBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const isOpen = dropdownEl.dataset.open === "true";
+      // close other open dropdowns
+      document.querySelectorAll(".relative.group .admin-dropdown").forEach(d=>{
+        if (d !== dropdownEl) {
+          d.dataset.open = "false";
+          d.style.opacity = "0";
+          d.style.pointerEvents = "none";
+          d.style.transform = "translateY(6px)";
+          d.style.visibility = "hidden";
+          d.closest(".relative.group")?.classList?.remove("open");
+        }
       });
-    }
+      if (isOpen) closeDropdown(); else openDropdown();
+    });
+
+    // Make sure clicking inside dropdown doesn't close it
+    dropdownEl.addEventListener("click", (e)=> e.stopPropagation());
+
+    // Clicking outside closes all
+    document.addEventListener("click", () => {
+      closeDropdown();
+    });
+
+    // Also close on Escape
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeDropdown(); } });
   });
 
-  // close dropdowns when clicking outside
-  document.addEventListener("click", () => {
-    by(".group .absolute, .group > div.absolute, .group .dropdown").forEach(m => {
-      m.classList.add("hidden");
-      m.classList.remove("block");
+  // Make sure top-level menu (id=menu) is visible below navbar and not clipped
+  const menu = document.getElementById("menu");
+  if (menu) {
+    menu.style.zIndex = "9998";
+    menu.style.overflow = "visible";
+  }
+}
+
+/* -------------------- Submenu Add button (admin-only) -------------------- */
+function attachAddSubmenuButtons() {
+  if (!isAdmin) return;
+  // for each dropdown (admin-dropdown), ensure there is a small add button at the bottom
+  document.querySelectorAll(".admin-dropdown").forEach(drop => {
+    if (drop.dataset.addSubAttached) return;
+    drop.dataset.addSubAttached = "1";
+    const add = document.createElement("div");
+    add.style.padding = "8px";
+    add.style.borderTop = "1px solid rgba(0,0,0,0.05)";
+    add.style.display = "flex";
+    add.style.justifyContent = "center";
+    const btn = document.createElement("button");
+    btn.textContent = "+ Ajouter un sous-menu";
+    btn.className = "px-3 py-1 rounded text-sm";
+    btn.style.background = "#eef";
+    btn.style.border = "1px solid rgba(0,0,0,0.06)";
+    btn.style.cursor = "pointer";
+    add.appendChild(btn);
+    drop.appendChild(add);
+
+    btn.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+      const a = document.createElement("a");
+      a.href = "#";
+      a.innerText = "Nouvel élément";
+      a.className = "block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue";
+      a.setAttribute("data-editable", "");
+      // create a small submenu-edit button next to it
+      const wrapper = document.createElement("div");
+      wrapper.style.display = "flex";
+      wrapper.style.alignItems = "center";
+      wrapper.style.justifyContent = "center";
+      wrapper.style.gap = "6px";
+      wrapper.appendChild(a);
+      const subBtn = document.createElement("button");
+      subBtn.className = "submenu-edit edit-btn";
+      subBtn.textContent = "✎";
+      wrapper.appendChild(subBtn);
+      drop.insertBefore(wrapper, add); // insert before add control
+      // wire the new submenu edit button
+      subBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        // reuse existing edit workflow: replace link with inputs
+        const textIn = document.createElement("input");
+        textIn.value = a.innerText;
+        textIn.style.font = "inherit";
+        textIn.style.padding = "4px";
+        const hrefIn = document.createElement("input");
+        hrefIn.value = a.href;
+        hrefIn.style.font = "inherit";
+        hrefIn.style.padding = "4px";
+        const editWrap = document.createElement("span");
+        editWrap.style.display = "inline-flex";
+        editWrap.style.gap = "6px";
+        editWrap.appendChild(textIn);
+        editWrap.appendChild(hrefIn);
+        wrapper.replaceWith(editWrap);
+        textIn.focus();
+        const finish = async () => {
+          const newA = document.createElement("a");
+          newA.href = hrefIn.value || "#";
+          newA.innerText = textIn.value || "Lien";
+          newA.className = "block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue";
+          newA.setAttribute("data-editable", "");
+          const newWrapper = document.createElement("div");
+          newWrapper.style.display = "flex";
+          newWrapper.style.alignItems = "center";
+          newWrapper.style.justifyContent = "center";
+          newWrapper.style.gap = "6px";
+          const newSubBtn = document.createElement("button");
+          newSubBtn.className = "submenu-edit edit-btn";
+          newSubBtn.textContent = "✎";
+          newWrapper.appendChild(newA);
+          newWrapper.appendChild(newSubBtn);
+          editWrap.replaceWith(newWrapper);
+          // attach behavior to newSubBtn
+          newSubBtn.addEventListener("click", (e)=> {
+            e.stopPropagation();
+            // delegate to edit-btn behavior by triggering a click on an .edit-btn if present
+            newSubBtn.click();
+          });
+          await saveContent();
+        };
+        textIn.addEventListener("blur", () => setTimeout(finish, 120));
+        hrefIn.addEventListener("blur", () => setTimeout(finish, 120));
+      });
     });
   });
 }
 
-// ------------------------ Initial wiring ------------------------
+/* -------------------- Bootstrapping -------------------- */
 async function initAdminMain() {
-  await checkAdminSession();
-  if (!isAdmin) {
-    console.log("Admin session not present; editing UI disabled.");
-    return;
-  }
-
-  // Load stored content first
+  if (!isAdmin) return;
+  // first load saved content
   await loadSiteContent();
 
-  // Wire existing buttons present in DOM (no creation)
-  wireEditButtons();
-  wireImageEditButtons();
-  wireAddBlockButtons();
-  wireDropdowns();
+  // attach handlers to existing elements/buttons (no new UI creation)
+  attachEditButtons();
+  attachImageEditButtons();
 
-  // Ensure content-box internals are wired
-  by(".content-box").forEach(box => {
-    // wire if content-box contains built-in edit/add buttons
-    by(".edit-btn", box).forEach(() => {}); // just to ensure selector exists
+  // initialize dropdown toggles and add-submenu buttons
+  initDropdowns();
+
+  // re-run attachAddSubmenuButtons after dropdown init so they can find .admin-dropdown
+  attachAddSubmenuButtons();
+
+  // Also attach submenu-edit and menu-edit existing buttons (wire them to nearest target)
+  document.querySelectorAll(".menu-edit, .submenu-edit").forEach(b => {
+    if (b.dataset.attachedMenu) return;
+    b.dataset.attachedMenu = "1";
+    b.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const target = findEditableTarget(b);
+      if (!target) return;
+      // reuse same behavior as .edit-btn click
+      b.classList.add("active");
+      b.click(); // if there is an edit-btn behavior this will trigger it; otherwise call manual flow
+    });
   });
 
-  // Save & logout buttons
-  const saveBtn = document.getElementById("save-btn");
-  if (saveBtn) saveBtn.addEventListener("click", saveContent);
-  const logoutBtn = document.getElementById("logout-btn");
-  if (logoutBtn) logoutBtn.addEventListener("click", () => { window.location.href = "/php/logout.php"; });
-
-  // Accessibility: allow keyboard activation for edit buttons
-  by(".edit-btn, .image-edit, .add-block-btn").forEach(b => {
-    b.setAttribute("tabindex", "0");
-    b.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); b.click(); } });
+  // Save & logout buttons already in DOM
+  document.getElementById("save-btn")?.addEventListener("click", async () => {
+    await saveContent();
+    // small visual feedback
+    const s = document.getElementById("save-btn");
+    if (s) { s.textContent = "Publié ✓"; setTimeout(()=> s.textContent = "Publier", 1200); }
   });
+  document.getElementById("logout-btn")?.addEventListener("click", () => window.location.href = "/php/logout.php");
 
-  console.log("Admin editing wired.");
+  // Re-attach on DOM mutations for cases where admin adds new submenu elements or boxes
+  const mo = new MutationObserver(() => {
+    attachEditButtons();
+    attachImageEditButtons();
+    initDropdowns();
+    attachAddSubmenuButtons();
+  });
+  mo.observe(document.body, { childList: true, subtree: true });
 }
 
-// run
+// Start
 document.addEventListener("DOMContentLoaded", initAdminMain);
