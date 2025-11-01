@@ -509,8 +509,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
-// ======================= INIT =======================
-document.addEventListener("DOMContentLoaded", () => {
-  checkAdminSession();   // Check if admin is logged in
-  loadSiteContent();     // Load saved content from DB
-});
+
