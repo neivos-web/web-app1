@@ -230,8 +230,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // }
 
   // Force admin for everyone logged in
-  isAdmin = true;
-  showTooltip("Connecté en tant qu'admin");
+  //isAdmin = true;
+  //showTooltip("Connecté en tant qu'admin");
 
   // Load content
   await loadSiteContent();
