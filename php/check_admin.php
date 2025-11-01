@@ -1,11 +1,13 @@
 <?php
-session_start();
+ini_set('session.cookie_samesite', 'None');
+ini_set('session.cookie_secure', '1');
 
-// Headers CORS + JSON
+session_start();
+header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: https://outsdrs.com");
+header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
 
 // Vérifie si l’admin est connecté
