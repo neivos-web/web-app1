@@ -227,24 +227,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     showTooltip("Non connecté ! Redirection…");
     setTimeout(() => window.location.href = "/admin.html", 1500);
     return;
-  } else {
-    showTooltip(isAdmin ? "Connecté en tant qu'admin" : "Connecté en tant qu'utilisateur");
   }
 
+  // Force admin for everyone logged in
+  isAdmin = true;
+  showTooltip("Connecté en tant qu'admin");
+
   // Load content
-  loadSiteContent();
+  await loadSiteContent();
   enableEditingForStaticElements();
 
-  // Attach content boxes behaviors
+  // Attach behaviors to existing content boxes
   document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
 
-  // Add new block button
+  // Show and attach Add Block button
   addBlockBtn = document.getElementById("add-block");
   if (addBlockBtn) {
-      addBlockBtn.style.display = isAdmin ? "inline-block" : "none";
-      addBlockBtn.addEventListener("click", () => {
-        const box = createNewContentBox();
-        pageContainer.appendChild(box);
-      });
+    addBlockBtn.style.display = "inline-block"; // now visible
+    addBlockBtn.addEventListener("click", () => {
+      const box = createNewContentBox();
+      pageContainer.appendChild(box);
+    });
   }
 });
