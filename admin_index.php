@@ -79,7 +79,7 @@ header('Content-Type: text/html; charset=UTF-8');
             <div id="menu" class="hidden md:flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">
             
                 <div data-editable data-key="nav_mission" class="flex items-center space-x-1">
-                    <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
+                    <a href="mission.php" class="hover:text-brand-blue">Mission et Vision</a>
                     <button class="edit-btn">✎</button>
                 </div>
 

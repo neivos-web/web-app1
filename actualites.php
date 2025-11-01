@@ -125,13 +125,13 @@
         <section class="content-section">
             <div class="content-box">
                 <div class="content-image">
-                    
+                    <button class="edit-btn">✎</button>
                     <img src="images/service.gif" alt="Illustration Services" data-editable>
                 </div>
                 <div class="content">
-                    
+                    <button class="edit-btn">✎</button>
                     <h2 data-editable>Nos actualitées</h2>
-                    
+                    <button class="edit-btn">✎</button>
                     <p data-editable>
                         Chargement des actualitées .....
                     </p>                   

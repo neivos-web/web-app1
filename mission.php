@@ -1,3 +1,18 @@
+<?php
+// Secure session settings (must come BEFORE session_start)
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.cookie_secure', '0'); 
+session_start();
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: mission.html");
+    exit;
+}
+
+header('Content-Type: text/html; charset=UTF-8');
+?>
+
+
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -21,7 +36,7 @@
             <!-- Logo -->
             <div class="flex items-center space-x-3">
                 <div class="nav-item-wrapper">
-                             
+                        <button class="edit-btn">📷</button>        
                         <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
                         
                             <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
@@ -40,7 +55,7 @@
             
                 <div data-editable data-key="nav_mission" class="flex items-center space-x-1">
                     <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
-                    
+                    <button class="edit-btn">✎</button>
                 </div>
 
                 <div class="relative group" data-editable data-key="nav_portfolio">
@@ -50,12 +65,12 @@
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
-                    
+                    <button class="edit-btn">✎</button>
                     <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
-                        <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a>
-                        <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a>
-                        <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
-                        <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a>
+                        <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
 
@@ -66,18 +81,18 @@
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
-                    
+                    <button class="edit-btn">✎</button>
                     <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20">
-                        <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
-                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a>
-                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a>
-                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a>
+                        <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
+                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
+                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a><button class="edit-btn">✎</button>
+                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
 
                 <div data-editable data-key="nav_research" class="flex items-center space-x-1">
                     <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
-                    
+                    <button class="edit-btn">✎</button>
                 </div>
 
                 <div class="relative group" data-editable data-key="nav_news">
@@ -87,15 +102,15 @@
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
-                    
+                    <button class="edit-btn">✎</button>
                     <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20">
-                        <a href="actualites.html" data-editable data-key="news_articles" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Actualités</a>
+                        <a href="actualites.html" data-editable data-key="news_articles" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Actualités</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
 
                 <div data-editable data-key="nav_contact" class="flex items-center space-x-1">
                     <a href="contact.html" class="hover:text-brand-blue">Contact</a>
-                    
+                    <button class="edit-btn">✎</button>
                 </div>
 
                 <div class="flex items-center space-x-2">
@@ -112,14 +127,14 @@
     <!-- Section Héros -->
     <section class="relative bg-white">
         <div class="absolute inset-0">
-            
+            <button class="edit-btn">✎</button>
             <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" data-editable data-key="hero_img" alt="Workspace">
             <div class="absolute inset-0 bg-black opacity-40"></div>
         </div>
         <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-            
+            <button class="edit-btn">✎</button>
             <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable data-key="hero_title">Bienvenue dans notre section mission et vision</h1>
-            
+            <button class="edit-btn">✎</button>
             <p class="text-lg max-w-3xl mx-auto" data-editable data-key="hero_subtitle">
                 Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.
             </p>
@@ -130,33 +145,33 @@
     <section class="content-section">
         <div class="content-box">
             <div class="content-image">
-                
+                <button class="edit-btn">✎</button>
                 <img src="images/innovation.gif" alt="Innovation et Avenir" data-editable data-key="innovation_img">
             </div>
             <div class="content">
-                
+                <button class="edit-btn">✎</button>
                 <h2 data-editable data-key="innovation_title">Innovation et Avenir</h2>
-                
+                <button class="edit-btn">✎</button>
                 <p data-editable data-key="innovation_text1">
                     Chez <strong>Outsiders</strong>, nous croyons fermement que l'innovation doit servir l'humain...nous croyons fermement que l'innovation 
                     doit servir l'humain. Notre équipe s'appuie sur une expertise technique solide pour accompagner les entreprises et les particuliers dans 
                     leur transformation numérique. Que vous souhaitiez explorer de nouvelles technologies ou optimiser vos processus existants, nous sommes
                     là pour vous guider.
                 </p>
-                
+                <button class="edit-btn">✎</button>
                 <p data-editable data-key="innovation_text2">
                     Notre palette de services reflète cette ambition : création d'expériences en réalité virtuelle immersives, développement d'hologrammes
                      interactifs pour des événements marquants, conception sur mesure d'applications mobiles et de jeux vidéo innovants. Nous proposons 
                      également des sessions de formation pratiques et des accompagnements stratégiques, notamment autour des systèmes d'information et 
                      de son intégration responsable.
                 </p>
-                
+                <button class="edit-btn">✎</button>
                  <p data-editable data-key="innovation_text3">
                     Le numérique transforme profondément nos façons de travailler, d'apprendre et d'interagir. Plutôt que de subir ces mutations, nous 
                     choisissons d'y voir une formidable occasion de progresser ensemble. En combinant réalité augmentée, réalité virtuelle et intelligence
                     artificielle, nous développons des solutions qui ouvrent de nouveaux horizons professionnels et créatifs.
                 </p>
-                 
+                 <button class="edit-btn">✎</button>
                  <p data-editable data-key="innovation_text4">
                     Notre engagement va au-delà de la simple performance technique : nous voulons démocratiser l'accès à ces technologies émergentes.
                      Chaque projet que nous menons vise un impact durable, qui bénéficie autant à la croissance économique qu'au développement social 
@@ -174,11 +189,11 @@
         <p class="footer-text" data-editable data-key="footer_contact_text">
             Vous avez des questions ? <span>Contactez-nous</span> — nous sommes à votre disposition.
         </p>
-        
+        <button class="edit-btn">✎</button>
 
         <!--contact -->
         <a href="contact.html" class="footer-btn" data-editable data-key="footer_contact_btn">Contactez-nous !</a>
-        
+        <button class="edit-btn">✎</button>
 
         <!-- Réseaux sociaux-->
         <div class="footer-social">
@@ -193,9 +208,9 @@
         <!-- Mentions légales -->
         <div class="footer-bottom">
         <a href="#" data-editable data-key="footer_legal">Mentions légales</a>
-        
+        <button class="edit-btn">✎</button>
         <a href="#" data-editable data-key="footer_privacy">Déclaration de confidentialité</a>
-        
+        <button class="edit-btn">✎</button>
         </div>
     </div>
 </footer>
