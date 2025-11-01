@@ -23,6 +23,12 @@ async function checkSession() {
   }
 }
 
+function applyAdminVisibility() {
+  document.querySelectorAll(".edit-btn, .publish-btn, #logout-btn").forEach(btn => {
+    btn.style.display = isAdmin ? "inline-flex" : "none";
+  });
+}
+
 // ======================= UTILITY =======================
 function allEditableElements() {
   return document.querySelectorAll("[data-editable]");
@@ -365,7 +371,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Attach behaviors to existing content boxes
   document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
-
+  applyAdminVisibility();
   // Show and attach Add Block button
   addBlockBtn = document.getElementById("add-block");
   if (addBlockBtn) {
