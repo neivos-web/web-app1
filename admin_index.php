@@ -83,23 +83,19 @@ header('Content-Type: text/html; charset=UTF-8');
                     <button class="edit-btn">✎</button>
                 </div>
 
-                <div class="relative group"  data-key="nav_portfolio">
-                    <button id="dropdownButtonPortefeuille" data-editable class="flex items-center hover:text-brand-blue focus:outline-none">
+                <div class="relative group" data-editable data-key="nav_portfolio">
+                    <button class="flex items-center hover:text-brand-blue focus:outline-none">
                         Portefeuille
                         <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
-
-                    <button class="menu-edit">✎</button>
-                    <div id="dropdownMenuPortefeuille" class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
-
-                        <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
-                            <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="submenu-edit">✎</button>
-                            <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a><button class="submenu-edit">✎</button>
-                            <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="submenu-edit">✎</button>
-                            <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a><button class="submenu-edit">✎</button>
-                        </div>
+                    <button class="edit-btn">✎</button>
+                    <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
+                        <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
 
@@ -110,12 +106,12 @@ header('Content-Type: text/html; charset=UTF-8');
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
-                    <button class="menu-edit">✎</button>
+                    <button class="edit-btn">✎</button>
                     <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20">
-                        <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="submenu-edit">✎</button>
-                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="submenu-edit">✎</button>
-                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a><button class="submenu-edit">✎</button>
-                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a><button class="submenu-edit">✎</button>
+                        <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
+                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
+                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a><button class="edit-btn">✎</button>
+                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
 
@@ -173,7 +169,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
                 <button class="edit-btn">✎</button>
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue dans notre section actualités et blogs</h1>
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue danns Outsiders</h1>
                 <button class="edit-btn">✎</button>
                 <p class="text-lg max-w-3xl mx-auto" data-editable>Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.</p>
             </div>
