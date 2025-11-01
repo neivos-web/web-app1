@@ -23,11 +23,26 @@ async function checkSession() {
   }
 }
 
+
 function applyAdminVisibility() {
-  document.querySelectorAll(".edit-btn, .publish-btn, #logout-btn").forEach(btn => {
+  const selectors = [
+    ".edit-btn",
+    ".image-edit",
+    ".publish-btn",
+    "#logout-btn",
+    ".menu-edit",         
+    ".submenu-edit",      
+    ".image-upload-btn",  
+    ".delete-btn",        
+    "#add-block"          
+  ];
+
+  document.querySelectorAll(selectors.join(", ")).forEach(btn => {
     btn.style.display = isAdmin ? "inline-flex" : "none";
   });
 }
+
+
 
 // ======================= UTILITY =======================
 function allEditableElements() {
@@ -408,6 +423,79 @@ function createNewContentBox() {
   attachContentBoxBehaviors(box);
   return box;
 }
+// --- Auto-insert missing edit buttons for every [data-editable] element ---
+// Place this after your other functions and run it once after DOMContentLoaded
+function ensureEditButtons() {
+  document.querySelectorAll('[data-editable]').forEach(target => {
+    // skip if an edit button is already adjacent (previous sibling or next sibling)
+    const prev = target.previousElementSibling;
+    const next = target.nextElementSibling;
+    if ((prev && (prev.classList && (prev.classList.contains('edit-btn') || prev.classList.contains('image-edit') || prev.classList.contains('menu-edit') || prev.classList.contains('submenu-edit'))))
+     || (next && (next.classList && (next.classList.contains('edit-btn') || next.classList.contains('image-edit') || next.classList.contains('menu-edit') || next.classList.contains('submenu-edit'))))) {
+      return;
+    }
+
+    // decide button type
+    let btn;
+    if (target.tagName === 'IMG' || target.tagName === 'VIDEO') {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'image-edit';
+      btn.textContent = '📷';
+      btn.title = 'Modifier l\'image';
+      // insert the button BEFORE the image so btn.nextElementSibling === image (your code expects nextElementSibling)
+      target.parentNode.insertBefore(btn, target);
+    } else {
+      // for anchors that are top-level menu buttons, prefer "menu-edit" for styling if parent is .group or has dropdown
+      const isMenuControl = target.closest('.group') || target.id?.toLowerCase().includes('dropdown') || target.classList.contains('menu-toggle') || target.closest('.relative');
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = isMenuControl ? 'menu-edit' : 'edit-btn';
+      btn.textContent = '✎';
+      btn.title = 'Éditer';
+      // insert the button BEFORE the editable element so btn.nextElementSibling === target (matches enableEditingForStaticElements)
+      target.parentNode.insertBefore(btn, target);
+    }
+  });
+
+  // ensure new buttons follow the same display rules as your code (visible only for admin)
+  const shouldShow = typeof isAdmin !== 'undefined' ? isAdmin : true;
+  document.querySelectorAll('.edit-btn, .image-edit, .menu-edit, .submenu-edit').forEach(b => {
+    b.style.display = shouldShow ? 'inline-flex' : 'none';
+    b.style.alignItems = 'center';
+    b.style.justifyContent = 'center';
+    b.style.cursor = 'pointer';
+    // protect against double attaching
+    if (!b.dataset.autoAttached) {
+      b.dataset.autoAttached = 'true';
+      // keep existing click wiring: rely on enableEditingForStaticElements() & attachContentBoxBehaviors()
+      // but as a fallback, add a minimal click that triggers click on nearest edit flow:
+      b.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        // if there is an image next, trigger the file input if present
+        const next = b.nextElementSibling;
+        if (b.classList.contains('image-edit')) {
+          const fileInput = b.parentElement && b.parentElement.querySelector('input[type="file"].file-input');
+          if (fileInput) fileInput.click();
+        }
+        // otherwise, if the enableEditingForStaticElements hasn't attached, try to make the target editable
+        if (!b.classList.contains('image-edit')) {
+          const target = b.nextElementSibling && b.nextElementSibling.hasAttribute && b.nextElementSibling.hasAttribute('data-editable') ? b.nextElementSibling : findEditableTargetForButton ? findEditableTargetForButton(b) : null;
+          if (target) {
+            target.contentEditable = 'true';
+            target.focus();
+            const range = document.createRange(); range.selectNodeContents(target);
+            const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+            target.addEventListener('blur', async () => {
+              target.contentEditable = 'false';
+              try { await saveSiteContent(); showTooltip('Mis à jour'); } catch(e) { console.error(e); }
+            }, { once: true });
+          }
+        }
+      });
+    }
+  });
+}
 
 // ======================= EVENT LISTENERS =======================
 saveBtn?.addEventListener("click", saveSiteContent);
@@ -418,6 +506,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load content regardless — session check just sets isAdmin
   await loadSiteContent();
+  ensureEditButtons();
 
   // enable editing UI and behavior
   enableEditingForStaticElements();
