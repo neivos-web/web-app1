@@ -95,21 +95,14 @@ function addEditButton(el) {
 
     if (el.classList.contains("add-block-btn")) return;
 
-    // Ensure parent is relative
-    const parent = el.parentElement;
-    if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
-
-    // Create small button
+    // Create small inline button
     const btn = document.createElement("button");
     btn.textContent = "✏️";
-    btn.className = "edit-btn absolute top-0 right-0 text-xs px-1 py-0.5 bg-blue-600 text-white rounded opacity-0 transition-opacity";
+    btn.className = "edit-btn text-xs ml-1 px-1 py-0.5 bg-blue-600 text-white rounded";
     btn.style.cursor = "pointer";
 
-    // Show on hover
-    el.addEventListener("mouseenter", () => btn.style.opacity = "1");
-    el.addEventListener("mouseleave", () => btn.style.opacity = "0");
-
-    parent.appendChild(btn);
+    // Insert button right after the element
+    el.insertAdjacentElement("afterend", btn);
 
     btn.addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -137,14 +130,15 @@ function addEditButton(el) {
         } else {
             const input = el.tagName === "A" ? document.createElement("input") : document.createElement("textarea");
             input.value = el.innerText;
-            input.style.width = "100%";
-            input.style.minHeight = "20px";
+            input.style.width = "auto";
+            input.style.minWidth = "50px";
+            input.style.font = "inherit";
+            input.style.display = "inline-block";
             el.replaceWith(input);
             input.focus();
 
             input.addEventListener("blur", async () => {
-                if (el.tagName === "A") el.innerText = input.value;
-                else el.innerText = input.value;
+                el.innerText = input.value;
                 input.replaceWith(el);
                 await saveContent();
             });
@@ -155,7 +149,7 @@ function addEditButton(el) {
 // ======================= CONTENT BOXES / ADD BLOCK =======================
 function createNewContentBox() {
     const box = document.createElement("div");
-    box.className = "content-box bg-white rounded shadow-md p-6 mt-6 relative";
+    box.className = "content-box bg-white rounded shadow-md p-6 mt-6";
 
     box.innerHTML = `
         <div class="content-image">
@@ -197,10 +191,10 @@ async function initAdminEditing() {
 
     await loadSiteContent();
 
-    // Add edit buttons to all content elements
+    // Add edit buttons to all elements
     Array.from(document.body.querySelectorAll("*")).forEach(addEditButton);
 
-    // Attach behaviors to existing content-boxes
+    // Attach behaviors to existing content boxes
     document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
 
     // Add edit buttons to menu/submenu links
