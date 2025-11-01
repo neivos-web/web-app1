@@ -60,11 +60,13 @@ header('Content-Type: text/html; charset=UTF-8');
             <!-- Logo -->
             <div class="flex items-center space-x-3">
                 <div class="nav-item-wrapper">
-                        <button class="edit-btn image-edit">📷</button>        
+                    <div class="content-image">
+                        <button class="edit-btn">📷</button>        
                         <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
                         
-                        <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-                    </a>
+                            <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -162,10 +164,12 @@ header('Content-Type: text/html; charset=UTF-8');
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-image">
             <div class="absolute inset-0">
-                <button class="edit-btn image-edit">📷</button>
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
-                <div class="absolute inset-0 bg-black opacity-40"></div>
+                <div class="content-image">
 
+                    <button class="edit-btn">📷</button>
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
+                    <div class="absolute inset-0 bg-black opacity-40"></div>
+                </div>
             </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
                 <button class="edit-btn">✎</button>
