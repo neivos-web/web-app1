@@ -18,7 +18,7 @@ form.addEventListener('submit', async (e) => {
     const data = await res.json();
 
     if (data.success) {
-      window.location.href = 'https://outsdrs.com/admin_index.html';
+      window.location.href = 'https://outsdrs.com/admin_index.php';
     } else {
       errorEl.textContent = data.message || 'Nom d’utilisateur ou mot de passe incorrect';
     }

@@ -1,16 +1,21 @@
 <?php
+// Secure session settings (must come BEFORE session_start)
+ini_set('session.cookie_samesite', 'None');
+ini_set('session.cookie_secure', '1');
 
 session_start();
+
 if (!isset($_SESSION['admin'])) {
     header("Location: admin.html");
     exit;
 }
-header('Content-Type: text/html; charset=UTF-8');
 
-ini_set('session.cookie_samesite', 'None');
-ini_set('session.cookie_secure', '1');
-session_start()
+header('Content-Type: text/html; charset=UTF-8');
 ?>
+
+
+?>
+
 
 
 <!DOCTYPE html>
@@ -60,7 +65,7 @@ session_start()
             <div class="flex items-center space-x-3">
                 <div class="nav-item-wrapper">
                     <button class="edit-btn">✎</button>
-                    <a href="admin_index.html" data-editable data-key="logo_text" class="flex items-center space-x-2">
+                    <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
                         <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
                         <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue">Outsiders</span>
                         <button class="edit-btn">✎</button>
