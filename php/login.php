@@ -3,10 +3,9 @@ session_start();
 
 // Headers
 header("Access-Control-Allow-Origin: https://outsdrs.com");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
+
 
 // Connexion DB
 $mysqli = new mysqli("localhost", "outsdrsc_outsiders", "AQW8759mlouK123vgyhn", "outsdrsc_cms_site");
