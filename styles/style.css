@@ -748,11 +748,3 @@ nav {
   }
 
 
-  .edit-btn,
-  .delete-btn,
-  #save-btn,
-  #logout-btn,
-  #logout-button,
-  #add-block-admin-btn {
-      display: none !important;
-  }
