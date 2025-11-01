@@ -635,7 +635,7 @@ saveBtn?.addEventListener("click", saveSiteContent);
 logoutBtn?.addEventListener("click", () => { window.location.href = "/php/logout.php"; });
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await checkSession();
+ isAdmin= await checkSession();
   applyAdminVisibility();
   // Load content regardless — session check just sets isAdmin
   // enable editing UI and behavior
@@ -648,7 +648,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Attach behaviors to existing content boxes
   document.querySelectorAll(".content-box").forEach(attachContentBoxBehaviors);
-  //refreshAdminVisibility();
+  refreshAdminVisibility();
 
   // Show and attach Add Block button
   addBlockBtn = document.getElementById("add-block");
