@@ -154,7 +154,7 @@ async function saveAndReload(page = pageKey) {
   });
 
   try {
-    const res = await fetch("/php/save_changes.php", {
+    const res = await fetch("/php/save_content.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ page, content }),
