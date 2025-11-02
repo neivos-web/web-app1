@@ -275,33 +275,33 @@ async function initAdminEditing() {
    // document.querySelectorAll("nav a, nav ul li a").forEach(addEditButton);
 
     // Fix dropdown menu visibility
-    // Dropdown toggle on click
-    const dropdowns = document.querySelectorAll("nav ul li");
-    dropdowns.forEach(li => {
-        const submenu = li.querySelector("ul");
-        if (!submenu) return;
+// Dropdown toggle on click
+const dropdowns = document.querySelectorAll("nav ul li");
+dropdowns.forEach(li => {
+    const submenu = li.querySelector("ul");
+    if (!submenu) return;
 
-        // Hide initially
-        submenu.style.display = "none";
+    // Hide initially
+    submenu.style.display = "none";
 
-        // Create a toggle button
-        const toggleBtn = document.createElement("button");
-        toggleBtn.className = "dropdown-toggle px-2 py-1 ml-2 text-sm";
-        toggleBtn.textContent = "▼"; // arrow icon
-        toggleBtn.style.background = "transparent";
-        toggleBtn.style.border = "none";
-        toggleBtn.style.cursor = "pointer";
+    // Create a toggle button
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "dropdown-toggle px-2 py-1 ml-2 text-sm";
+    toggleBtn.textContent = "▼"; // arrow icon
+    toggleBtn.style.background = "transparent";
+    toggleBtn.style.border = "none";
+    toggleBtn.style.cursor = "pointer";
 
-        // Add button to the menu item
-        li.insertBefore(toggleBtn, li.querySelector("ul"));
+    // Add button to the menu item
+    li.insertBefore(toggleBtn, li.querySelector("ul"));
 
-        // Toggle submenu on click
-        toggleBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            submenu.style.display = submenu.style.display === "block" ? "none" : "block";
-        });
+    // Toggle submenu on click
+    toggleBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        submenu.style.display = submenu.style.display === "block" ? "none" : "block";
     });
+});
 
 }
 
