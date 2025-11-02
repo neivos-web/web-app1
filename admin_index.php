@@ -33,40 +33,37 @@ header('Content-Type: text/html; charset=UTF-8');
     </script>
     <style>
 /* Fix for dropdown menus - keep edit buttons visible */
-.group:hover .absolute,
-.group:focus-within .absolute {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Ensure dropdowns never clip buttons */
-#menu, .group, .relative, nav, header {
-  overflow: visible !important;
-}
-
-/* Ensure edit buttons stay above dropdowns */
-.edit-btn, .menu-edit, .image-edit {
+/* --- General: make sure edit buttons can appear above menu --- */
+.edit-btn,
+.menu-edit,
+.image-edit {
   position: relative;
   z-index: 9999 !important;
   background: #22e4ac;
   color: white;
   border-radius: 6px;
   font-weight: bold;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   padding: 3px 6px;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
-/* Always visible for admin users */
-.edit-btn, .menu-edit, .image-edit {
+/* Prevent any clipping of edit buttons */
+#menu, nav, header, .group, .relative {
+  overflow: visible !important;
+}
+
+/* Keep dropdowns working normally on hover */
+.group:hover > .absolute,
+.group:focus-within > .absolute {
+  display: block !important;
   opacity: 1 !important;
-  pointer-events: auto !important;
   visibility: visible !important;
 }
+
 
     </style>
 
