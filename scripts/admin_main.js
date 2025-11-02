@@ -35,12 +35,18 @@ function initAdminEditor() {
 
   // Attach editing actions
   document.querySelectorAll(".edit-btn").forEach(btn => {
-    const target = btn.nextElementSibling || btn.previousElementSibling;
+    const targetId = btn.dataset.target;
+    const target = targetId ? document.getElementById(targetId) : btn.nextElementSibling || btn.previousElementSibling;
+
     if (target && target.dataset.editable !== undefined) {
       const key = target.dataset.key || `${pageKey}_${Date.now()}`;
-      btn.addEventListener("click", () => openInlineEditor(target, key));
+      btn.addEventListener("click", e => {
+        e.stopPropagation(); // prevent dropdown closing
+        openInlineEditor(target, key);
+      });
     }
   });
+
 }
 
 // ======================= INLINE EDITOR =======================
