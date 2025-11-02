@@ -372,8 +372,7 @@ header('Content-Type: text/html; charset=UTF-8');
         </div>
     </footer>
     <script src="js/dropdown.js"></script>
-
-
+    <script src="/js/lang.js"></script>
     <script type="module" src="scripts/admin_main.js"></script>
 
 
