@@ -1,467 +1,486 @@
-// admin_edit.js
-// Usage: <script type="module" src="/js/admin_edit.js"></script>
-/*
-Features:
-- auto-detect page name from URL (auto)
-- editable tags: p, h1..h6, span, a, img
-- per-element edit button (pen), inline editor, image file upload & preview
-- "Ajouter un nouveau bloc" inserts a template .content-box and makes it editable
-- "Save All" sends FormData to /php/save_content.php:
-    - text entries are sent as JSON string under 'entries'
-    - files are appended as file_<key>
-- only enabled if admin (checks /php/check_session.php or ?admin=1)
-*/
+// admin-editing.js
+// Usage: <script type="module" src="/js/admin-editing.js"></script>
+// Assumptions:
+// - Page protected by PHP session (admin)
+// - Endpoints:
+//    POST /php/upload.php         -> receives file under 'file', returns JSON { success: true, path: "/uploads/..." }
+//    POST /php/save_changes.php   -> receives JSON { page: "...", entries: { key: { type, value } } } returns { success: true }
+//    GET  /php/load_content.php?page=... -> returns JSON of saved entries { key: { type, value } }
+//    POST /php/logout.php         -> destroys session (returns {success:true})
+// - There is a #save-btn and #logout-btn in page markup
 
-const EDITABLE_SELECTORS = "p, h1, h2, h3, h4, h5, h6, span, a, img";
-const CONTENT_BOX_SELECTOR = ".content-box";
-const NEW_BLOCK_TEMPLATE_HTML = `
-  <div class="content-box editable-block">
-    <div class="content-image">
-      <img src="images/placeholder.jpg" alt="placeholder" />
-    </div>
-    <div class="content">
-      <h2>Nouveau titre...</h2>
-      <p>Votre texte ici...</p>
-    </div>
-  </div>
-`;
+const UPLOAD_ENDPOINT = '/php/upload.php';
+const SAVE_ENDPOINT = '/php/save_changes.php';
+const LOAD_ENDPOINT = '/php/load_content.php';
+const LOGOUT_ENDPOINT = '/php/logout.php';
+const UPLOAD_WEB_PREFIX = '/uploads/'; // server should return full path but keep this as fallback
 
-let isAdmin = false;
-let pageName = detectPageName(); // auto by default
-let pendingChanges = {}; // { key: { type: 'text'|'image'|'block', value: string | File | null } }
+const EDITABLE_SELECTOR = '[data-editable]';
+const IMAGE_EDIT_BTN_SELECTOR = '.image-edit';
+const EDIT_BTN_CLASS = 'ae-edit-btn';
+const IMAGE_PICKER_ID = 'ae-image-picker';
+const NEW_BLOCK_BTN_ID = 'ae-add-block-btn';
+
+let pageName = detectPageName();
 let keyCounter = 1;
+let pendingChanges = {}; // { key: { type: 'text'|'image'|'block', value: string or File } }
 
-init();
+document.addEventListener('DOMContentLoaded', init);
 
-async function init() {
-  try {
-    isAdmin = await checkAdmin();
-  } catch (e) {
-    console.warn("Admin check failed, falling back to URL param", e);
-    isAdmin = getQueryParam("admin") === "1";
-  }
+function init() {
+  // wire up save & logout
+  const saveBtn = document.getElementById('save-btn');
+  if (saveBtn) saveBtn.addEventListener('click', onPublish);
 
-  if (!isAdmin) {
-    console.log("Admin mode not active — admin editor disabled.");
-    return;
-  }
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) logoutBtn.addEventListener('click', onLogout);
 
-  injectStyles();
-  buildSaveBar();
-  buildAddBlockButton();
-  attachEditors(document);
-  // observe DOM for newly inserted content-boxes
-  observeDOM();
+  // inject Add New Block button near save/logout (if not present)
+  injectAddBlockButton();
+
+  // create hidden file input for image picks
+  createHiddenFilePicker();
+
+  // load server content and apply
+  loadServerContent().then(() => {
+    // scan DOM and attach edit UI
+    scanAndAttach();
+    // observe DOM additions (new blocks)
+    observeDomMutations();
+  });
 }
 
-/* ---------- Utilities ---------- */
+/* ---------- Page name detection ---------- */
 function detectPageName() {
   try {
-    const path = window.location.pathname.split("/").filter(Boolean);
-    if (path.length === 0) return "index";
-    const last = path[path.length - 1];
-    const file = last.split("?")[0].split("#")[0];
-    if (!file) return "index";
-    if (!file.includes(".")) return file;
-    const name = file.replace(/\.[^/.]+$/, "");
-    return name || "index";
-  } catch (e) {
-    return "index";
-  }
-}
-
-async function checkAdmin() {
-  // Try server-side session check if available
-  try {
-    const res = await fetch("/php/check_session.php", { credentials: "include" });
-    if (!res.ok) throw new Error("no session endpoint");
-    const data = await res.json();
-    return data.logged_in === true;
+    const p = window.location.pathname.split('/').filter(Boolean);
+    if (p.length === 0) return 'index';
+    const last = p[p.length - 1];
+    const name = last.includes('.') ? last.replace(/\.[^/.]+$/, '') : last;
+    return name || 'index';
   } catch {
-    // fallback to URL param
-    return getQueryParam("admin") === "1";
+    return 'index';
   }
 }
 
-function getQueryParam(name) {
-  return new URLSearchParams(window.location.search).get(name);
+/* ---------- Load content from server ---------- */
+async function loadServerContent() {
+  try {
+    const url = new URL(LOAD_ENDPOINT, window.location.origin);
+    url.searchParams.set('page', pageName);
+    const res = await fetch(url.toString(), { credentials: 'include' });
+    if (!res.ok) return;
+    const json = await res.json();
+    if (!json || typeof json !== 'object') return;
+    // apply values to DOM
+    const entries = json.entries || json; // support both shapes
+    Object.entries(entries).forEach(([key, meta]) => {
+      const nodes = document.querySelectorAll(`[data-key="${escapeCss(key)}"]`);
+      if (!nodes || nodes.length === 0) return;
+      for (const node of nodes) {
+        if (meta.type === 'image') {
+          // meta.value should be a URL
+          if (node.tagName.toLowerCase() === 'img') node.src = meta.value;
+          else {
+            const img = node.querySelector('img');
+            if (img) img.src = meta.value;
+          }
+        } else {
+          node.innerHTML = meta.value;
+        }
+      }
+    });
+  } catch (err) {
+    console.warn('Could not load server content', err);
+  }
 }
 
-function pad(n, digits = 2) {
-  return String(n).padStart(digits, "0");
+/* ---------- Scan DOM and attach edit buttons ---------- */
+function scanAndAttach(root = document) {
+  const editables = Array.from(root.querySelectorAll(EDITABLE_SELECTOR));
+  editables.forEach((el) => {
+    // skip if inside our controls
+    if (el.closest('.ae-admin-ui')) return;
+    // ensure data-key exists
+    if (!el.dataset.key) {
+      el.dataset.key = generateKey();
+    } else {
+      // update keyCounter to avoid duplicates
+      const last = el.dataset.key.split('_').pop();
+      const n = parseInt(last, 10);
+      if (!isNaN(n) && n >= keyCounter) keyCounter = n + 1;
+    }
+    // don't add duplicate edit buttons
+    if (!hasAttachedEditBtn(el)) addEditButton(el);
+  });
+
+  // wire image-edit buttons (.image-edit) to open file picker for the nearest image or data-key
+  const imageBtns = Array.from(root.querySelectorAll(IMAGE_EDIT_BTN_SELECTOR));
+  imageBtns.forEach((btn) => {
+    if (btn.dataset.aeAttached === '1') return;
+    btn.dataset.aeAttached = '1';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // find closest image in parent or next sibling
+      const parent = btn.parentElement;
+      const img = parent ? (parent.querySelector('img[data-editable]') || parent.querySelector('img')) : null;
+      // choose target key:
+      let targetKey = img?.dataset.key || parent?.dataset?.key || generateKey();
+      if (!img && !parent) {
+        // fallback: open image picker but user must drop to the target element later
+      }
+      // store current target on hidden input
+      const picker = document.getElementById(IMAGE_PICKER_ID);
+      picker.dataset.targetKey = targetKey;
+      picker.click();
+    });
+  });
+
+  // also allow clicking directly on img[data-editable] to open picker
+  const imgs = Array.from(root.querySelectorAll('img[data-editable]'));
+  imgs.forEach((img) => {
+    if (img.dataset.aeImgAttached === '1') return;
+    img.dataset.aeImgAttached = '1';
+    img.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const picker = document.getElementById(IMAGE_PICKER_ID);
+      picker.dataset.targetKey = img.dataset.key || generateKey();
+      picker.click();
+    });
+  });
 }
 
-/* ---------- DOM observation ---------- */
-function observeDOM() {
+/* ---------- Helpers ---------- */
+function hasAttachedEditBtn(el) {
+  // look for sibling edit btn
+  return !!el.parentElement?.querySelector(`.${EDIT_BTN_CLASS}[data-for="${escapeCss(el.dataset.key)}"]`);
+}
+
+function addEditButton(el) {
+  // create small edit button and insert before element visually (we don't change markup)
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = EDIT_BTN_CLASS + ' edit-btn ae-admin-ui';
+  btn.title = 'Éditer';
+  btn.dataset.for = el.dataset.key;
+  btn.innerText = '✎';
+  // position: try to insert before element if inline; else append inside parent at start
+  // We'll insert as previous sibling to keep layout similar to provided HTML where many edit btns exist
+  try {
+    el.parentElement.insertBefore(btn, el);
+  } catch {
+    // fallback: append after
+    el.parentElement.appendChild(btn);
+  }
+
+  // click opens textual editor
+  btn.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    openTextEditor(el);
+  });
+}
+
+/* ---------- Inline text editor ---------- */
+function openTextEditor(el) {
+  // remove any existing editor
+  closeInlineEditor();
+
+  // Decide input type: textarea for blocks/paragraphs, input for small tags
+  const tag = el.tagName.toLowerCase();
+  const isLong = tag === 'p' || tag === 'div' || (el.innerText && el.innerText.length > 120);
+  const editor = isLong ? document.createElement('textarea') : document.createElement('input');
+  editor.className = 'ae-inline-editor';
+  if (isLong) {
+    editor.rows = 6;
+  } else {
+    editor.type = 'text';
+  }
+  // set initial value (preserving innerHTML stripped of scripts)
+  editor.value = el.innerText.trim();
+
+  // position editor overlay near element — simple replacement for better UX
+  editor.style.width = '100%';
+  editor.style.boxSizing = 'border-box';
+  editor.style.fontSize = '14px';
+  editor.style.padding = '8px';
+  editor.style.margin = '6px 0';
+
+  // create save/cancel controls
+  const save = document.createElement('button');
+  save.type = 'button';
+  save.textContent = 'Appliquer';
+  save.className = 'ae-save-btn edit-btn';
+  const cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.textContent = 'Annuler';
+  cancel.className = 'edit-btn';
+
+  // wrapper
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ae-inline-wrapper ae-admin-ui';
+  wrapper.style.marginTop = '6px';
+
+  wrapper.appendChild(editor);
+  wrapper.appendChild(save);
+  wrapper.appendChild(cancel);
+
+  // insert wrapper after the element
+  el.after(wrapper);
+  editor.focus();
+
+  save.addEventListener('click', () => {
+    const newVal = editor.value;
+    el.innerText = newVal;
+    const key = el.dataset.key || generateKey();
+    el.dataset.key = key;
+    pendingChanges[key] = { type: 'text', value: newVal };
+    markUnsaved(el, true);
+    wrapper.remove();
+  });
+
+  cancel.addEventListener('click', () => wrapper.remove());
+}
+
+function closeInlineEditor() {
+  const ex = document.querySelector('.ae-inline-wrapper');
+  if (ex) ex.remove();
+}
+
+/* ---------- Hidden file picker ---------- */
+function createHiddenFilePicker() {
+  if (document.getElementById(IMAGE_PICKER_ID)) return;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+  input.id = IMAGE_PICKER_ID;
+  input.addEventListener('change', async (ev) => {
+    const files = input.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    const key = input.dataset.targetKey || generateKey();
+    // immediately show preview if element exists with key
+    const targetNode = document.querySelector(`[data-key="${escapeCss(key)}"]`);
+    if (targetNode) {
+      // if it's an img tag, preview by local URL
+      if (targetNode.tagName.toLowerCase() === 'img') {
+        targetNode.src = URL.createObjectURL(file);
+      } else {
+        const img = targetNode.querySelector('img');
+        if (img) img.src = URL.createObjectURL(file);
+      }
+    }
+    // Save in pendingChanges as File; upload will happen on publish
+    pendingChanges[key] = { type: 'image', value: file };
+    markUnsaved(targetNode || document.body, true);
+    // clear picker value
+    input.value = '';
+  });
+  document.body.appendChild(input);
+}
+
+/* ---------- Publish (Save All) ---------- */
+async function onPublish() {
+  if (Object.keys(pendingChanges).length === 0) {
+    alert('Aucune modification à publier.');
+    return;
+  }
+  // First upload all image files, get their server paths
+  const entries = {}; // final entries to send to save endpoint
+  // iterate pendingChanges
+  for (const [key, meta] of Object.entries(pendingChanges)) {
+    if (meta.type === 'image' && meta.value instanceof File) {
+      try {
+        const uploadRes = await uploadFile(meta.value, key);
+        if (uploadRes && uploadRes.success && uploadRes.path) {
+          entries[key] = { type: 'image', value: uploadRes.path };
+          // update DOM images to server path
+          const node = document.querySelector(`[data-key="${escapeCss(key)}"]`);
+          if (node) {
+            if (node.tagName.toLowerCase() === 'img') node.src = uploadRes.path;
+            else {
+              const img = node.querySelector('img');
+              if (img) img.src = uploadRes.path;
+            }
+            markUnsaved(node, false);
+          }
+        } else {
+          // failed upload; record empty and continue
+          entries[key] = { type: 'image', value: '' };
+        }
+      } catch (err) {
+        console.error('Upload error', err);
+        entries[key] = { type: 'image', value: '' };
+      }
+    } else if (meta.type === 'text' || meta.type === 'block') {
+      entries[key] = { type: meta.type, value: meta.value };
+    } else {
+      // fallback: try to read DOM
+      const node = document.querySelector(`[data-key="${escapeCss(key)}"]`);
+      if (node) entries[key] = { type: 'text', value: node.innerHTML };
+    }
+  }
+
+  // send entries JSON to save endpoint
+  try {
+    const payload = { page: pageName, entries };
+    const res = await fetch(SAVE_ENDPOINT, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (json && json.success) {
+      // clear pendingChanges, mark saved
+      pendingChanges = {};
+      updateSaveCounter();
+      flashSaveSuccess();
+      alert('Publier OK');
+    } else {
+      console.error('Save error', json);
+      alert('Erreur lors de la sauvegarde (voir console).');
+    }
+  } catch (err) {
+    console.error('Save exception', err);
+    alert('Erreur réseau pendant la sauvegarde.');
+  }
+}
+
+/* ---------- File upload helper ---------- */
+async function uploadFile(file, key) {
+  const form = new FormData();
+  form.append('file', file, file.name);
+  form.append('key', key);
+  form.append('page', pageName);
+  const res = await fetch(UPLOAD_ENDPOINT, {
+    method: 'POST',
+    credentials: 'include',
+    body: form,
+  });
+  if (!res.ok) return null;
+  return await res.json(); // expect { success: true, path: "/uploads/..." }
+}
+
+/* ---------- Add new block button & template ---------- */
+function injectAddBlockButton() {
+  // add near #save-btn container (.extra-right-buttons) or admin bar
+  const container = document.querySelector('.extra-right-buttons') || document.querySelector('nav .container') || document.body;
+  if (!container) return;
+  if (document.getElementById(NEW_BLOCK_BTN_ID)) return;
+  const btn = document.createElement('button');
+  btn.id = NEW_BLOCK_BTN_ID;
+  btn.type = 'button';
+  btn.className = 'bg-white border px-3 py-2 rounded-md text-sm';
+  btn.textContent = 'Ajouter un nouveau bloc';
+  btn.style.marginRight = '8px';
+  // insert before save btn if exists
+  const saveBtn = document.getElementById('save-btn');
+  if (saveBtn && saveBtn.parentElement) saveBtn.parentElement.insertBefore(btn, saveBtn);
+  else container.appendChild(btn);
+
+  btn.addEventListener('click', () => {
+    const target = document.querySelector('#articles-container') || document.querySelector('main') || container;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = `
+      <div class="content-box new-content-box" style="border:1px dashed #e5e7eb; padding:12px; margin-bottom:12px;">
+        <div class="content-image">
+          <img src="images/placeholder.jpg" alt="placeholder" data-editable>
+        </div>
+        <div class="content">
+          <h2 data-editable>Nouveau titre...</h2>
+          <p data-editable>Votre texte ici...</p>
+        </div>
+      </div>
+    `;
+    const newBlock = tmp.firstElementChild;
+    // append
+    target.appendChild(newBlock);
+    // ensure keys and attach editors
+    scanAndAttach(newBlock);
+    // register block as pending (store outerHTML)
+    const blockKey = newBlock.dataset.key || generateKey();
+    newBlock.dataset.key = blockKey;
+    pendingChanges[blockKey] = { type: 'block', value: newBlock.outerHTML };
+    updateSaveCounter();
+    newBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
+/* ---------- Logout ---------- */
+async function onLogout() {
+  if (!confirm('Déconnexion ?')) return;
+  try {
+    const res = await fetch(LOGOUT_ENDPOINT, { method: 'POST', credentials: 'include' });
+    const j = await res.json();
+    if (j && j.success) {
+      window.location.href = '/admin.html';
+    } else {
+      alert('Erreur déconnexion');
+    }
+  } catch (err) {
+    console.error('Logout error', err);
+    window.location.href = '/admin.html';
+  }
+}
+
+/* ---------- Visual helpers ---------- */
+function markUnsaved(node, yes = true) {
+  if (!node) return;
+  if (yes) node.classList.add('ae-unsaved');
+  else node.classList.remove('ae-unsaved');
+  updateSaveCounter();
+}
+
+function updateSaveCounter() {
+  const saveBtn = document.getElementById('save-btn');
+  if (!saveBtn) return;
+  const count = Object.keys(pendingChanges).length;
+  // optionally update label
+  const badgeId = 'ae-save-count';
+  let badge = document.getElementById(badgeId);
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.id = badgeId;
+    badge.style.marginLeft = '8px';
+    badge.style.fontWeight = '700';
+    saveBtn.after(badge);
+  }
+  badge.textContent = count > 0 ? `(${count})` : '';
+}
+
+function flashSaveSuccess() {
+  const btn = document.getElementById('save-btn');
+  if (!btn) return;
+  btn.style.transition = 'box-shadow 0.3s';
+  btn.style.boxShadow = '0 0 0 6px rgba(34, 228, 172, 0.18)';
+  setTimeout(() => (btn.style.boxShadow = ''), 900);
+}
+
+/* ---------- MutationObserver for dynamic content ---------- */
+function observeDomMutations() {
   const mo = new MutationObserver((mutations) => {
     for (const m of mutations) {
-      for (const node of m.addedNodes) {
-        if (!(node instanceof HTMLElement)) continue;
-        // attach editors to any new subtree
-        attachEditors(node);
+      if (m.type === 'childList' && m.addedNodes.length) {
+        m.addedNodes.forEach((n) => {
+          if (n.nodeType === 1) scanAndAttach(n);
+        });
       }
     }
   });
   mo.observe(document.body, { childList: true, subtree: true });
 }
 
-/* ---------- Attach editors ---------- */
-function attachEditors(root) {
-  // First: ensure content-boxes are identifiable and set data-key if missing
-  const boxes = root.querySelectorAll(CONTENT_BOX_SELECTOR);
-  boxes.forEach((box) => ensureBoxKey(box));
-
-  // Attach edit buttons to every editable element inside root
-  const elements = root.querySelectorAll(EDITABLE_SELECTORS);
-  elements.forEach((el) => {
-    // skip if inside controls (save bar, panel)
-    if (el.closest(".admin-editor-bar") || el.closest(".admin-editor-control")) return;
-    if (!el.dataset.key) {
-      // preserve existing keys if set in HTML
-      el.dataset.key = generateKey();
-    } else {
-      // try to parse and update keyCounter so we don't reuse the same number
-      const k = parseInt(el.dataset.key.split("_").pop(), 10);
-      if (!Number.isNaN(k) && k >= keyCounter) keyCounter = k + 1;
-    }
-    if (!el.parentElement) return;
-    if (el.dataset.adminAttach === "true") return; // already attached
-    addEditUI(el);
-    el.dataset.adminAttach = "true";
-  });
-}
-
-/* ---------- Key generation / ensure box has key ---------- */
+/* ---------- Key generation ---------- */
 function generateKey() {
-  const key = `${pageName}_${pad(keyCounter)}`;
+  const k = `${pageName}_${String(keyCounter).padStart(2, '0')}`;
   keyCounter += 1;
-  return key;
+  return k;
 }
 
-function ensureBoxKey(box) {
-  if (box.dataset.key) return;
-  box.dataset.key = generateKey();
-  // ensure inner editable children also get keys assigned when attachEditors runs
-}
-
-/* ---------- UI: add edit button ---------- */
-function addEditUI(element) {
-  element.style.position = element.style.position || "";
-
-  // create wrapper container for positioning if needed
-  const wrapper = document.createElement("span");
-  wrapper.className = "admin-edit-wrapper";
-  // We don't want to break inline flow for inline elements like span or a -> so we insert the button as absolutely positioned.
-  // Ensure parent is positioned
-  const parent = element.parentElement;
-  if (getComputedStyle(parent).position === "static") {
-    parent.style.position = "relative";
-  }
-
-  // create pen button
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "admin-edit-pen";
-  btn.title = "Éditer";
-  btn.innerHTML = penSVG();
-
-  // position button next to element (absolute)
-  btn.style.position = "absolute";
-  btn.style.top = "4px";
-  btn.style.right = "4px";
-  btn.style.zIndex = "9999";
-
-  // container for the element to attach to
-  // We will not move the element; instead we append button to parent
-  parent.style.position = parent.style.position || "relative";
-  parent.appendChild(btn);
-
-  btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    openEditorFor(element);
-  });
-
-  // highlight on hover
-  element.addEventListener("mouseenter", () => {
-    element.classList.add("admin-edit-highlight");
-  });
-  element.addEventListener("mouseleave", () => {
-    element.classList.remove("admin-edit-highlight");
-  });
-}
-
-/* ---------- Editor panel (inline) ---------- */
-function openEditorFor(element) {
-  const key = element.dataset.key;
-  if (!key) return;
-
-  // If an editor panel already exists, remove it
-  const existing = document.querySelector(".admin-inline-editor");
-  if (existing) existing.remove();
-
-  const panel = document.createElement("div");
-  panel.className = "admin-inline-editor admin-editor-control";
-  panel.style.position = "absolute";
-  panel.style.zIndex = 10000;
-
-  // position panel near element (simple approach)
-  const rect = element.getBoundingClientRect();
-  panel.style.top = `${rect.bottom + window.scrollY + 6}px`;
-  panel.style.left = `${Math.max(6, rect.left + window.scrollX)}px`;
-  panel.innerHTML = "";
-
-  if (element.tagName.toLowerCase() === "img") {
-    // Show file input + preview
-    const preview = document.createElement("img");
-    preview.src = element.src;
-    preview.style.maxWidth = "240px";
-    preview.style.display = "block";
-    preview.style.marginBottom = "8px";
-
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = "image/*";
-
-    fileInput.addEventListener("change", () => {
-      if (!fileInput.files || fileInput.files.length === 0) return;
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        preview.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-      // store file in pendingChanges
-      pendingChanges[key] = { type: "image", value: file };
-      markUnsaved(element, true);
-    });
-
-    const saveBtn = document.createElement("button");
-    saveBtn.type = "button";
-    saveBtn.className = "admin-inline-save";
-    saveBtn.textContent = "OK (prévisualisé)";
-    saveBtn.addEventListener("click", () => {
-      // we just close panel; actual upload happens on Save All
-      panel.remove();
-    });
-
-    panel.appendChild(preview);
-    panel.appendChild(fileInput);
-    panel.appendChild(saveBtn);
-  } else {
-    // Textual element: either single-line input or textarea for long text
-    const text = element.innerText.trim();
-    const isLong = text.length > 120 || element.tagName.toLowerCase() === "p" || element.tagName.toLowerCase() === "div";
-    const input = isLong ? document.createElement("textarea") : document.createElement("input");
-    if (isLong) {
-      input.rows = 6;
-    } else {
-      input.type = "text";
-    }
-    input.className = "admin-inline-input";
-    input.value = text;
-    input.style.width = "360px";
-
-    const saveBtn = document.createElement("button");
-    saveBtn.type = "button";
-    saveBtn.className = "admin-inline-save";
-    saveBtn.textContent = "Appliquer";
-
-    saveBtn.addEventListener("click", () => {
-      const newVal = input.value;
-      element.innerText = newVal;
-      pendingChanges[key] = { type: "text", value: newVal };
-      markUnsaved(element, true);
-      panel.remove();
-    });
-
-    const cancelBtn = document.createElement("button");
-    cancelBtn.type = "button";
-    cancelBtn.className = "admin-inline-cancel";
-    cancelBtn.textContent = "Annuler";
-    cancelBtn.addEventListener("click", () => panel.remove());
-
-    panel.appendChild(input);
-    panel.appendChild(saveBtn);
-    panel.appendChild(cancelBtn);
-  }
-
-  document.body.appendChild(panel);
-
-  // click outside to close
-  setTimeout(() => {
-    const onDocClick = (ev) => {
-      if (!panel.contains(ev.target)) {
-        panel.remove();
-        document.removeEventListener("click", onDocClick);
-      }
-    };
-    document.addEventListener("click", onDocClick);
-  }, 10);
-}
-
-/* ---------- Mark unsaved ---------- */
-function markUnsaved(el, state = true) {
-  if (state) {
-    el.classList.add("admin-unsaved");
-  } else {
-    el.classList.remove("admin-unsaved");
-  }
-  updateSaveCounter();
-}
-
-/* ---------- Save bar UI ---------- */
-function buildSaveBar() {
-  const bar = document.createElement("div");
-  bar.className = "admin-editor-bar";
-  bar.innerHTML = `
-    <div class="admin-editor-bar-inner">
-      <button id="admin-add-block" class="admin-btn">Ajouter un nouveau bloc</button>
-      <div id="admin-save-count" class="admin-save-count">Modifications: 0</div>
-      <div style="flex:1"></div>
-      <button id="admin-save-all" class="admin-btn admin-save-primary">Save All</button>
-    </div>
-  `;
-  document.body.appendChild(bar);
-
-  document.getElementById("admin-save-all").addEventListener("click", saveAll);
-  // Add-block handler added separately in buildAddBlockButton()
-}
-
-function buildAddBlockButton() {
-  const btn = document.getElementById("admin-add-block");
-  btn.addEventListener("click", () => {
-    // Insert new block at end of #articles-container if exists, else body > main
-    const target = document.querySelector("#articles-container") || document.querySelector("main") || document.body;
-    const tmp = document.createElement("div");
-    tmp.innerHTML = NEW_BLOCK_TEMPLATE_HTML;
-    const newBlock = tmp.firstElementChild;
-    // assign key to block and its inner editable children later when attachEditors runs
-    target.appendChild(newBlock);
-    // ensure the new block has a key
-    ensureBoxKey(newBlock);
-    // attach editors to the new block subtree
-    attachEditors(newBlock);
-    // mark as pending 'block' so server can insert it
-    const blockKey = newBlock.dataset.key;
-    pendingChanges[blockKey] = { type: "block", value: newBlock.outerHTML };
-    markUnsaved(newBlock, true);
-    // scroll into view
-    newBlock.scrollIntoView({ behavior: "smooth", block: "center" });
-  });
-}
-
-/* ---------- Save All ---------- */
-async function saveAll() {
-  if (Object.keys(pendingChanges).length === 0) {
-    alert("Aucune modification détectée.");
-    return;
-  }
-
-  const form = new FormData();
-  form.append("page", pageName);
-
-  // Build entries object for text & blocks; files appended separately
-  const entries = {};
-  for (const [key, ch] of Object.entries(pendingChanges)) {
-    if (ch.type === "image") {
-      // ch.value is File
-      form.append(`file_${key}`, ch.value, ch.value.name);
-      entries[key] = { type: "image", value: "" }; // server will return new path
-    } else if (ch.type === "text") {
-      entries[key] = { type: "text", value: ch.value };
-    } else if (ch.type === "block") {
-      entries[key] = { type: "block", value: ch.value };
-    }
-  }
-
-  form.append("entries", JSON.stringify(entries));
-
-  try {
-    const res = await fetch("/php/save_content.php", {
-      method: "POST",
-      body: form,
-      credentials: "include",
-    });
-    const json = await res.json();
-    if (json.success) {
-      // mark saved elements as saved and update any returned image paths
-      if (json.saved && Array.isArray(json.saved)) {
-        json.saved.forEach((s) => {
-          const el = document.querySelector(`[data-key="${s.key}"]`);
-          if (el) {
-            markUnsaved(el, false);
-            // for images, update src if provided
-            if (s.type === "image" && s.path) {
-              if (el.tagName.toLowerCase() === "img") {
-                el.src = s.path;
-              } else {
-                const img = el.querySelector("img");
-                if (img) img.src = s.path;
-              }
-            }
-          }
-        });
-      }
-      // clear pendingChanges
-      pendingChanges = {};
-      updateSaveCounter();
-      flashSaveSuccess();
-    } else {
-      alert("Erreur lors de l'enregistrement: " + (json.message || "unknown"));
-      console.error("Save error:", json);
-    }
-  } catch (err) {
-    alert("Erreur lors de l'enregistrement (network). Voir console.");
-    console.error(err);
-  }
-}
-
-/* ---------- Helpers ---------- */
-function updateSaveCounter() {
-  const el = document.getElementById("admin-save-count");
-  if (!el) return;
-  el.textContent = `Modifications: ${Object.keys(pendingChanges).length}`;
-}
-
-function flashSaveSuccess() {
-  const bar = document.querySelector(".admin-editor-bar");
-  if (!bar) return;
-  bar.classList.add("admin-save-success");
-  setTimeout(() => bar.classList.remove("admin-save-success"), 1500);
-}
-
-/* ---------- small pen svg ---------- */
-function penSVG() {
-  return `
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 20h9" />
-    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z" />
-  </svg>
-  `;
-}
-
-/* ---------- Inject styles ---------- */
-function injectStyles() {
-  const css = `
-  .admin-edit-pen { background: rgba(255,255,255,0.95); border:1px solid #ddd; padding:4px; border-radius:4px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
-  .admin-edit-pen:hover { transform: translateY(-1px); }
-  .admin-edit-highlight { outline: 2px dashed rgba(8,179,229,0.45); }
-  .admin-unsaved { box-shadow: 0 0 0 3px rgba(250,200,0,0.12) inset; }
-  .admin-inline-editor { background:#fff; border:1px solid #e5e7eb; padding:8px; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,0.12); }
-  .admin-inline-input { font-size:14px; padding:6px; border:1px solid #cbd5e1; border-radius:4px; display:block; margin-bottom:8px; width:100%; }
-  .admin-inline-save, .admin-inline-cancel { margin-right:8px; padding:6px 8px; border-radius:4px; cursor:pointer; }
-  .admin-inline-save { background:#08B3E5;color:#fff;border:none; }
-  .admin-inline-cancel { background:#f3f4f6;border:1px solid #e5e7eb; }
-  .admin-editor-bar { position:fixed; left:12px; right:12px; bottom:12px; z-index:99999; display:flex; justify-content:center; pointer-events:auto; }
-  .admin-editor-bar-inner { background: rgba(255,255,255,0.98); border:1px solid #e5e7eb; padding:10px 12px; border-radius:10px; display:flex; gap:10px; align-items:center; box-shadow: 0 8px 20px rgba(2,6,23,0.08); width: calc(100% - 24px); max-width:1100px; }
-  .admin-btn { padding:8px 10px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; }
-  .admin-save-primary { background:#08B3E5;color:#fff;border:none; }
-  .admin-save-success { animation: adminSavePulse 1s ease; }
-  @keyframes adminSavePulse { 0%{ box-shadow: 0 0 0 0 rgba(42,211,152,0.0);} 50%{ box-shadow: 0 0 0 8px rgba(42,211,152,0.14);} 100%{box-shadow:0 0 0 0 rgba(42,211,152,0);} }
-  .admin-save-count { font-weight:600; color:#374151; }
-  .admin-editor-control { max-width: 420px; }
-  `;
-  const s = document.createElement("style");
-  s.textContent = css;
-  document.head.appendChild(s);
+/* ---------- Utility escape for CSS selector use ---------- */
+function escapeCss(s) {
+  return s.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1');
 }
