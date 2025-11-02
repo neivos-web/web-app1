@@ -79,8 +79,8 @@ header('Content-Type: text/html; charset=UTF-8');
             <div class="flex items-center space-x-3">
                 <div class="nav-item-wrapper">
                     <button class="edit-btn">✎</button>
-                    <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
-                        <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                    <a href="admin_index.php" data-key="logo_text" class="flex items-center space-x-2">
+                        <img src="images/logo_noir.png" data-editable alt="Outsiders Logo" class="h-10 w-auto object-contain">
                     </a>
                 </div>
             </div>
@@ -94,64 +94,67 @@ header('Content-Type: text/html; charset=UTF-8');
             <!-- Menu principal -->
             <div id="menu" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">
             
-                <div data-editable data-key="nav_mission" class="flex items-center space-x-1">
-                    <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
-                    
+                <div data-key="nav_mission" class="flex items-center space-x-1">
+                    <a href="mission.html" class="hover:text-brand-blue" data-editable>Mission et Vision</a>
+                    <button class="edit-btn">✎</button>
                 </div>
 
-                <div class="relative group" data-editable data-key="nav_portfolio">
-                    <button class="flex items-center hover:text-brand-blue focus:outline-none">
+                <div class="relative group" data-key="nav_portfolio">
+                    <button class="flex items-center hover:text-brand-blue focus:outline-none" data-editable> 
                         Portefeuille
                         <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
+                    <button class="edit-btn">✎</button>
                     
                     <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
-                        <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a>
-                        <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a>
-                        <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
-                        <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a>
+                        <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
 
-                <div class="relative group" data-editable data-key="nav_training">
-                    <button class="flex items-center hover:text-brand-blue focus:outline-none">
+                <div class="relative group" data-key="nav_training">
+                    <button class="flex items-center hover:text-brand-blue focus:outline-none" data-editable>
                         Formations & conseils
                         <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
+                    <button class="edit-btn">✎</button>
                     
-                    <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20">
-                        <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
-                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a>
-                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a>
-                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a>
+                    <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-left z-20">
+                        <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
+                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
+                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a><button class="edit-btn">✎</button>
+                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
 
-                <div data-editable data-key="nav_research" class="flex items-center space-x-1">
-                    <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
-                    
+                <div data-key="nav_research" class="flex items-center space-x-1">
+                    <a href="recherche.html" class="hover:text-brand-blue" data-editable>Recherche</a>
+                    <button class="edit-btn">✎</button>
                 </div>
 
-                <div class="relative group" data-editable data-key="nav_news">
-                    <button class="flex items-center text-brand-blue font-semibold focus:outline-none">
+                <div class="relative group" data-key="nav_news">
+                    <button class="flex items-center text-brand-blue font-semibold focus:outline-none" data-editable>
                         Actualités / Blog
                         <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
-                    
+                    <button class="edit-btn">✎</button>
                     <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20">
                         <a href="actualites.html" data-editable data-key="news_articles" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Actualités</a>
+                        <button class="edit-btn">✎</button>
                     </div>
                 </div>
 
-                <div data-editable data-key="nav_contact" class="flex items-center space-x-1">
-                    <a href="contact.html" class="hover:text-brand-blue">Contact</a>
-                    
+                <div data-key="nav_contact" class="flex items-center space-x-1">
+                    <a href="contact.html" data-editable class="hover:text-brand-blue">Contact</a>
+                    <button class="edit-btn">✎</button>
                 </div>
 
                 <div class="flex items-center space-x-2">
@@ -178,9 +181,9 @@ header('Content-Type: text/html; charset=UTF-8');
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-image">
             <div class="absolute inset-0">
-                <button class="edit-btn absolute top-4 right-4 z-50">✎</button>
                 <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
-                <div class="absolute inset-0 bg-black opacity-40"></div>
+                <button class="edit-btn absolute top-4 right-4 z-50">✎</button>
+
 
             </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
