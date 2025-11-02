@@ -1,47 +1,48 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Select all dropdown groups
+  const dropdownGroups = document.querySelectorAll(".relative.group");
 
-  const dropdownPairs = [
-    { buttonId: "dropdownButtonPortefeuille", menuId: "dropdownMenuPortefeuille" },
-    { buttonId: "dropdownButtonFormations", menuId: "dropdownMenuFormations" },
-    { buttonId: "dropdownButtonBlog", menuId: "dropdownMenuBlog" }, 
-  ];
-
-  dropdownPairs.forEach(({ buttonId, menuId }) => {
-    const button = document.getElementById(buttonId);
-    const menu = document.getElementById(menuId);
+  dropdownGroups.forEach(group => {
+    const button = group.querySelector("button:not(.edit-btn)"); // skip edit buttons
+    const menu = group.querySelector("div.absolute");
 
     if (button && menu) {
-      // Toggle menu visibility on button click
-      button.addEventListener("click", (e) => {
+      // Hide dropdown by default
+      menu.classList.add("hidden");
+
+      // Toggle menu on click
+      button.addEventListener("click", e => {
         e.stopPropagation();
-        // Hide all other menus before showing the current one
-        dropdownPairs.forEach(({ menuId: otherMenuId }) => {
-          if (otherMenuId !== menuId) {
-            const otherMenu = document.getElementById(otherMenuId);
-            if (otherMenu) otherMenu.classList.add("hidden");
+
+        // Close other open dropdowns first
+        dropdownGroups.forEach(otherGroup => {
+          const otherMenu = otherGroup.querySelector("div.absolute");
+          if (otherMenu && otherMenu !== menu) {
+            otherMenu.classList.add("hidden");
           }
         });
+
+        // Toggle the current one
         menu.classList.toggle("hidden");
       });
     }
   });
 
-  // Close all menus when clicking outside
-  document.addEventListener("click", (e) => {
-    dropdownPairs.forEach(({ buttonId, menuId }) => {
-      const button = document.getElementById(buttonId);
-      const menu = document.getElementById(menuId);
-      if (button && menu && !button.contains(e.target) && !menu.contains(e.target)) {
+  // Close all dropdowns on click outside
+  document.addEventListener("click", e => {
+    dropdownGroups.forEach(group => {
+      const menu = group.querySelector("div.absolute");
+      if (menu && !group.contains(e.target)) {
         menu.classList.add("hidden");
       }
     });
   });
 
-  // Close all menus when pressing Escape
-  document.addEventListener("keydown", (e) => {
+  // Close all on Escape key
+  document.addEventListener("keydown", e => {
     if (e.key === "Escape") {
-      dropdownPairs.forEach(({ menuId }) => {
-        const menu = document.getElementById(menuId);
+      dropdownGroups.forEach(group => {
+        const menu = group.querySelector("div.absolute");
         if (menu) menu.classList.add("hidden");
       });
     }
