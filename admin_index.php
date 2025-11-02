@@ -32,30 +32,42 @@ header('Content-Type: text/html; charset=UTF-8');
         }
     </script>
     <style>
-        /* Ensure menu and dropdowns don’t clip buttons */
-        header, nav, #menu, .group, .relative {
-            overflow: visible !important;
-        }
+/* Fix for dropdown menus - keep edit buttons visible */
+.group:hover .absolute,
+.group:focus-within .absolute {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 
-        /* Make sure edit buttons are visible and clickable */
-        .edit-btn, .menu-edit, .image-edit {
-            position: relative;
-            z-index: 9999 !important;
-            background: #22e4ac;
-            color: white;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.75rem;
-            padding: 3px 6px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
+/* Ensure dropdowns never clip buttons */
+#menu, .group, .relative, nav, header {
+  overflow: visible !important;
+}
 
-        .edit-btn:hover, .menu-edit:hover, .image-edit:hover {
-            background: #0b9c77;
-  }
+/* Ensure edit buttons stay above dropdowns */
+.edit-btn, .menu-edit, .image-edit {
+  position: relative;
+  z-index: 9999 !important;
+  background: #22e4ac;
+  color: white;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Always visible for admin users */
+.edit-btn, .menu-edit, .image-edit {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+}
+
     </style>
 
 
