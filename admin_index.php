@@ -167,9 +167,8 @@ header('Content-Type: text/html; charset=UTF-8');
         <section class="relative bg-white" id="hero-image">
             <div class="absolute inset-0">
 
-                    <button class="image-edit">📷</button>
+                    <button class="edit-btn">📷</button>
                     <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
-                    <div class="absolute inset-0 bg-black opacity-40"></div>
                 </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
                 <button class="edit-btn">✎</button>
@@ -350,7 +349,6 @@ header('Content-Type: text/html; charset=UTF-8');
     <script src="js/dropdown.js"></script>
 
 
-    <script type="module" src="scripts/admin_main.js"></script>
     <script type="module" src="/js/lang.js"></script>
     <script src="/js/translations.js"></script>
     <!-- Script pour le menu mobile -->
