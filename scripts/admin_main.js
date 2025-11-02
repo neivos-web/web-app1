@@ -65,12 +65,16 @@ function enableInlineEditing() {
   document.querySelectorAll(".edit-btn").forEach(btn => {
     const targetId = btn.dataset.target;
     let target = targetId ? document.getElementById(targetId) : btn.nextElementSibling || btn.previousElementSibling;
-    if (target && target.tagName === "A" && target.querySelector("img[data-editable]")) {
+
+    // SAFETY CHECK
+    if (!target) return;
+
+    if (target.tagName === "A" && target.querySelector("img[data-editable]")) {
       target = target.querySelector("img[data-editable]");
     }
 
-    if (target && target.dataset.editable !== undefined) {
-      // Remove previous listener if any
+    if (target.dataset.editable !== undefined) {
+      // Remove duplicates and add listener safely
       btn.replaceWith(btn.cloneNode(true));
       const newBtn = btn.parentElement.querySelector(".edit-btn");
       newBtn.onclick = e => {
