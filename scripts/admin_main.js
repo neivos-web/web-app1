@@ -21,19 +21,15 @@ async function loadPageContent() {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(pageKey)}`);
     const data = await res.json();
-    if (data.success && data.content) {
-      Object.entries(data.content).forEach(([_, value], i) => {
-        const editable = document.querySelectorAll("[data-editable]")[i];
-        if (editable) {
-          if (editable.tagName === "IMG") editable.src = value;
-          else editable.innerHTML = value;
-        }
-      });
+    if (data.success && data.content?.html) {
+      const container = document.querySelector("#editable-container");
+      if (container) container.innerHTML = data.content.html;
     }
   } catch (err) {
     console.error("Erreur chargement contenu", err);
   }
 }
+
 
 // ======================= ADMIN EDITOR =======================
 function initAdminEditor() {
@@ -71,16 +67,17 @@ function cleanupEdit(el, inputEl) {
   el.style.display = "";
   delete el.dataset.editing;
 }
-
-// ======================= BLOCK MANAGEMENT =======================
-function enableBlockManagement() {
-  document.querySelectorAll(".content-box").forEach(box => addDeleteAndAddBlockButtons(box));
-}
-
 function addDeleteAndAddBlockButtons(box) {
+  // Remove any previous buttons to avoid duplicates
+  box.querySelectorAll(".delete-btn").forEach(btn => btn.remove());
+  const nextAddBtn = box.nextElementSibling;
+  if (nextAddBtn && nextAddBtn.classList.contains("add-block-btn")) nextAddBtn.remove();
+
+  // === DELETE button ===
   const delBtn = document.createElement("button");
   delBtn.innerText = "❌";
-  delBtn.className = "delete-btn absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold z-50";
+  delBtn.className =
+    "delete-btn absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold z-50";
   delBtn.addEventListener("click", async () => {
     if (confirm("Supprimer ce bloc ?")) {
       box.remove();
@@ -88,18 +85,48 @@ function addDeleteAndAddBlockButtons(box) {
     }
   });
 
+  // === ADD button ===
   const addBtn = document.createElement("button");
   addBtn.innerText = "+ Ajouter un block";
-  addBtn.className = "add-block-btn mt-4 bg-sky-600 hover:bg-sky-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition";
+  addBtn.className =
+    "add-block-btn mt-4 bg-sky-600 hover:bg-sky-500 text-white font-semibold px-4 py-2 rounded-md shadow-md transition";
   addBtn.addEventListener("click", async () => {
     const newBox = createContentBox();
     box.parentElement.insertBefore(newBox, addBtn);
     await autoSave();
   });
 
+  // === Attach ===
   box.style.position = "relative";
   box.prepend(delBtn);
   box.insertAdjacentElement("afterend", addBtn);
+}
+
+
+// ======================= BLOCK MANAGEMENT =======================
+function enableBlockManagement() {
+  document.querySelectorAll(".content-box").forEach(box => addDeleteAndAddBlockButtons(box));
+}
+
+async function autoSave() {
+  const container = document.querySelector("#editable-container"); // wrap your editable area in a div
+  if (!container) return;
+
+  const content = { html: container.innerHTML };
+
+  try {
+    const res = await fetch("/php/save_content.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page: pageKey, content }),
+      credentials: "include"
+    });
+
+    const data = await res.json();
+    if (!data.success) console.error("Erreur de sauvegarde:", data.error);
+  } catch (err) {
+    console.error("Erreur réseau", err);
+  }
 }
 
 function createContentBox() {
@@ -122,12 +149,14 @@ function createContentBox() {
   return newBox;
 }
 
+
 // ======================= AUTO SAVE =======================
 async function autoSave() {
-  const content = {};
-  document.querySelectorAll("[data-editable]").forEach((el, i) => {
-    content[`item_${i}`] = el.tagName === "IMG" ? el.src : el.innerHTML;
-  });
+  const container = document.querySelector("#editable-container"); // wrap your editable area in a div
+  if (!container) return;
+
+  const content = { html: container.innerHTML };
+
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
@@ -135,12 +164,14 @@ async function autoSave() {
       body: JSON.stringify({ page: pageKey, content }),
       credentials: "include"
     });
+
     const data = await res.json();
     if (!data.success) console.error("Erreur de sauvegarde:", data.error);
   } catch (err) {
     console.error("Erreur réseau", err);
   }
 }
+
 
 // ======================= INIT =======================
 document.addEventListener("DOMContentLoaded", checkAdminSession);

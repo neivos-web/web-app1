@@ -229,7 +229,7 @@ header('Content-Type: text/html; charset=UTF-8');
         </section>
 
         <!-- Section Innovation et Avenir -->
-        <section class="content-section">
+        <section id="editable-container" class="content-section">
             <div class="content-box">
                 <div class="content-image">
                     <button class="edit-btn">✎</button>
