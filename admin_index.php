@@ -35,7 +35,7 @@ header('Content-Type: text/html; charset=UTF-8');
 /* Fix for dropdown menus - keep edit buttons visible */
 /* --- General: make sure edit buttons can appear above menu --- */
 .edit-btn,
-.menu-edit,
+.edit-btn,
 .image-edit {
   position: relative;
   z-index: 9999 !important;
@@ -56,13 +56,7 @@ header('Content-Type: text/html; charset=UTF-8');
   overflow: visible !important;
 }
 
-/* Keep dropdowns working normally on hover */
-.group:hover > .absolute,
-.group:focus-within > .absolute {
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
+
 
 
     </style>
@@ -112,7 +106,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 </button>
 
                 <!-- Edit button for main label -->
-                <button class="menu-edit ml-2">✎</button>
+                <button class="edit-btn ml-2">✎</button>
 
                 <!-- Dropdown submenu -->
                 <div id="dropdownMenuPortefeuille" class="absolute top-full left-0   bg-white shadow-xl rounded-lg w-64 z-20 mt-2">
@@ -151,7 +145,7 @@ header('Content-Type: text/html; charset=UTF-8');
                     </button>
 
                     <!-- Edit button for main label -->
-                    <button class="menu-edit ml-2">✎</button>
+                    <button class="edit-btn ml-2">✎</button>
 
                     <!-- Dropdown submenu -->
                     <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-52 rounded-md shadow-lg bg-white z-20  ">
