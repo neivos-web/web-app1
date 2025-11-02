@@ -61,12 +61,16 @@ function initAdminEditor() {
 }
 
 // ======================= INLINE EDITING =======================
-function enableInlineEditing() {
-  document.querySelectorAll(".edit-btn").forEach(btn => {
-    const targetId = btn.dataset.target;
-    let target = targetId ? document.getElementById(targetId) : btn.nextElementSibling || btn.previousElementSibling;
+function enableInlineEditing(root = document) {
+  root.querySelectorAll(".edit-btn").forEach(btn => {
+    // Avoid adding multiple listeners
+    if (btn.dataset.listenerAttached) return;
+    btn.dataset.listenerAttached = true;
 
-    // SAFETY CHECK
+    let target = btn.dataset.target
+      ? document.getElementById(btn.dataset.target)
+      : btn.nextElementSibling || btn.previousElementSibling;
+
     if (!target) return;
 
     if (target.tagName === "A" && target.querySelector("img[data-editable]")) {
@@ -74,19 +78,13 @@ function enableInlineEditing() {
     }
 
     if (target.dataset.editable !== undefined) {
-      // Remove old listeners by replacing the button with a fresh clone
-      const newBtn = btn.cloneNode(true);
-      btn.replaceWith(newBtn);
-
-      // Attach the listener to the new button
-      newBtn.addEventListener("click", e => {
+      btn.addEventListener("click", e => {
         e.stopPropagation();
         openInlineEditor(target);
       });
     }
   });
 }
-
 
 function cleanupEdit(el, inputEl) {
   inputEl.remove();
@@ -153,10 +151,8 @@ async function saveAndReload(page = pageKey) {
   const container = document.querySelector("#editable-container");
   if (!container) return;
 
-  // Clone container to avoid modifying the live DOM
+  // Clone container to remove admin buttons before saving
   const clone = container.cloneNode(true);
-
-  // Remove admin buttons before saving
   clone.querySelectorAll(".delete-btn, .add-block-btn").forEach(btn => btn.remove());
 
   const content = { html: clone.innerHTML };
@@ -285,8 +281,13 @@ function createContentBox() {
       <p data-editable>Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
     </div>
   `;
+
+  // Add admin buttons
   addDeleteAndAddBlockButtons(newBox);
-  enableInlineEditing();
+
+  // Attach inline editor listeners to new buttons only
+  enableInlineEditing(newBox);
+
   return newBox;
 }
 
