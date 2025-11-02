@@ -14,7 +14,7 @@ if (!$page) {
 }
 
 try {
-  $stmt = $pdo->prepare("SELECT content, last_modified FROM page_content WHERE page = :page");
+  $stmt = $pdo->prepare("SELECT content, last_modified FROM pages_content WHERE page = :page");
   $stmt->execute([':page' => $page]);
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
 

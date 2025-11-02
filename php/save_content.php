@@ -34,7 +34,7 @@ try {
   $jsonContent = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
   $stmt = $pdo->prepare("
-    INSERT INTO page_content (page, content, last_modified)
+    INSERT INTO pages_content (page, content, last_modified)
     VALUES (:page, :content, :last_modified)
     ON DUPLICATE KEY UPDATE
       content = VALUES(content),
