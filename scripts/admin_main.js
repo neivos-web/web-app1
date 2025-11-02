@@ -74,13 +74,15 @@ function enableInlineEditing() {
     }
 
     if (target.dataset.editable !== undefined) {
-      // Remove duplicates and add listener safely
-      btn.replaceWith(btn.cloneNode(true));
-      const newBtn = btn.parentElement.querySelector(".edit-btn");
-      newBtn.onclick = e => {
+      // Remove old listeners by replacing the button with a fresh clone
+      const newBtn = btn.cloneNode(true);
+      btn.replaceWith(newBtn);
+
+      // Attach the listener to the new button
+      newBtn.addEventListener("click", e => {
         e.stopPropagation();
         openInlineEditor(target);
-      };
+      });
     }
   });
 }
@@ -151,7 +153,13 @@ async function saveAndReload(page = pageKey) {
   const container = document.querySelector("#editable-container");
   if (!container) return;
 
-  const content = { html: container.innerHTML };
+  // Clone container to avoid modifying the live DOM
+  const clone = container.cloneNode(true);
+
+  // Remove admin buttons before saving
+  clone.querySelectorAll(".delete-btn, .add-block-btn").forEach(btn => btn.remove());
+
+  const content = { html: clone.innerHTML };
 
   try {
     const res = await fetch("/php/save_content.php", {
@@ -173,6 +181,7 @@ async function saveAndReload(page = pageKey) {
     console.error("Erreur réseau", err);
   }
 }
+
 
 // ======================= RELOAD FROM DATABASE =======================
 async function reloadPageContent(page = pageKey) {
