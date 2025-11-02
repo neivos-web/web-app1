@@ -1,164 +1,169 @@
 // ======================= CONFIG / STATE =======================
 let isAdmin = false;
-const pendingChanges = {}; // { element_key: { type, value } }
+const pendingChanges = {}; // { page: { key: { type, value } } }
+const pageKey = window.location.pathname.split("/").pop() || "admin_index.php";
 
 // ======================= SESSION CHECK =======================
 async function checkAdminSession() {
   try {
     const res = await fetch("/php/check_session.php", { credentials: "include" });
-    if (!res.ok) throw new Error("Session check failed");
     const data = await res.json();
     isAdmin = data.logged_in === true;
 
     if (!isAdmin) {
-      window.location.href = "/admin/admin.html"; // redirect if not admin
+      window.location.href = "/admin/admin.html";
       return;
     }
 
-    initAdminEditor(); // start editor if admin
+    initAdminEditor();
   } catch (err) {
-    console.error(err);
+    console.error("Session check failed", err);
     window.location.href = "/admin/admin.html";
   }
 }
 
 // ======================= ADMIN EDITOR =======================
 function initAdminEditor() {
-  // 1️⃣ Show main menu & all dropdowns for admin
-  const menu = document.getElementById("menu");
-  if (menu) menu.classList.remove("hidden");
+  console.log("Admin mode enabled");
 
-  document.querySelectorAll(".group-hover\\:block").forEach(el => {
-    el.classList.remove("hidden");
-    el.style.display = "block";
-  });
-
-  // Make edit buttons above everything
+  // Show all edit buttons
   document.querySelectorAll(".edit-btn").forEach(btn => {
-    btn.style.zIndex = 50;
+    btn.style.display = "inline-flex";
     btn.style.position = "relative";
+    btn.style.zIndex = 50;
   });
 
-  // 2️⃣ Attach inline editing
-  document.querySelectorAll("[data-editable]").forEach(el => {
-    const key = el.dataset.key || el.textContent.slice(0,20);
-    const editBtn = el.parentElement.querySelector(".edit-btn") || createEditButton(el);
-
-    editBtn.addEventListener("click", () => openInlineEditor(el, key));
+  // Attach editing actions
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    const target = btn.nextElementSibling || btn.previousElementSibling;
+    if (target && target.dataset.editable !== undefined) {
+      const key = target.dataset.key || `${pageKey}_${Date.now()}`;
+      btn.addEventListener("click", () => openInlineEditor(target, key));
+    }
   });
-
-  // 3️⃣ Attach save button
-  const saveBtn = document.getElementById("save-btn");
-  if (saveBtn) saveBtn.addEventListener("click", publishChanges);
 }
 
 // ======================= INLINE EDITOR =======================
-function createEditButton(el) {
-  const btn = document.createElement("button");
-  btn.textContent = "✎";
-  btn.className = "edit-btn";
-  el.parentElement.insertBefore(btn, el);
-  return btn;
-}
-
 function openInlineEditor(el, key) {
-  if (el.dataset.editing === "true") return; // already editing
+  if (el.dataset.editing === "true") return;
   el.dataset.editing = "true";
 
   let inputEl;
 
   if (el.tagName === "IMG") {
-    // image upload
+    // === Image upload ===
     inputEl = document.createElement("input");
     inputEl.type = "file";
     inputEl.accept = "image/*";
+
+    inputEl.addEventListener("change", async () => {
+      const file = inputEl.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("key", key);
+      formData.append("page", pageKey);
+
+      try {
+        const res = await fetch("/php/upload_image.php", {
+          method: "POST",
+          body: formData,
+          credentials: "include"
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          el.src = data.url;
+          pendingChanges[key] = { type: "image", value: data.url };
+        } else {
+          alert("Erreur lors du téléchargement de l'image.");
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        inputEl.remove();
+        delete el.dataset.editing;
+      }
+    });
+
   } else if (el.tagName === "A") {
-    // link editing
+    // === Link text edit ===
     inputEl = document.createElement("input");
     inputEl.type = "text";
-    inputEl.value = el.textContent;
+    inputEl.value = el.textContent.trim();
+
+    inputEl.addEventListener("blur", () => {
+      el.textContent = inputEl.value;
+      pendingChanges[key] = { type: "link", value: inputEl.value };
+      cleanupEdit(el, inputEl);
+    });
+
   } else {
-    // text editing
-    const longText = el.textContent.length > 50 || el.tagName === "P" || el.tagName === "DIV";
-    inputEl = longText ? document.createElement("textarea") : document.createElement("input");
-    inputEl.value = el.textContent;
+    // === Text edit (h1, h2, p, div, span) ===
+    const isLong = el.textContent.length > 60 || el.tagName === "P" || el.tagName === "DIV";
+    inputEl = isLong ? document.createElement("textarea") : document.createElement("input");
+    inputEl.value = el.textContent.trim();
     inputEl.style.width = "100%";
+    inputEl.classList.add("border", "border-blue-400", "rounded", "p-1");
+
+    inputEl.addEventListener("blur", () => {
+      el.textContent = inputEl.value;
+      pendingChanges[key] = { type: "text", value: inputEl.value };
+      cleanupEdit(el, inputEl);
+    });
+
+    inputEl.addEventListener("keydown", e => {
+      if (e.key === "Enter" && inputEl.tagName !== "TEXTAREA") inputEl.blur();
+    });
   }
 
-  inputEl.classList.add("border", "border-blue-400", "rounded", "p-1");
   el.style.display = "none";
   el.parentElement.insertBefore(inputEl, el);
-
   inputEl.focus();
-
-  inputEl.addEventListener("blur", () => saveInlineEdit(el, inputEl, key));
-  inputEl.addEventListener("keydown", e => {
-    if (e.key === "Enter" && inputEl.tagName !== "TEXTAREA") inputEl.blur();
-  });
 }
 
-function saveInlineEdit(el, inputEl, key) {
-  let newValue = "";
-
-  if (el.tagName === "IMG") {
-    const file = inputEl.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        el.src = e.target.result;
-        pendingChanges[key] = { type: "image", value: e.target.result };
-      };
-      reader.readAsDataURL(file);
-    }
-  } else if (el.tagName === "A") {
-    newValue = inputEl.value;
-    el.textContent = newValue;
-    pendingChanges[key] = { type: "link", value: newValue };
-  } else {
-    newValue = inputEl.value;
-    el.textContent = newValue;
-    pendingChanges[key] = { type: "text", value: newValue };
-  }
-
-  el.style.display = "";
+function cleanupEdit(el, inputEl) {
   inputEl.remove();
+  el.style.display = "";
   delete el.dataset.editing;
 }
 
 // ======================= PUBLISH CHANGES =======================
-function publishChanges() {
+async function publishChanges() {
   if (Object.keys(pendingChanges).length === 0) {
     alert("Aucune modification à publier.");
     return;
   }
 
-  fetch("/php/save_changes.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(pendingChanges),
-    credentials: "include"
-  })
-  .then(res => res.json())
-  .then(data => {
+  try {
+    const res = await fetch("/php/save_changes.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page: pageKey, changes: pendingChanges }),
+      credentials: "include"
+    });
+    const data = await res.json();
+
     if (data.success) {
-      alert("Modifications publiées avec succès !");
+      alert("Modifications enregistrées !");
       Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
     } else {
-      alert("Erreur lors de la publication.");
+      alert("Erreur lors de la sauvegarde.");
     }
-  })
-  .catch(err => {
+  } catch (err) {
     console.error(err);
-    alert("Erreur lors de la publication.");
-  });
+    alert("Erreur réseau lors de la sauvegarde.");
+  }
 }
 
 // ======================= LOGOUT =======================
 const logoutBtn = document.getElementById("logout-btn");
-if (logoutBtn) logoutBtn.addEventListener("click", async () => {
-  await fetch("/php/logout.php", { credentials: "include" });
-  window.location.href = "/admin/admin.html";
-});
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    await fetch("/php/logout.php", { credentials: "include" });
+    window.location.href = "/admin/admin.html";
+  });
+}
 
 // ======================= INIT =======================
 checkAdminSession();
