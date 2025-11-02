@@ -41,6 +41,30 @@ header('Content-Type: text/html; charset=UTF-8');
             margin-right: 4px;
         }
         .edit-btn:hover { background: #06a0c5; }
+        /* Ensure dropdowns are hidden by default */
+[id^="dropdownMenu"] {
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* When not hidden, show dropdown smoothly */
+[id^="dropdownMenu"]:not(.hidden) {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Fix position and overflow for scrolling */
+header, nav, .relative, .group {
+  overflow: visible !important;
+}
+
+body {
+  overflow-y: auto !important;
+}
+
     </style>
 
 
@@ -54,12 +78,12 @@ header('Content-Type: text/html; charset=UTF-8');
             <!-- Logo -->
             <div class="flex items-center space-x-3">
                 <div class="nav-item-wrapper">
-                             
-                        <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
-                        
-                            <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-                        </a>
-                    </div>
+                    <button class="edit-btn">✎</button>
+                    <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
+                        <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                        <button class="edit-btn">✎</button>
+                    </a>
+                </div>
             </div>
             <!-- Bouton hamburger (mobile) -->
             <button id="menu-toggle" class="md:hidden flex items-center text-gray-700 hover:text-brand-blue focus:outline-none">
