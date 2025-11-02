@@ -96,7 +96,7 @@ header('Content-Type: text/html; charset=UTF-8');
             </button>
 
             <!-- Menu principal -->
-            <div id="menu" class="hidden md:flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">
+            <div id="menu" class=" md:flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">
             
                 <div data-editable data-key="nav_mission" class="flex items-center space-x-1">
                     <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
@@ -115,7 +115,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 <button class="menu-edit ml-2">✎</button>
 
                 <!-- Dropdown submenu -->
-                <div id="dropdownMenuPortefeuille" class="absolute top-full left-0 hidden group-hover:block bg-white shadow-xl rounded-lg w-64 z-20 mt-2">
+                <div id="dropdownMenuPortefeuille" class="absolute top-full left-0   bg-white shadow-xl rounded-lg w-64 z-20 mt-2">
                     
                     <!-- Each submenu item in its own flex row -->
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
@@ -154,7 +154,7 @@ header('Content-Type: text/html; charset=UTF-8');
                     <button class="menu-edit ml-2">✎</button>
 
                     <!-- Dropdown submenu -->
-                    <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-52 rounded-md shadow-lg bg-white z-20 hidden group-hover:block">
+                    <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-52 rounded-md shadow-lg bg-white z-20  ">
                         <div class="py-1">
 
                         <!-- Each submenu item in a flex row -->
@@ -196,7 +196,7 @@ header('Content-Type: text/html; charset=UTF-8');
                         </svg>
                     </button>
                     <button class="edit-btn">✎</button>
-                    <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20">
+                    <div class="absolute left-1/2 -translate-x-1/2   bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20">
                         <a href="actualites.html" data-editable data-key="news_articles" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Actualités</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
@@ -419,7 +419,7 @@ header('Content-Type: text/html; charset=UTF-8');
     <!-- Script pour le menu mobile -->
     <script>
     document.getElementById('menu-toggle').addEventListener('click', function () {
-        document.getElementById('menu').classList.toggle('hidden');
+        document.getElementById('menu').classList.toggle('');
     });
     </script>
 
