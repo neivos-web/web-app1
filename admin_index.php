@@ -100,11 +100,10 @@ header('Content-Type: text/html; charset=UTF-8');
                     
                 </div>
 
-                <div class="relative group" data-key="nav_portfolio">
+                <div class="relative group space-x-3" data-key="nav_portfolio">
                     <button class="edit-btn">✎</button>
                     <button class="flex items-center hover:text-brand-blue focus:outline-none" data-editable> 
-                        Portefeuille
-                        
+                        Portefeuille 
                         <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
@@ -119,7 +118,7 @@ header('Content-Type: text/html; charset=UTF-8');
                     </div>
                 </div>
 
-                <div class="relative group" data-key="nav_training">
+                <div class="relative group space-x-3" data-key="nav_training">
                     <button class="edit-btn">✎</button>
                     <button class="flex items-center hover:text-brand-blue focus:outline-none" data-editable>
                         Formations & conseils
@@ -143,7 +142,7 @@ header('Content-Type: text/html; charset=UTF-8');
                     
                 </div>
 
-                <div class="relative group" data-key="nav_news">
+                <div class="relative group space-x-2" data-key="nav_news">
                     <button class="edit-btn">✎</button>
                     <button class="flex items-center text-brand-blue font-semibold focus:outline-none" data-editable>
                         Actualités / Blog
