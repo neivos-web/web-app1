@@ -74,9 +74,9 @@ header('Content-Type: text/html; charset=UTF-8');
     
   <!-- =========== En-tête du site =========== -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <nav class="container mx-auto max-w-full px-20 py-6 flex justify-between items-center gap-10">
             <!-- Logo -->
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-4">
                 <div class="nav-item-wrapper">
                     <button class="edit-btn">✎</button>
                     <a href="admin_index.php" data-key="logo_text" class="flex items-center space-x-2">
@@ -92,7 +92,7 @@ header('Content-Type: text/html; charset=UTF-8');
             </button>
 
             <!-- Menu principal -->
-            <div id="menu" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">
+            <div id="menu" class="hidden md:flex space-x-5 items-center font-medium text-gray-700">
             
                 <div data-key="nav_mission" class="flex items-center space-x-1">
                     <button class="edit-btn">✎</button>
