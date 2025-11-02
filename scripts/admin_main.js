@@ -347,7 +347,7 @@ function attachExistingImageEdits() {
   });
 }
 
-// menu-edit and submenu-edit handlers: they are same as edit-btn but target menu items (text or link)
+// menu-edit and submenu-edit handlers: allow editing top-level and nested submenu items
 function attachMenuEdits() {
   document.querySelectorAll(".menu-edit, .submenu-edit").forEach(btn => {
     if (btn.dataset.attached === "true") return;
@@ -356,29 +356,31 @@ function attachMenuEdits() {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      // attempt to find nearest link or element to edit
-      const parent = btn.parentNode;
+
+      // 1. Find nearest editable element: prefer [data-key] or [data-editable] in parent
+      const parent = btn.closest("li, div, nav") || btn.parentNode;
       const target = parent.querySelector("[data-key]") || parent.querySelector("[data-editable]") || parent.querySelector("a,button");
       if (!target) return;
-      // delegate to edit-btn behavior by simulating a + .edit-btn click if exists
+
+      // 2. If there's a sibling .edit-btn, trigger its click
       const siblingEdit = parent.querySelector(".edit-btn");
-      if (siblingEdit) siblingEdit.click();
-      else {
-        // fallback: use generic inline edit
-        const fakeBtn = document.createElement("button");
-        fakeBtn.className = "edit-btn-temp";
-        parent.appendChild(fakeBtn);
-        // attach single-use
-        fakeBtn.addEventListener("click", () => {}, { once: true });
-        // reuse attachEditButtons logic by marking it unattached and calling attachEditButtons
-        fakeBtn.dataset.attached = "";
-        attachEditButtons();
-        fakeBtn.click();
-        fakeBtn.remove();
+      if (siblingEdit) {
+        siblingEdit.click();
+        return;
       }
+
+      // 3. Otherwise, create a temporary fake button to trigger attachEditButtons logic
+      const fakeBtn = document.createElement("button");
+      fakeBtn.className = "edit-btn-temp";
+      parent.appendChild(fakeBtn);
+      fakeBtn.dataset.attached = "";
+      attachEditButtons();
+      fakeBtn.click();
+      fakeBtn.remove();
     });
   });
 }
+
 
 // ======================= DROPDOWNS (click toggle) =======================
 function initClickDropdowns() {

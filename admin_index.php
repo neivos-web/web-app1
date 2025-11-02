@@ -121,22 +121,47 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
                 </div>
 
-
-                <div class="relative group" data-editable data-key="nav_training">
+                <div class="relative group" data-key="nav_training">
+                <!-- Main button -->
                     <button class="flex items-center hover:text-brand-blue focus:outline-none">
                         Formations & conseils
                         <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
-                    <button class="menu-edit">✎</button>
-                    <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20">
-                        <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="submenu-edit">✎</button>
-                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="submenu-edit">✎</button>
-                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a><button class="submenu-edit">✎</button>
-                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a><button class="submenu-edit">✎</button>
+
+                    <!-- Edit button for main label -->
+                    <button class="menu-edit ml-2">✎</button>
+
+                    <!-- Dropdown submenu -->
+                    <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-52 rounded-md shadow-lg bg-white z-20 hidden group-hover:block">
+                        <div class="py-1">
+
+                        <!-- Each submenu item in a flex row -->
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                            <a href="formations-vr.html" data-editable data-key="training_vr" class="text-left w-full hover:text-brand-blue">VR</a>
+                            <button class="submenu-edit ml-2">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                            <a href="formations-jeux.html" data-editable data-key="training_games" class="text-left w-full hover:text-brand-blue">Jeux Vidéo</a>
+                            <button class="submenu-edit ml-2">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                            <a href="formations-iot.html" data-editable data-key="training_iot" class="text-left w-full hover:text-brand-blue">Systèmes Embarqués & IOT</a>
+                            <button class="submenu-edit ml-2">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                            <a href="formations-consulting.html" data-editable data-key="training_consulting" class="text-left w-full hover:text-brand-blue">Consulting & Accompagnement IT</a>
+                            <button class="submenu-edit ml-2">✎</button>
+                        </div>
+
+                        </div>
                     </div>
                 </div>
+
 
                 <div data-editable data-key="nav_research" class="flex items-center space-x-1">
                     <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
