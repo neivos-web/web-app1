@@ -1,329 +1,423 @@
 // admin-editing.js
-// Usage: <script type="module" src="/js/admin-editing.js"></script>
-// Assumptions:
-// - Page protected by PHP session (admin)
-// - Endpoints:
-//    POST /php/upload.php         -> receives file under 'file', returns JSON { success: true, path: "/uploads/..." }
-//    POST /php/save_changes.php   -> receives JSON { page: "...", entries: { key: { type, value } } } returns { success: true }
-//    GET  /php/load_content.php?page=... -> returns JSON of saved entries { key: { type, value } }
-//    POST /php/logout.php         -> destroys session (returns {success:true})
-// - There is a #save-btn and #logout-btn in page markup
+// Full inline editor module (tag-based editors)
+// Requires endpoints:
+//   POST  /php/upload.php        -> { success: true, path: "/uploads/..." }
+//   POST  /php/save_changes.php  -> { success: true }
+//   GET   /php/load_content.php?page=... -> { entries: { key: { type, value, (href) } } }
+//   POST  /php/logout.php        -> { success: true }
+// Optional session check endpoint: /php/check_session.php returning { logged_in: true }
 
-const UPLOAD_ENDPOINT = '/php/upload.php';
 const SAVE_ENDPOINT = '/php/save_changes.php';
+const UPLOAD_ENDPOINT = '/php/upload.php';
 const LOAD_ENDPOINT = '/php/load_content.php';
 const LOGOUT_ENDPOINT = '/php/logout.php';
-const UPLOAD_WEB_PREFIX = '/uploads/'; // server should return full path but keep this as fallback
+const CHECK_SESSION_ENDPOINT = '/php/check_session.php';
+
+const EDIT_BTN_CLASS = 'ae-edit-btn';
+const INLINE_WRAPPER_CLASS = 'ae-inline-wrapper';
+const IMAGE_PICKER_ID = 'ae-image-picker';
+const ADD_BLOCK_BTN_ID = 'ae-add-block-btn';
+const SAVE_COUNT_ID = 'ae-save-count';
 
 const EDITABLE_SELECTOR = '[data-editable]';
-const IMAGE_EDIT_BTN_SELECTOR = '.image-edit';
-const EDIT_BTN_CLASS = 'ae-edit-btn';
-const IMAGE_PICKER_ID = 'ae-image-picker';
-const NEW_BLOCK_BTN_ID = 'ae-add-block-btn';
+const CONTENT_BOX_SELECTOR = '.content-box';
 
 let pageName = detectPageName();
 let keyCounter = 1;
-let pendingChanges = {}; // { key: { type: 'text'|'image'|'block', value: string or File } }
+let pendingChanges = {}; // { key: { type:'text'|'link'|'image'|'block', value: string | File | {text,href} } }
+let isAdmin = true; // we will do a session-check attempt but page is usually admin-protected
 
-document.addEventListener('DOMContentLoaded', init);
-
-function init() {
-  // wire up save & logout
-  const saveBtn = document.getElementById('save-btn');
-  if (saveBtn) saveBtn.addEventListener('click', onPublish);
-
-  const logoutBtn = document.getElementById('logout-btn');
-  if (logoutBtn) logoutBtn.addEventListener('click', onLogout);
-
-  // inject Add New Block button near save/logout (if not present)
+document.addEventListener('DOMContentLoaded', async () => {
+  try { isAdmin = await checkSession(); } catch (e) { /* fallback true */ }
+  if (!isAdmin) {
+    console.log('Admin session not detected — editor won\'t activate.');
+    return;
+  }
+  injectStyles();
+  createImagePicker();
+  attachGlobalHandlers();
+  await loadServerContent();
+  scanAndAttach(document);
   injectAddBlockButton();
+  observeDomMutations();
+  updateSaveCounter();
+});
 
-  // create hidden file input for image picks
-  createHiddenFilePicker();
-
-  // load server content and apply
-  loadServerContent().then(() => {
-    // scan DOM and attach edit UI
-    scanAndAttach();
-    // observe DOM additions (new blocks)
-    observeDomMutations();
-  });
-}
-
-/* ---------- Page name detection ---------- */
+/* ---------------- utilities ---------------- */
 function detectPageName() {
   try {
-    const p = window.location.pathname.split('/').filter(Boolean);
-    if (p.length === 0) return 'index';
-    const last = p[p.length - 1];
-    const name = last.includes('.') ? last.replace(/\.[^/.]+$/, '') : last;
-    return name || 'index';
+    const path = window.location.pathname.split('/').filter(Boolean);
+    if (path.length === 0) return 'index';
+    const last = path[path.length - 1];
+    return last.includes('.') ? last.replace(/\.[^/.]+$/, '') : last;
   } catch {
     return 'index';
   }
 }
+function pad(n, d = 2) { return String(n).padStart(d, '0'); }
+function generateKey() { const k = `${pageName}_${pad(keyCounter)}`; keyCounter += 1; return k; }
+function escapeCss(s) { return s.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1'); }
 
-/* ---------- Load content from server ---------- */
+/* ---------------- session check (optional) ---------------- */
+async function checkSession() {
+  try {
+    const res = await fetch(CHECK_SESSION_ENDPOINT, { credentials: 'include' });
+    if (!res.ok) throw new Error('no-check');
+    const j = await res.json();
+    return j.logged_in === true || j.admin === true;
+  } catch {
+    // fallback: if page contains #save-btn assume admin
+    return !!document.getElementById('save-btn');
+  }
+}
+
+/* ---------------- load existing content ---------------- */
 async function loadServerContent() {
   try {
     const url = new URL(LOAD_ENDPOINT, window.location.origin);
     url.searchParams.set('page', pageName);
     const res = await fetch(url.toString(), { credentials: 'include' });
     if (!res.ok) return;
-    const json = await res.json();
-    if (!json || typeof json !== 'object') return;
-    // apply values to DOM
-    const entries = json.entries || json; // support both shapes
+    const j = await res.json();
+    const entries = j.entries || j;
+    if (!entries) return;
     Object.entries(entries).forEach(([key, meta]) => {
+      // meta expected: { type, value } (for link: meta.text & meta.href)
       const nodes = document.querySelectorAll(`[data-key="${escapeCss(key)}"]`);
-      if (!nodes || nodes.length === 0) return;
-      for (const node of nodes) {
+      if (!nodes.length) return;
+      nodes.forEach((node) => {
         if (meta.type === 'image') {
-          // meta.value should be a URL
           if (node.tagName.toLowerCase() === 'img') node.src = meta.value;
           else {
             const img = node.querySelector('img');
             if (img) img.src = meta.value;
           }
+        } else if (meta.type === 'link') {
+          if (typeof meta.text !== 'undefined') node.innerText = meta.text;
+          if (typeof meta.href !== 'undefined') node.setAttribute('href', meta.href);
         } else {
           node.innerHTML = meta.value;
         }
-      }
+      });
     });
   } catch (err) {
-    console.warn('Could not load server content', err);
+    console.warn('loadServerContent error', err);
   }
 }
 
-/* ---------- Scan DOM and attach edit buttons ---------- */
+/* ---------------- scanning & attach edit buttons ---------------- */
 function scanAndAttach(root = document) {
+  // Ensure content-boxes get keys
+  const boxes = Array.from(root.querySelectorAll(CONTENT_BOX_SELECTOR));
+  boxes.forEach((b) => {
+    if (!b.dataset.key) b.dataset.key = generateKey();
+  });
+
   const editables = Array.from(root.querySelectorAll(EDITABLE_SELECTOR));
   editables.forEach((el) => {
-    // skip if inside our controls
-    if (el.closest('.ae-admin-ui')) return;
-    // ensure data-key exists
-    if (!el.dataset.key) {
-      el.dataset.key = generateKey();
-    } else {
-      // update keyCounter to avoid duplicates
-      const last = el.dataset.key.split('_').pop();
-      const n = parseInt(last, 10);
-      if (!isNaN(n) && n >= keyCounter) keyCounter = n + 1;
-    }
-    // don't add duplicate edit buttons
-    if (!hasAttachedEditBtn(el)) addEditButton(el);
-  });
-
-  // wire image-edit buttons (.image-edit) to open file picker for the nearest image or data-key
-  const imageBtns = Array.from(root.querySelectorAll(IMAGE_EDIT_BTN_SELECTOR));
-  imageBtns.forEach((btn) => {
-    if (btn.dataset.aeAttached === '1') return;
-    btn.dataset.aeAttached = '1';
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      // find closest image in parent or next sibling
-      const parent = btn.parentElement;
-      const img = parent ? (parent.querySelector('img[data-editable]') || parent.querySelector('img')) : null;
-      // choose target key:
-      let targetKey = img?.dataset.key || parent?.dataset?.key || generateKey();
-      if (!img && !parent) {
-        // fallback: open image picker but user must drop to the target element later
-      }
-      // store current target on hidden input
-      const picker = document.getElementById(IMAGE_PICKER_ID);
-      picker.dataset.targetKey = targetKey;
-      picker.click();
-    });
-  });
-
-  // also allow clicking directly on img[data-editable] to open picker
-  const imgs = Array.from(root.querySelectorAll('img[data-editable]'));
-  imgs.forEach((img) => {
-    if (img.dataset.aeImgAttached === '1') return;
-    img.dataset.aeImgAttached = '1';
-    img.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const picker = document.getElementById(IMAGE_PICKER_ID);
-      picker.dataset.targetKey = img.dataset.key || generateKey();
-      picker.click();
-    });
+    if (el.closest('.ae-admin-ui')) return; // avoid controls
+    if (!el.dataset.key) el.dataset.key = generateKey();
+    // update keyCounter to avoid reuse
+    const lastPart = el.dataset.key.split('_').pop();
+    const n = parseInt(lastPart, 10);
+    if (!isNaN(n) && n >= keyCounter) keyCounter = n + 1;
+    if (!hasEditBtn(el)) addEditButton(el);
+    attachDirectHandlers(el);
   });
 }
 
-/* ---------- Helpers ---------- */
-function hasAttachedEditBtn(el) {
-  // look for sibling edit btn
+function hasEditBtn(el) {
   return !!el.parentElement?.querySelector(`.${EDIT_BTN_CLASS}[data-for="${escapeCss(el.dataset.key)}"]`);
 }
 
 function addEditButton(el) {
-  // create small edit button and insert before element visually (we don't change markup)
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.className = EDIT_BTN_CLASS + ' edit-btn ae-admin-ui';
+  btn.className = `${EDIT_BTN_CLASS} ae-admin-ui`;
   btn.title = 'Éditer';
   btn.dataset.for = el.dataset.key;
   btn.innerText = '✎';
-  // position: try to insert before element if inline; else append inside parent at start
-  // We'll insert as previous sibling to keep layout similar to provided HTML where many edit btns exist
+  // Insert before element where markup expects: many pages have the edit-btn manually placed.
+  // We try to insert before the element when possible to match your HTML.
   try {
     el.parentElement.insertBefore(btn, el);
   } catch {
-    // fallback: append after
-    el.parentElement.appendChild(btn);
+    el.after(btn);
   }
-
-  // click opens textual editor
   btn.addEventListener('click', (ev) => {
-    ev.preventDefault();
-    openTextEditor(el);
+    ev.stopPropagation();
+    openEditorFor(el);
   });
 }
 
-/* ---------- Inline text editor ---------- */
-function openTextEditor(el) {
-  // remove any existing editor
-  closeInlineEditor();
-
-  // Decide input type: textarea for blocks/paragraphs, input for small tags
+/* ---------------- open inline editor (tag-based) ---------------- */
+function openEditorFor(el) {
+  closeAnyInlineEditor();
   const tag = el.tagName.toLowerCase();
-  const isLong = tag === 'p' || tag === 'div' || (el.innerText && el.innerText.length > 120);
-  const editor = isLong ? document.createElement('textarea') : document.createElement('input');
-  editor.className = 'ae-inline-editor';
-  if (isLong) {
-    editor.rows = 6;
-  } else {
-    editor.type = 'text';
+
+  if (tag === 'img') {
+    openImagePickerFor(el);
+    return;
   }
-  // set initial value (preserving innerHTML stripped of scripts)
-  editor.value = el.innerText.trim();
+  if (tag === 'a') {
+    openLinkEditor(el);
+    return;
+  }
 
-  // position editor overlay near element — simple replacement for better UX
-  editor.style.width = '100%';
-  editor.style.boxSizing = 'border-box';
-  editor.style.fontSize = '14px';
-  editor.style.padding = '8px';
-  editor.style.margin = '6px 0';
-
-  // create save/cancel controls
-  const save = document.createElement('button');
-  save.type = 'button';
-  save.textContent = 'Appliquer';
-  save.className = 'ae-save-btn edit-btn';
-  const cancel = document.createElement('button');
-  cancel.type = 'button';
-  cancel.textContent = 'Annuler';
-  cancel.className = 'edit-btn';
-
-  // wrapper
+  const isBlock = ['p', 'div', 'section', 'article', 'pre', 'blockquote'].includes(tag) || el.classList.contains('content-box') || ['h1','h2','h3','h4','h5','h6'].includes(tag);
   const wrapper = document.createElement('div');
-  wrapper.className = 'ae-inline-wrapper ae-admin-ui';
-  wrapper.style.marginTop = '6px';
+  wrapper.className = `${INLINE_WRAPPER_CLASS} ae-admin-ui`;
+  wrapper.style.margin = '8px 0';
 
-  wrapper.appendChild(editor);
-  wrapper.appendChild(save);
-  wrapper.appendChild(cancel);
+  const input = isBlock ? document.createElement('textarea') : document.createElement('input');
+  input.className = 'ae-inline-input';
+  if (isBlock) {
+    input.rows = 6;
+    input.style.width = '100%';
+  } else {
+    input.type = 'text';
+    input.style.width = '50%';
+  }
+  // Prefill with plain text
+  input.value = tag === 'input' || tag === 'textarea' ? el.value || el.innerText : el.innerText.trim();
 
-  // insert wrapper after the element
+  const applyBtn = document.createElement('button');
+  applyBtn.type = 'button';
+  applyBtn.className = 'ae-apply-btn edit-btn';
+  applyBtn.textContent = 'Appliquer';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'edit-btn';
+  cancelBtn.textContent = 'Annuler';
+
+  wrapper.appendChild(input);
+  wrapper.appendChild(applyBtn);
+  wrapper.appendChild(cancelBtn);
+
   el.after(wrapper);
-  editor.focus();
+  input.focus();
 
-  save.addEventListener('click', () => {
-    const newVal = editor.value;
+  applyBtn.addEventListener('click', () => {
+    const newVal = input.value;
     el.innerText = newVal;
-    const key = el.dataset.key || generateKey();
-    el.dataset.key = key;
+    const key = ensureKey(el);
     pendingChanges[key] = { type: 'text', value: newVal };
     markUnsaved(el, true);
     wrapper.remove();
+    updateSaveCounter();
   });
 
-  cancel.addEventListener('click', () => wrapper.remove());
+  cancelBtn.addEventListener('click', () => {
+    wrapper.remove();
+  });
+
+  // support Esc to cancel
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') wrapper.remove();
+  });
 }
 
-function closeInlineEditor() {
-  const ex = document.querySelector('.ae-inline-wrapper');
-  if (ex) ex.remove();
+/* ---------------- link editor ---------------- */
+function openLinkEditor(aEl) {
+  closeAnyInlineEditor();
+  const wrapper = document.createElement('div');
+  wrapper.className = `${INLINE_WRAPPER_CLASS} ae-admin-ui`;
+  wrapper.style.margin = '8px 0';
+
+  const labelInput = document.createElement('input');
+  labelInput.type = 'text';
+  labelInput.className = 'ae-inline-input';
+  labelInput.style.width = '48%';
+  labelInput.value = aEl.innerText.trim();
+
+  const hrefInput = document.createElement('input');
+  hrefInput.type = 'text';
+  hrefInput.className = 'ae-inline-input';
+  hrefInput.style.width = '48%';
+  hrefInput.style.marginLeft = '8px';
+  hrefInput.value = aEl.getAttribute('href') || '';
+
+  const applyBtn = document.createElement('button');
+  applyBtn.type = 'button';
+  applyBtn.className = 'ae-apply-btn edit-btn';
+  applyBtn.textContent = 'Appliquer';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'edit-btn';
+  cancelBtn.textContent = 'Annuler';
+
+  wrapper.appendChild(labelInput);
+  wrapper.appendChild(hrefInput);
+  wrapper.appendChild(applyBtn);
+  wrapper.appendChild(cancelBtn);
+
+  aEl.after(wrapper);
+  labelInput.focus();
+
+  applyBtn.addEventListener('click', () => {
+    const text = labelInput.value;
+    const href = hrefInput.value;
+    aEl.innerText = text;
+    aEl.setAttribute('href', href);
+    const key = ensureKey(aEl);
+    pendingChanges[key] = { type: 'link', text, href };
+    markUnsaved(aEl, true);
+    wrapper.remove();
+    updateSaveCounter();
+  });
+
+  cancelBtn.addEventListener('click', () => wrapper.remove());
+  // ESC cancels
+  labelInput.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') wrapper.remove(); });
+  hrefInput.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') wrapper.remove(); });
 }
 
-/* ---------- Hidden file picker ---------- */
-function createHiddenFilePicker() {
+/* ---------------- image picker / uploader ---------------- */
+function createImagePicker() {
   if (document.getElementById(IMAGE_PICKER_ID)) return;
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.style.display = 'none';
   input.id = IMAGE_PICKER_ID;
-  input.addEventListener('change', async (ev) => {
+  input.style.display = 'none';
+  document.body.appendChild(input);
+
+  input.addEventListener('change', (ev) => {
     const files = input.files;
     if (!files || files.length === 0) return;
     const file = files[0];
-    const key = input.dataset.targetKey || generateKey();
-    // immediately show preview if element exists with key
-    const targetNode = document.querySelector(`[data-key="${escapeCss(key)}"]`);
-    if (targetNode) {
-      // if it's an img tag, preview by local URL
-      if (targetNode.tagName.toLowerCase() === 'img') {
-        targetNode.src = URL.createObjectURL(file);
-      } else {
-        const img = targetNode.querySelector('img');
+    const targetKey = input.dataset.targetKey;
+    // preview local if node exists
+    const node = document.querySelector(`[data-key="${escapeCss(targetKey)}"]`);
+    if (node) {
+      if (node.tagName.toLowerCase() === 'img') node.src = URL.createObjectURL(file);
+      else {
+        const img = node.querySelector('img');
         if (img) img.src = URL.createObjectURL(file);
       }
     }
-    // Save in pendingChanges as File; upload will happen on publish
-    pendingChanges[key] = { type: 'image', value: file };
-    markUnsaved(targetNode || document.body, true);
-    // clear picker value
+    // store File in pendingChanges; upload occurs on Publish
+    pendingChanges[targetKey] = { type: 'image', value: file };
+    markUnsaved(node || document.body, true);
+    updateSaveCounter();
+    // clear value for next pick
     input.value = '';
+    delete input.dataset.targetKey;
   });
-  document.body.appendChild(input);
 }
 
-/* ---------- Publish (Save All) ---------- */
-async function onPublish() {
+function openImagePickerFor(imgEl) {
+  const key = ensureKey(imgEl);
+  const picker = document.getElementById(IMAGE_PICKER_ID);
+  if (!picker) return;
+  picker.dataset.targetKey = key;
+  picker.click();
+}
+
+/* ---------------- common helpers ---------------- */
+function ensureKey(el) {
+  if (!el.dataset.key) el.dataset.key = generateKey();
+  return el.dataset.key;
+}
+function markUnsaved(node, yes = true) {
+  if (!node) return;
+  if (yes) node.classList.add('ae-unsaved');
+  else node.classList.remove('ae-unsaved');
+}
+function updateSaveCounter() {
+  const saveBtn = document.getElementById('save-btn');
+  if (!saveBtn) return;
+  let badge = document.getElementById(SAVE_COUNT_ID);
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.id = SAVE_COUNT_ID;
+    badge.style.marginLeft = '8px';
+    badge.style.fontWeight = '700';
+    saveBtn.after(badge);
+  }
+  const count = Object.keys(pendingChanges).length;
+  badge.textContent = count > 0 ? `(${count})` : '';
+}
+function closeAnyInlineEditor() {
+  const ex = document.querySelector(`.${INLINE_WRAPPER_CLASS}`);
+  if (ex) ex.remove();
+}
+
+/* ---------------- open editor routing: direct handlers ---------------- */
+function attachDirectHandlers(el) {
+  // prevent default navigation for anchors and open editor on click
+  if (el.tagName.toLowerCase() === 'a') {
+    if (el.dataset.aAttached) return;
+    el.dataset.aAttached = '1';
+    el.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      openLinkEditor(el);
+    });
+    return;
+  }
+
+  // for images, we will also allow clicking the element to open the picker
+  if (el.tagName.toLowerCase() === 'img') {
+    if (el.dataset.imgAttached) return;
+    el.dataset.imgAttached = '1';
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      openImagePickerFor(el);
+    });
+    return;
+  }
+
+  // for other elements, no direct override needed: user clicks the edit button.
+}
+
+/* ---------------- Publish (Save All) ---------------- */
+async function publishAll() {
   if (Object.keys(pendingChanges).length === 0) {
     alert('Aucune modification à publier.');
     return;
   }
-  // First upload all image files, get their server paths
-  const entries = {}; // final entries to send to save endpoint
-  // iterate pendingChanges
+  // 1) Upload all image Files first and replace pendingChanges values with server paths
+  const entries = {}; // final entries to send
   for (const [key, meta] of Object.entries(pendingChanges)) {
     if (meta.type === 'image' && meta.value instanceof File) {
       try {
-        const uploadRes = await uploadFile(meta.value, key);
-        if (uploadRes && uploadRes.success && uploadRes.path) {
-          entries[key] = { type: 'image', value: uploadRes.path };
-          // update DOM images to server path
+        const up = await uploadFile(meta.value, key);
+        if (up && up.success && up.path) {
+          entries[key] = { type: 'image', value: up.path };
+          // update DOM image src if present
           const node = document.querySelector(`[data-key="${escapeCss(key)}"]`);
           if (node) {
-            if (node.tagName.toLowerCase() === 'img') node.src = uploadRes.path;
+            if (node.tagName.toLowerCase() === 'img') node.src = up.path;
             else {
               const img = node.querySelector('img');
-              if (img) img.src = uploadRes.path;
+              if (img) img.src = up.path;
             }
             markUnsaved(node, false);
           }
         } else {
-          // failed upload; record empty and continue
           entries[key] = { type: 'image', value: '' };
         }
       } catch (err) {
-        console.error('Upload error', err);
+        console.error('uploadFile error', err);
         entries[key] = { type: 'image', value: '' };
       }
-    } else if (meta.type === 'text' || meta.type === 'block') {
-      entries[key] = { type: meta.type, value: meta.value };
+    } else if (meta.type === 'text') {
+      entries[key] = { type: 'text', value: meta.value };
+    } else if (meta.type === 'link') {
+      entries[key] = { type: 'link', text: meta.text, href: meta.href };
+    } else if (meta.type === 'block') {
+      entries[key] = { type: 'block', value: meta.value };
     } else {
-      // fallback: try to read DOM
+      // fallback: attempt to read DOM
       const node = document.querySelector(`[data-key="${escapeCss(key)}"]`);
       if (node) entries[key] = { type: 'text', value: node.innerHTML };
     }
   }
 
-  // send entries JSON to save endpoint
+  // 2) POST entries JSON to SAVE_ENDPOINT
   try {
     const payload = { page: pageName, entries };
     const res = await fetch(SAVE_ENDPOINT, {
@@ -332,134 +426,110 @@ async function onPublish() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const json = await res.json();
-    if (json && json.success) {
-      // clear pendingChanges, mark saved
+    const j = await res.json();
+    if (j && j.success) {
+      // clear pendingChanges and UI marks
+      Object.keys(entries).forEach((k) => {
+        const node = document.querySelector(`[data-key="${escapeCss(k)}"]`);
+        if (node) markUnsaved(node, false);
+      });
       pendingChanges = {};
       updateSaveCounter();
       flashSaveSuccess();
-      alert('Publier OK');
+      alert('Contenu publié avec succès.');
     } else {
-      console.error('Save error', json);
-      alert('Erreur lors de la sauvegarde (voir console).');
+      console.error('Save failed', j);
+      alert('Erreur lors de la sauvegarde. Voir console.');
     }
   } catch (err) {
-    console.error('Save exception', err);
-    alert('Erreur réseau pendant la sauvegarde.');
+    console.error('Publish error', err);
+    alert('Erreur réseau lors de la publication.');
   }
 }
 
-/* ---------- File upload helper ---------- */
+/* ---------------- file upload helper ---------------- */
 async function uploadFile(file, key) {
-  const form = new FormData();
-  form.append('file', file, file.name);
-  form.append('key', key);
-  form.append('page', pageName);
+  const fd = new FormData();
+  fd.append('file', file, file.name);
+  fd.append('key', key);
+  fd.append('page', pageName);
   const res = await fetch(UPLOAD_ENDPOINT, {
     method: 'POST',
     credentials: 'include',
-    body: form,
+    body: fd,
   });
-  if (!res.ok) return null;
-  return await res.json(); // expect { success: true, path: "/uploads/..." }
+  if (!res.ok) throw new Error('upload failed');
+  return await res.json();
 }
 
-/* ---------- Add new block button & template ---------- */
+/* ---------------- add new block template ---------------- */
 function injectAddBlockButton() {
-  // add near #save-btn container (.extra-right-buttons) or admin bar
+  if (document.getElementById(ADD_BLOCK_BTN_ID)) return;
   const container = document.querySelector('.extra-right-buttons') || document.querySelector('nav .container') || document.body;
   if (!container) return;
-  if (document.getElementById(NEW_BLOCK_BTN_ID)) return;
   const btn = document.createElement('button');
-  btn.id = NEW_BLOCK_BTN_ID;
+  btn.id = ADD_BLOCK_BTN_ID;
   btn.type = 'button';
   btn.className = 'bg-white border px-3 py-2 rounded-md text-sm';
   btn.textContent = 'Ajouter un nouveau bloc';
   btn.style.marginRight = '8px';
-  // insert before save btn if exists
   const saveBtn = document.getElementById('save-btn');
   if (saveBtn && saveBtn.parentElement) saveBtn.parentElement.insertBefore(btn, saveBtn);
   else container.appendChild(btn);
 
   btn.addEventListener('click', () => {
-    const target = document.querySelector('#articles-container') || document.querySelector('main') || container;
+    const target = document.querySelector('#articles-container') || document.querySelector('main') || document.body;
     const tmp = document.createElement('div');
     tmp.innerHTML = `
       <div class="content-box new-content-box" style="border:1px dashed #e5e7eb; padding:12px; margin-bottom:12px;">
         <div class="content-image">
-          <img src="images/placeholder.jpg" alt="placeholder" data-editable>
+          <img src="images/placeholder.jpg" alt="placeholder" data-editable />
         </div>
         <div class="content">
           <h2 data-editable>Nouveau titre...</h2>
           <p data-editable>Votre texte ici...</p>
         </div>
-      </div>
-    `;
+      </div>`;
     const newBlock = tmp.firstElementChild;
-    // append
     target.appendChild(newBlock);
-    // ensure keys and attach editors
+    // assign key(s) and attach editors
     scanAndAttach(newBlock);
-    // register block as pending (store outerHTML)
-    const blockKey = newBlock.dataset.key || generateKey();
-    newBlock.dataset.key = blockKey;
-    pendingChanges[blockKey] = { type: 'block', value: newBlock.outerHTML };
+    // register pending change as block (store outerHTML)
+    const bk = newBlock.dataset.key || generateKey();
+    newBlock.dataset.key = bk;
+    pendingChanges[bk] = { type: 'block', value: newBlock.outerHTML };
+    markUnsaved(newBlock, true);
     updateSaveCounter();
     newBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 }
 
-/* ---------- Logout ---------- */
-async function onLogout() {
-  if (!confirm('Déconnexion ?')) return;
-  try {
-    const res = await fetch(LOGOUT_ENDPOINT, { method: 'POST', credentials: 'include' });
-    const j = await res.json();
-    if (j && j.success) {
-      window.location.href = '/admin.html';
-    } else {
-      alert('Erreur déconnexion');
-    }
-  } catch (err) {
-    console.error('Logout error', err);
-    window.location.href = '/admin.html';
-  }
-}
-
-/* ---------- Visual helpers ---------- */
-function markUnsaved(node, yes = true) {
-  if (!node) return;
-  if (yes) node.classList.add('ae-unsaved');
-  else node.classList.remove('ae-unsaved');
-  updateSaveCounter();
-}
-
-function updateSaveCounter() {
+/* ---------------- logout handler & global bindings ---------------- */
+function attachGlobalHandlers() {
   const saveBtn = document.getElementById('save-btn');
-  if (!saveBtn) return;
-  const count = Object.keys(pendingChanges).length;
-  // optionally update label
-  const badgeId = 'ae-save-count';
-  let badge = document.getElementById(badgeId);
-  if (!badge) {
-    badge = document.createElement('span');
-    badge.id = badgeId;
-    badge.style.marginLeft = '8px';
-    badge.style.fontWeight = '700';
-    saveBtn.after(badge);
-  }
-  badge.textContent = count > 0 ? `(${count})` : '';
+  if (saveBtn) saveBtn.addEventListener('click', (e) => { e.preventDefault(); publishAll(); });
+
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) logoutBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (!confirm('Déconnexion ?')) return;
+    try {
+      const res = await fetch(LOGOUT_ENDPOINT, { method: 'POST', credentials: 'include' });
+      const j = await res.json();
+      if (j && j.success) window.location.href = '/admin.html';
+      else window.location.href = '/admin.html';
+    } catch { window.location.href = '/admin.html'; }
+  });
+
+  // click outside any editor closes it
+  document.addEventListener('click', (ev) => {
+    const target = ev.target;
+    if (target.closest('.ae-admin-ui')) return;
+    closeAnyInlineEditor();
+  });
 }
 
-function flashSaveSuccess() {
-  const btn = document.getElementById('save-btn');
-  if (!btn) return;
-  btn.style.transition = 'box-shadow 0.3s';
-  btn.style.boxShadow = '0 0 0 6px rgba(34, 228, 172, 0.18)';
-  setTimeout(() => (btn.style.boxShadow = ''), 900);
-}
-
-/* ---------- MutationObserver for dynamic content ---------- */
+/* ---------------- observe DOM mutations to attach new nodes ---------------- */
 function observeDomMutations() {
   const mo = new MutationObserver((mutations) => {
     for (const m of mutations) {
@@ -473,14 +543,36 @@ function observeDomMutations() {
   mo.observe(document.body, { childList: true, subtree: true });
 }
 
-/* ---------- Key generation ---------- */
-function generateKey() {
-  const k = `${pageName}_${String(keyCounter).padStart(2, '0')}`;
-  keyCounter += 1;
-  return k;
+/* ---------------- helper: open image picker for an element (exposed) ---------------- */
+function openImagePickerForNode(node) { openImagePickerFor(node); }
+
+/* ---------------- small UI effects ---------------- */
+function flashSaveSuccess() {
+  const btn = document.getElementById('save-btn');
+  if (!btn) return;
+  btn.style.transition = 'box-shadow 0.3s';
+  btn.style.boxShadow = '0 0 0 8px rgba(34,228,172,0.12)';
+  setTimeout(() => (btn.style.boxShadow = ''), 900);
 }
 
-/* ---------- Utility escape for CSS selector use ---------- */
-function escapeCss(s) {
-  return s.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1');
+/* ---------------- utilities for the module scope ---------------- */
+function closeAnyInlineEditor() {
+  const ex = document.querySelector(`.${INLINE_WRAPPER_CLASS}`);
+  if (ex) ex.remove();
+}
+
+/* ---------------- CSS injection ---------------- */
+function injectStyles() {
+  const css = `
+  .${EDIT_BTN_CLASS}{ background:#22e4ac;color:#fff;border-radius:6px;padding:2px 6px;border:none;cursor:pointer;margin-right:6px;font-size:0.9rem; }
+  .${EDIT_BTN_CLASS}:hover{ background:#06a0c5; transform:translateY(-1px); }
+  .ae-inline-wrapper{ background:#fff;border:1px solid #e5e7eb;padding:8px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.06); z-index:9999; }
+  .ae-inline-input{ font-size:14px;padding:6px;border:1px solid #cbd5e1;border-radius:4px; display:block; margin-bottom:8px; }
+  .ae-unsaved{ box-shadow: inset 0 0 0 3px rgba(250,200,0,0.12); }
+  .${INLINE_WRAPPER_CLASS} .edit-btn{ margin-right:8px; }
+  #${ADD_BLOCK_BTN_ID}{ cursor:pointer; }
+  `;
+  const s = document.createElement('style');
+  s.textContent = css;
+  document.head.appendChild(s);
 }
