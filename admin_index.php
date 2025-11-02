@@ -1,17 +1,12 @@
 <?php
-// Secure session settings (must come BEFORE session_start)
-ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.cookie_secure', '0'); 
-session_start();
 
+session_start();
 if (!isset($_SESSION['admin'])) {
     header("Location: admin.html");
     exit;
 }
-
 header('Content-Type: text/html; charset=UTF-8');
 ?>
-
 
 
 <!DOCTYPE html>
@@ -32,35 +27,21 @@ header('Content-Type: text/html; charset=UTF-8');
         }
     </script>
     <style>
-/* Fix for dropdown menus - keep edit buttons visible */
-/* --- General: make sure edit buttons can appear above menu --- */
-.edit-btn,
-.edit-btn,
-.image-edit {
-  position: relative;
-  z-index: 9999 !important;
-  background: #22e4ac;
-  color: white;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 0.7rem;
-  padding: 3px 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Prevent any clipping of edit buttons */
-#menu, nav, header, .group, .relative {
-  overflow: visible !important;
-}
-
-
-
-
+        .edit-btn {
+            font-size: 0.8rem;
+            background: #08B3E5;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 4px;
+        }
+        .edit-btn:hover { background: #06a0c5; }
     </style>
-
 
 
 
@@ -74,12 +55,13 @@ header('Content-Type: text/html; charset=UTF-8');
             <!-- Logo -->
             <div class="flex items-center space-x-3">
                 <div class="nav-item-wrapper">
-                        <button class="image-edit">📷</button>        
-                        <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
-                        
-                            <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-                        </a>
-                    </div>
+                    <button class="edit-btn">✎</button>
+                    <a href="admin_index.php" data-editable data-key="logo_text" class="flex items-center space-x-2">
+                        <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                        <span class="text-2xl font-bold text-gray-900 hover:text-brand-blue">Outsiders</span>
+                        <button class="edit-btn">✎</button>
+                    </a>
+                </div>
             </div>
 
             <!-- Bouton hamburger (mobile) -->
@@ -96,86 +78,38 @@ header('Content-Type: text/html; charset=UTF-8');
                     <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
                     <button class="edit-btn">✎</button>
                 </div>
-                <div class="relative group" data-key="nav_portfolio">
-                <!-- Main button -->
-                <button id="dropdownButtonPortefeuille" data-editable class="flex items-center hover:text-brand-blue focus:outline-none">
-                    Portefeuille
-                    <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-                    </svg>
-                </button>
 
-                <!-- Edit button for main label -->
-                <button class="edit-btn ml-2">✎</button>
-
-                <!-- Dropdown submenu -->
-                <div id="dropdownMenuPortefeuille" class="absolute top-full left-0   bg-white shadow-xl rounded-lg w-64 z-20 mt-2">
-                    
-                    <!-- Each submenu item in its own flex row -->
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
-                    <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="text-left w-full hover:text-brand-blue">Jeux Vidéo</a>
-                    <button class="edit-btn ml-2">✎</button>
+                <div class="relative group" data-editable data-key="nav_portfolio">
+                    <button class="flex items-center hover:text-brand-blue focus:outline-none">
+                        Portefeuille
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                    <button class="edit-btn">✎</button>
+                    <div class="absolute left-1/2 -translate-x-1/2   bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
+                        <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
+                        <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a><button class="edit-btn">✎</button>
                     </div>
-
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
-                    <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="text-left w-full hover:text-brand-blue">AR/MR</a>
-                    <button class="edit-btn ml-2">✎</button>
-                    </div>
-
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
-                    <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="text-left w-full hover:text-brand-blue">VR</a>
-                    <button class="edit-btn ml-2">✎</button>
-                    </div>
-
-                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
-                    <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="text-left w-full hover:text-brand-blue">CAD</a>
-                    <button class="edit-btn ml-2">✎</button>
-                    </div>
-
-                </div>
                 </div>
 
-                <div class="relative group" data-key="nav_training">
-                <!-- Main button -->
+                <div class="relative group" data-editable data-key="nav_training">
                     <button class="flex items-center hover:text-brand-blue focus:outline-none">
                         Formations & conseils
                         <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
-
-                    <!-- Edit button for main label -->
-                    <button class="edit-btn ml-2">✎</button>
-
-                    <!-- Dropdown submenu -->
-                    <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-52 rounded-md shadow-lg bg-white z-20  ">
-                        <div class="py-1">
-
-                        <!-- Each submenu item in a flex row -->
-                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
-                            <a href="formations-vr.html" data-editable data-key="training_vr" class="text-left w-full hover:text-brand-blue">VR</a>
-                            <button class="edit-btn ml-2">✎</button>
-                        </div>
-
-                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
-                            <a href="formations-jeux.html" data-editable data-key="training_games" class="text-left w-full hover:text-brand-blue">Jeux Vidéo</a>
-                            <button class="edit-btn ml-2">✎</button>
-                        </div>
-
-                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
-                            <a href="formations-iot.html" data-editable data-key="training_iot" class="text-left w-full hover:text-brand-blue">Systèmes Embarqués & IOT</a>
-                            <button class="edit-btn ml-2">✎</button>
-                        </div>
-
-                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
-                            <a href="formations-consulting.html" data-editable data-key="training_consulting" class="text-left w-full hover:text-brand-blue">Consulting & Accompagnement IT</a>
-                            <button class="edit-btn ml-2">✎</button>
-                        </div>
-
-                        </div>
+                    <button class="edit-btn">✎</button>
+                    <div class="absolute left-1/2 -translate-x-1/2   bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20">
+                        <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
+                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
+                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a><button class="edit-btn">✎</button>
+                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a><button class="edit-btn">✎</button>
                     </div>
                 </div>
-
 
                 <div data-editable data-key="nav_research" class="flex items-center space-x-1">
                     <a href="recherche.html" class="hover:text-brand-blue">Recherche</a>
@@ -196,7 +130,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
 
                 <div data-editable data-key="nav_contact" class="flex items-center space-x-1">
-                    <a href="contact.html" class="hover:text-brand-blue" data-editable>Contact</a>
+                    <a href="contact.html" class="hover:text-brand-blue">Contact</a>
                     <button class="edit-btn">✎</button>
                 </div>
 
@@ -207,16 +141,6 @@ header('Content-Type: text/html; charset=UTF-8');
                     </select>
                 </div>
             </div>
-            <div class="extra-right-buttons flex items-center space-x-3">
-                <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
-                    Publier
-                </button>
-
-                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
-                    ⏻
-                </button>
-            </div>
-
         </nav>
     </header>
 
@@ -224,10 +148,11 @@ header('Content-Type: text/html; charset=UTF-8');
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-image">
             <div class="absolute inset-0">
+                <button class="edit-btn absolute top-4 right-4 z-50">✎</button>
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
+                <div class="absolute inset-0 bg-black opacity-40"></div>
 
-                    <button class="edit-btn">📷</button>
-                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
-                </div>
+            </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
                 <button class="edit-btn">✎</button>
                 <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue dans notre section actualités et blogs</h1>
@@ -354,9 +279,22 @@ header('Content-Type: text/html; charset=UTF-8');
                         le choix d'une profession et formation pour les personnes atteintes de d'améliorer le spectre de l'autisme. 
                         Nous soutenons leur intégration active sur le marché du travail et contribue ainsi une contribution à une société plus inclusive.
                     </p>                    
-                </div>     
+                </div>
+
+                
             </div>
 
+            <div class="content-box bg-white shadow-md rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-6">
+                <div class="content-image flex-1">
+                    <img src="https://placehold.co/600x400" alt="Image d'exemple" data-editable>
+                </div>
+                <div class="content flex-1">
+                    <h2 data-editable contenteditable="true" class="text-2xl font-bold">Titre exemple</h2>
+                    <p data-editable contenteditable="true" class="text-gray-700">
+                    Exemple de contenu modifiable. Vous pouvez éditer ce texte.
+                    </p>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -373,26 +311,26 @@ header('Content-Type: text/html; charset=UTF-8');
 
             <!-- Réseaux sociaux-->
             <div class="footer-social">
-            <button class="image-edit">✎</button>
+            <button class="edit-btn">✎</button>
             <a href="#" target="_blank" aria-label="LinkedIn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" data-editable>
                 <path d="M19 0h-14c-2.8 0-5 2.2-5 5v14c0 2.8 2.2 5 5 5h14c2.8 0 5-2.2 5-5v-14c0-2.8-2.2-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.4c-.9 0-1.6-.8-1.6-1.6 0-.9.7-1.6 1.6-1.6s1.6.7 1.6 1.6c0 .8-.7 1.6-1.6 1.6zm13.5 11.4h-3v-5.5c0-1.3-.5-2.2-1.7-2.2-1 0-1.6.7-1.8 1.4-.1.2-.1.5-.1.8v5.5h-3s.1-8.9 0-9.8h3v1.4c.4-.7 1.1-1.7 2.8-1.7 2 0 3.8 1.3 3.8 4.3v5.8z" />
                 </svg>
             </a>
-            <button class="image-edit">✎</button>
+            <button class="edit-btn">✎</button>
             <a href="#" target="_blank" aria-label="Instagram">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" data-editable>
                 <path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.3 2.3.5.6.3 1.1.7 1.6 1.2.5.5.9 1 1.2 1.6.2.4.4 1.1.5 2.3.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.9-.5 2.3-.3.6-.7 1.1-1.2 1.6-.5.5-1 .9-1.6 1.2-.4.2-1.1.4-2.3.5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.3-2.3-.5-.6-.3-1.1-.7-1.6-1.2-.5-.5-.9-1-1.2-1.6-.2-.4-.4-1.1-.5-2.3-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.3-1.9.5-2.3.3-.6.7-1.1 1.2-1.6.5-.5 1-.9 1.6-1.2.4-.2 1.1-.4 2.3-.5 1.3-.1 1.7-.1 4.9-.1zm0 1.8c-3.1 0-3.5 0-4.7.1-1 .1-1.6.2-2 .4-.5.2-.9.5-1.3.9-.4.4-.7.8-.9 1.3-.2.4-.3 1-.4 2-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 1 .2 1.6.4 2 .2.5.5.9.9 1.3.4.4.8.7 1.3.9.4.2 1 .3 2 .4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1-.1 1.6-.2 2-.4.5-.2.9-.5 1.3-.9.4-.4.7-.8.9-1.3.2-.4.3-1 .4-2 .1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1-.2-1.6-.4-2-.2-.5-.5-.9-.9-1.3-.4-.4-.8-.7-1.3-.9-.4-.2-1-.3-2-.4-1.2-.1-1.6-.1-4.7-.1zm0 3.3a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zm0 10.8a4.3 4.3 0 1 0 0-8.6 4.3 4.3 0 0 0 0 8.6zm5.5-11.8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
                 </svg>
             </a>
-            <button class="image-edit">✎</button>
+            <button class="edit-btn">✎</button>
             <a href="#" target="_blank" aria-label="Facebook">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" data-editable>
                 <path d="M22.7 0h-21.4c-.7 0-1.3.6-1.3 1.3v21.4c0 .7.6 1.3 1.3 1.3h11.5v-9.3h-3.1v-3.6h3.1v-2.6c0-3.1 1.9-4.8 4.7-4.8 1.3 0 2.3.1 2.6.1v3h-1.8c-1.4 0-1.7.7-1.7 1.6v2.7h3.4l-.4 3.6h-3v9.3h5.8c.7 0 1.3-.6 1.3-1.3v-21.4c.1-.7-.5-1.3-1.2-1.3z"/>
                 </svg>
             </a>
             <div class="footer-logo">
-                <button class="image-edit">✎</button>
+                <button class="edit-btn">✎</button>
                 <img src="images/logo_blanc.png" alt="Logo du site" data-editable/>
             </div>
             </div>
@@ -406,16 +344,8 @@ header('Content-Type: text/html; charset=UTF-8');
     </footer>
     <script src="js/dropdown.js"></script>
 
-    <script type="module" src="scripts/admin_main.js"></script>
 
-    <script type="module" src="/js/lang.js"></script>
-    <script src="/js/translations.js"></script>
-    <!-- Script pour le menu mobile -->
-    <script>
-    document.getElementById('menu-toggle').addEventListener('click', function () {
-        document.getElementById('menu').classList.toggle('');
-    });
-    </script>
+    <script type="module" src="scripts/admin_main.js"></script>
 
 
 
