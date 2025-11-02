@@ -151,11 +151,14 @@ async function saveAndReload(page = pageKey) {
   const container = document.querySelector("#editable-container");
   if (!container) return;
 
-  // Clone container to remove admin buttons before saving
-  const clone = container.cloneNode(true);
-  clone.querySelectorAll(".delete-btn, .add-block-btn").forEach(btn => btn.remove());
-
-  const content = { html: clone.innerHTML };
+  // Collect all editable elements, exclude admin buttons
+  const content = {};
+  container.querySelectorAll("[data-editable]").forEach(el => {
+    if (el.closest(".delete-btn, .add-block-btn")) return; // skip admin controls
+    const key = el.dataset.key || el.id || generateKey(el);
+    if (el.tagName === "IMG") content[key] = el.src;
+    else content[key] = el.textContent.trim();
+  });
 
   try {
     const res = await fetch("/php/save_content.php", {
@@ -176,6 +179,11 @@ async function saveAndReload(page = pageKey) {
   } catch (err) {
     console.error("Erreur réseau", err);
   }
+}
+
+// Generate a unique key if data-key or id is missing
+function generateKey(el) {
+  return el.tagName.toLowerCase() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
 
@@ -285,7 +293,7 @@ function createContentBox() {
   // Add admin buttons
   addDeleteAndAddBlockButtons(newBox);
 
-  // Attach inline editor listeners to new buttons only
+  // Attach inline editor listeners only to this new box
   enableInlineEditing(newBox);
 
   return newBox;
