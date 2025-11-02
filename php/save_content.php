@@ -31,27 +31,29 @@ try {
             last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )
     ");
-  $jsonContent = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-  $stmt = $pdo->prepare("
-    INSERT INTO pages_content (page, content, last_modified)
-    VALUES (:page, :content, :last_modified)
-    ON DUPLICATE KEY UPDATE
-      content = VALUES(content),
-      last_modified = VALUES(last_modified)
-  ");
-  $stmt->execute([
-    ':page' => $page,
-    ':content' => $jsonContent,
-    ':last_modified' => $date
-  ]);
+    $jsonContent = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-  echo json_encode([
-    "success" => true,
-    "updated" => $date
-  ]);
+    $stmt = $pdo->prepare("
+      INSERT INTO pages_content (page, content, last_modified)
+      VALUES (:page, :content, :last_modified)
+      ON DUPLICATE KEY UPDATE
+        content = VALUES(content),
+        last_modified = VALUES(last_modified)
+    ");
+    $stmt->execute([
+      ':page' => $page,
+      ':content' => $jsonContent,
+      ':last_modified' => $date
+    ]);
+
+    echo json_encode([
+      "success" => true,
+      "updated" => $date
+    ]);
 } catch (Exception $e) {
-  echo json_encode(["success" => false, "error" => $e->getMessage()]);
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
+
 ?>
 

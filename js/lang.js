@@ -46,41 +46,7 @@ export const translations = {
     innovation_text1: "Chez Outsiders, nous croyons fermement que l'innovation doit servir l'humain...nous croyons fermement que l'innovation doit servir l'humain. Notre équipe s'appuie sur une expertise technique solide pour accompagner les entreprises et les particuliers dans leur transformation numérique. Que vous souhaitiez explorer de nouvelles technologies ou optimiser vos processus existants, nous sommes là pour vous guider.",
     innovation_text2: "Notre palette de services reflète cette ambition : création d'expériences en réalité virtuelle immersives, développement d'hologrammes interactifs pour des événements marquants, conception sur mesure d'applications mobiles et de jeux vidéo innovants. Nous proposons également des sessions de formation pratiques et des accompagnements stratégiques, notamment autour des systèmes d'information et de son intégration responsable.",
     innovation_text3: "Le numérique transforme profondément nos façons de travailler, d'apprendre et d'interagir. Plutôt que de subir ces mutations, nous choisissons d'y voir une formidable occasion de progresser ensemble. En combinant réalité augmentée, réalité virtuelle et intelligence artificielle, nous développons des solutions qui ouvrent de nouveaux horizons professionnels et créatifs.",
-    innovation_text4: "Notre engagement va au-delà de la simple performance technique : nous voulons démocratiser l'accès à ces technologies émergentes. Chaque projet que nous menons vise un impact durable, qui bénéficie autant à la croissance économique qu'au développement social et à l'inclusion de tous.",
-    //page portefeuille/AR 
-    ar_mr_hero_title: "Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations.",
-    ar_mr_hero_text: "Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !",
-    ar_mr_image: "images/ar_mr.jpg",
-    ar_mr_title: "AR/MR - Réalité augmentée mixte",
-    ar_mr_paragraph: "La réalité augmentée et la réalité mixte redéfinissent notre rapport au monde numérique...",
-    ar_mr_subtitle: "Ce que nous créons pour vous",
-    ar_mr_learning_title: "Apprentissage immersif :",
-    ar_mr_learning_text: "Nous écrivons des histoires captivantes et bâtissons des mondes 3D cohérents...",
-    ar_mr_guidance_title: "Guidage intelligent :",
-    ar_mr_guidance_text: "Des instructions contextuelles qui s'affichent directement sur vos machines...",
-    ar_mr_support_title: "Support expert à distance :",
-    ar_mr_support_text: "Vos spécialistes peuvent assister les techniciens sur le terrain en temps réel...",
-    ar_mr_showroom_title: "Showrooms virtuels :",
-    ar_mr_showroom_text: "Vos catalogues prennent vie : les produits apparaissent en 3D...",
-    ar_mr_button: "En savoir plus",
-    //page protefeuille/CAO
-    cao_banner_img: "images/cao_banner.jpg",
-    cao_hero_title: "Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations.",
-    cao_hero_text: "Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !",
-    cao_image: "images/cao.jpg",
-    cao_title_prefix: "CAO - ",
-    cao_title: "Conception assistée par ordinateur",
-    cao_intro: "Donnez vie à vos idées grâce à des créations réalistes et minutieuses. En nous appuyant sur les outils de conception assistée par ordinateur (CAO), nous concevons des environnements, des paysages, des bâtiments et des objets du quotidien avec un haut niveau de précision et de détail.",
-    cao_subtitle: "Nos expertises en conception assistée par ordinateur (CAO) :",
-    cao_3d_title: "Création et modélisation 3D :",
-    cao_3d_text: "Produits, prototypes et environnements virtuels.",
-    cao_animation_title: "Animations 3D :",
-    cao_animation_text: "Pour illustrer des concepts, des mécanismes ou des scénarios techniques.",
-    cao_ar_title: "Intégration en réalité augmentée (AR) :",
-    cao_ar_text: "Pour valoriser vos produits, vos campagnes publicitaires ou vos contenus pédagogiques.",
-    cao_render_title: "Rendus photoréalistes :",
-    cao_render_text: "Pour donner vie à vos modèles et sublimer vos concepts issus de la CAO.",
-    cao_button: "En savoir plus"
+    innovation_text4: "Notre engagement va au-delà de la simple performance technique : nous voulons démocratiser l'accès à ces technologies émergentes. Chaque projet que nous menons vise un impact durable, qui bénéficie autant à la croissance économique qu'au développement social et à l'inclusion de tous."
 
   },
   en: {
@@ -129,47 +95,7 @@ export const translations = {
     innovation_text1: "At Outsiders, we firmly believe that innovation should serve humanity...we firmly believe that innovation should serve humanity. Our team relies on solid technical expertise to support businesses and individuals in their digital transformation. Whether you want to explore new technologies or optimize your existing processes, we are here to guide you.",
     innovation_text2: "Our range of services reflects this ambition: creation of immersive virtual reality experiences, development of interactive holograms for remarkable events, tailor-made design of innovative mobile applications and video games. We also offer practical training sessions and strategic support, particularly around information systems and their responsible integration.",
     innovation_text3: "Digital technology is profoundly transforming the way we work, learn, and interact. Rather than undergoing these changes passively, we choose to see them as a great opportunity to progress together. By combining augmented reality, virtual reality, and artificial intelligence, we develop solutions that open up new professional and creative horizons.",
-    innovation_text4: "Our commitment goes beyond mere technical performance: we want to democratize access to these emerging technologies. Every project we undertake aims for a sustainable impact, benefiting both economic growth and social development, as well as inclusion for all.",
-    //page portefeuille/AR
-    ar_mr_banner_img: "images/ar_mr_banner.jpg",
-    ar_mr_hero_title: "Explore the universe of our projects and let yourself be amazed by the diversity of our creations.",
-    ar_mr_hero_text: "Browse through our work! Perhaps you'll find the spark for your next project? We sincerely hope so!",
-    ar_mr_image: "images/ar_mr.jpg",
-    ar_mr_title: "AR/MR - Augmented & Mixed Reality",
-    ar_mr_paragraph: "Augmented and mixed reality are redefining our relationship with the digital world. By seamlessly blending real-world elements with virtual content, we create immersive experiences that go far beyond traditional screens. Users are no longer just observers — they interact, explore, and actively engage in enhanced environments. Whether for training, project visualization, remote collaboration, or exploring complex concepts, these technologies are revolutionizing how we interact with information.",
-    ar_mr_subtitle: "What we create for you",
-    ar_mr_learning_title: "Immersive Learning:",
-    ar_mr_learning_text: "We craft captivating stories and build coherent 3D worlds where your teams or players can truly immerse themselves. Mixed reality training environments enable your staff to practice in realistic conditions, repeat technical gestures, and learn from mistakes without consequences.",
-    ar_mr_guidance_title: "Smart Guidance:",
-    ar_mr_guidance_text: "Contextual instructions appear directly on your machines, guiding your operators step by step through maintenance or operational procedures with clarity and precision.",
-    ar_mr_support_title: "Remote Expert Support:",
-    ar_mr_support_text: "Your specialists can assist on-site technicians in real time — annotating their field of view and providing accurate guidance, regardless of distance or location.",
-    ar_mr_showroom_title: "Virtual Showrooms:",
-    ar_mr_showroom_text: "Bring your catalogs to life: products appear in 3D, can be configured according to preferences, and change color or size with a simple gesture, offering your clients an interactive and engaging experience.",
-    ar_mr_button: "Learn more",
-    //page portefeuille/CAO
-    cao_banner_img: "images/cao_banner.jpg",
-    cao_hero_title: "Explore the world of our projects and be amazed by the diversity of our creations.",
-    cao_hero_text: "Browse our work! Perhaps you'll find the spark for your next project — we sincerely hope so!",
-    cao_image: "images/cao.jpg",
-    cao_title_prefix: "CAD - ",
-    cao_title: "Computer-Aided Design",
-    cao_intro: "Bring your ideas to life with realistic and detailed creations. Using computer-aided design (CAD) tools, we design environments, landscapes, buildings, and everyday objects with high precision and attention to detail.",
-    cao_subtitle: "Our expertise in Computer-Aided Design (CAD):",
-    cao_3d_title: "3D Creation and Modeling:",
-    cao_3d_text: "Products, prototypes, and virtual environments.",
-    cao_animation_title: "3D Animations:",
-    cao_animation_text: "To illustrate concepts, mechanisms, or technical scenarios.",
-    cao_ar_title: "Augmented Reality (AR) Integration:",
-    cao_ar_text: "To enhance your products, advertising campaigns, or educational content.",
-    cao_render_title: "Photorealistic Renderings:",
-    cao_render_text: "To bring your models to life and enhance your CAD-based concepts.",
-    cao_button: "Learn more"
-
-
-
-
-
+    innovation_text4: "Our commitment goes beyond mere technical performance: we want to democratize access to these emerging technologies. Every project we undertake aims for a sustainable impact, benefiting both economic growth and social development, as well as inclusion for all."
 
   }
 };

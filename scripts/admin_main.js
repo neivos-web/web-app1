@@ -19,11 +19,25 @@ async function checkAdminSession() {
 // ======================= LOAD CONTENT =======================
 async function loadPageContent() {
   try {
-    const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(pageKey)}`);
-    const data = await res.json();
-    if (data.success && data.content?.html) {
+    // 1️⃣ Load page-specific content
+    const resPage = await fetch(`/php/load_content.php?page=${encodeURIComponent(pageKey)}`);
+    const dataPage = await resPage.json();
+    if (dataPage.success && dataPage.content?.html) {
       const container = document.querySelector("#editable-container");
-      if (container) container.innerHTML = data.content.html;
+      if (container) container.innerHTML = dataPage.content.html;
+    }
+
+    // 2️⃣ Load shared menu
+    const resShared = await fetch(`/php/load_content.php?page=shared`);
+    const dataShared = await resShared.json();
+    if (dataShared.success && dataShared.content?.menu) {
+      const menuEls = document.querySelectorAll("[data-editable][data-key^='nav_']");
+      const sharedMenuEntries = Object.entries(dataShared.content.menu);
+      menuEls.forEach((el, i) => {
+        if (sharedMenuEntries[i]) {
+          el.innerHTML = sharedMenuEntries[i][1];
+        }
+      });
     }
   } catch (err) {
     console.error("Erreur chargement contenu", err);
@@ -61,14 +75,15 @@ function enableInlineEditing() {
   });
 }
 
-
 function cleanupEdit(el, inputEl) {
   inputEl.remove();
   el.style.display = "";
   delete el.dataset.editing;
 }
+
+// ======================= BLOCK MANAGEMENT =======================
 function addDeleteAndAddBlockButtons(box) {
-  // Remove any previous buttons to avoid duplicates
+  // Remove previous buttons to avoid duplicates
   box.querySelectorAll(".delete-btn").forEach(btn => btn.remove());
   const nextAddBtn = box.nextElementSibling;
   if (nextAddBtn && nextAddBtn.classList.contains("add-block-btn")) nextAddBtn.remove();
@@ -81,7 +96,7 @@ function addDeleteAndAddBlockButtons(box) {
   delBtn.addEventListener("click", async () => {
     if (confirm("Supprimer ce bloc ?")) {
       box.remove();
-      await autoSave();
+      await saveAndReload(pageKey);
     }
   });
 
@@ -93,7 +108,7 @@ function addDeleteAndAddBlockButtons(box) {
   addBtn.addEventListener("click", async () => {
     const newBox = createContentBox();
     box.parentElement.insertBefore(newBox, addBtn);
-    await autoSave();
+    await saveAndReload(pageKey);
   });
 
   // === Attach ===
@@ -102,87 +117,30 @@ function addDeleteAndAddBlockButtons(box) {
   box.insertAdjacentElement("afterend", addBtn);
 }
 
-
-// ======================= BLOCK MANAGEMENT =======================
 function enableBlockManagement() {
   document.querySelectorAll(".content-box").forEach(box => addDeleteAndAddBlockButtons(box));
 }
 
-async function autoSave() {
-  const container = document.querySelector("#editable-container"); // wrap your editable area in a div
-  if (!container) return;
-
-  const content = { html: container.innerHTML };
-
+async function saveMenu(menuContent) {
   try {
-    const res = await fetch("/php/save_content.php", {
+    await fetch("/php/save_content.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page: pageKey, content }),
+      body: JSON.stringify({ page: "shared", content: { menu: menuContent } }),
       credentials: "include"
     });
-
-    const data = await res.json();
-    if (!data.success) console.error("Erreur de sauvegarde:", data.error);
   } catch (err) {
-    console.error("Erreur réseau", err);
-  }
-}
-
-function createContentBox() {
-  const newBox = document.createElement("div");
-  newBox.className = "content-box bg-white p-6 rounded-lg shadow-md";
-  newBox.innerHTML = `
-    <div class="content-image mb-4">
-      <button class="edit-btn">✎</button>
-      <img src="images/default.png" alt="Nouvelle image" data-editable class="w-full h-auto rounded-lg">
-    </div>
-    <div class="content">
-      <button class="edit-btn">✎</button>
-      <h2 data-editable>Nouveau Titre</h2>
-      <button class="edit-btn">✎</button>
-      <p data-editable>Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
-    </div>
-  `;
-  addDeleteAndAddBlockButtons(newBox);
-  enableInlineEditing();
-  return newBox;
-}
-
-
-// ======================= AUTO SAVE =======================
-async function autoSave() {
-  const container = document.querySelector("#editable-container"); // wrap your editable area in a div
-  if (!container) return;
-
-  const content = { html: container.innerHTML };
-
-  try {
-    const res = await fetch("/php/save_content.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page: pageKey, content }),
-      credentials: "include"
-    });
-
-    const data = await res.json();
-    if (!data.success) console.error("Erreur de sauvegarde:", data.error);
-  } catch (err) {
-    console.error("Erreur réseau", err);
+    console.error("Erreur sauvegarde menu", err);
   }
 }
 
 
-// ======================= INIT =======================
-document.addEventListener("DOMContentLoaded", checkAdminSession);
-// ======================= AUTO SAVE + RELOAD =======================
-
-// Auto-save after each edit
+// ======================= SAVE + RELOAD =======================
 async function saveAndReload(page = pageKey) {
-  const content = {};
-  document.querySelectorAll("[data-editable]").forEach((el, i) => {
-    content[`item_${i}`] = el.tagName === "IMG" ? el.src : el.innerHTML;
-  });
+  const container = document.querySelector("#editable-container");
+  if (!container) return;
+
+  const content = { html: container.innerHTML };
 
   try {
     const res = await fetch("/php/save_content.php", {
@@ -218,14 +176,11 @@ async function reloadPageContent(page = pageKey) {
 
     console.log("Rechargement depuis la base de données...");
 
-    const entries = Object.entries(data.content);
-    document.querySelectorAll("[data-editable]").forEach((el, i) => {
-      const entry = entries[i];
-      if (!entry) return;
-      const value = entry[1];
-      if (el.tagName === "IMG") el.src = value;
-      else el.innerHTML = value;
-    });
+    const container = document.querySelector("#editable-container");
+    if (container && data.content?.html) {
+      container.innerHTML = data.content.html;
+      if (isAdmin) enableBlockManagement();
+    }
 
     const info = document.getElementById("lastUpdated");
     if (info) info.textContent = "Dernière mise à jour : " + data.last_modified;
@@ -234,8 +189,8 @@ async function reloadPageContent(page = pageKey) {
   }
 }
 
-// ======================= INLINE EDITING (AUTO-SAVE) =======================
-function openInlineEditor(el, key) {
+// ======================= INLINE EDITOR =======================
+function openInlineEditor(el) {
   if (el.dataset.editing === "true") return;
   el.dataset.editing = "true";
   let inputEl;
@@ -250,7 +205,6 @@ function openInlineEditor(el, key) {
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("key", key);
       formData.append("page", pageKey);
 
       try {
@@ -293,6 +247,27 @@ function openInlineEditor(el, key) {
   inputEl.addEventListener("keydown", e => {
     if (e.key === "Enter" && inputEl.tagName !== "TEXTAREA") inputEl.blur();
   });
+}
+
+// ======================= CREATE NEW BLOCK =======================
+function createContentBox() {
+  const newBox = document.createElement("div");
+  newBox.className = "content-box bg-white p-6 rounded-lg shadow-md";
+  newBox.innerHTML = `
+    <div class="content-image mb-4">
+      <button class="edit-btn">✎</button>
+      <img src="images/default.png" alt="Nouvelle image" data-editable class="w-full h-auto rounded-lg">
+    </div>
+    <div class="content">
+      <button class="edit-btn">✎</button>
+      <h2 data-editable>Nouveau Titre</h2>
+      <button class="edit-btn">✎</button>
+      <p data-editable>Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
+    </div>
+  `;
+  addDeleteAndAddBlockButtons(newBox);
+  enableInlineEditing();
+  return newBox;
 }
 
 // ======================= INIT =======================

@@ -38,224 +38,262 @@
 <body class="bg-gray-100 text-brand-dark">
 
      
-  <!-- =========== En-tête du site =========== -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto max-w-full px-20 py-6 flex justify-between items-center gap-10">
-            <!-- Logo -->
+    <!-- =========== En-tête du site =========== -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="container mx-auto max-w-full px-20 py-6 flex justify-between items-center gap-10">
+    
             <div class="flex items-center space-x-4">
+                <button class="edit-btn">✎</button>
+                <a href="admin_index.html" class="flex items-center space-x-5">
+                    <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain" data-editable>
+                </a>
+            </div>
+
+        <!-- Bouton hamburger (mobile) -->
+        <button id="menu-toggle" class="md:hidden flex items-center text-gray-700 hover:text-brand-blue focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+        </button>
+
+            <div class="hidden md:flex space-x-5 items-center font-medium text-gray-700">
                 <div class="nav-item-wrapper">
                     <button class="edit-btn">✎</button>
-                    <a href="admin_index.php" data-key="logo_text" class="flex items-center space-x-2">
-                        <img src="images/logo_noir.png" data-editable alt="Outsiders Logo" class="h-10 w-auto object-contain">
-                    </a>
-                </div>
-            </div>
-            <!-- Bouton hamburger (mobile) -->
-            <button id="menu-toggle" class="md:hidden flex items-center text-gray-700 hover:text-brand-blue focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-
-            <!-- Menu principal -->
-            <div id="menu" class="hidden md:flex space-x-8 items-center font-medium text-gray-700">
-            
-                <div data-key="nav_mission" class="flex items-center space-x-2">
-                    <button class="edit-btn">✎</button>
                     <a href="mission.html" class="hover:text-brand-blue" data-editable>Mission et Vision</a>
-                    
                 </div>
-
-                <div class="relative group space-x-3" data-key="nav_portfolio">
+                <div class="relative nav-item-wrapper">
                     <button class="edit-btn">✎</button>
-                    <button class="flex items-center hover:text-brand-blue focus:outline-none" data-editable> 
-                        Portefeuille 
-                        <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+
+                    <!-- Main button -->
+                    <button 
+                        id="dropdownButtonPortefeuille"  class="flex items-center hover:text-brand-blue focus:outline-none" data-editable>
+                        Portefeuille
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                            clip-rule="evenodd" />
                         </svg>
                     </button>
-                    
-                    
-                    <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
-                      <button class="edit-btn">✎</button> <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a>
-                      <button class="edit-btn">✎</button><a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a>
-                      <button class="edit-btn">✎</button><a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a>
-                      <button class="edit-btn">✎</button> <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a>
+
+                    <!-- Dropdown menu -->
+                    <div id="dropdownMenuPortefeuille" class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-jeux.html" data-editable>Jeux Video</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-ar.html" data-editable>AR/MR</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+                        
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-vr.html" data-editable>VR</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                            <a href="portefeuille-cao.html" data-editable>CAD</a>
+                            <button class="edit-btn text-xs">✎</button>
+                        </div>
+
                     </div>
                 </div>
 
-                <div class="relative group space-x-3" data-key="nav_training">
-                    <button class="edit-btn">✎</button>
-                    <button class="flex items-center hover:text-brand-blue focus:outline-none" data-editable>
-                        Formations & conseils
-                        <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-                        </svg>
-                    </button>
-                    
-                    
-                    <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20">
-                       <button class="edit-btn">✎</button> <a href="formations-vr.html" data-editable data-key="training_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="edit-btn">✎</button>
-                        <a href="formations-jeux.html" data-editable data-key="training_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="edit-btn">✎</button>
-                        <a href="formations-iot.html" data-editable data-key="training_iot" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Systèmes Embarqués & IOT</a><button class="edit-btn">✎</button>
-                        <a href="formations-consulting.html" data-editable data-key="training_consulting" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Consulting & Accompagnement IT</a>
-                    </div>
-                </div>
+                <div class="relative nav-item-wrapper">
+                <button class="edit-btn">✎</button>
 
-                <div data-key="nav_research" class="flex items-center space-x-2">
-                    <button class="edit-btn">✎</button>
-                    <a href="recherche.html" class="hover:text-brand-blue" data-editable>Recherche</a>
-                    
-                </div>
-
-                <div class="relative group space-x-3" data-key="nav_news">
-                    <button class="edit-btn">✎</button>
-                    <button class="flex items-center text-brand-blue font-semibold focus:outline-none" data-editable>
-                        Actualités / Blog
-                        <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-                        </svg>
-                    </button>
-                    
-                    <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20">
-                        <a href="actualites.html" data-editable data-key="news_articles" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Actualités</a>
-                        <button class="edit-btn">✎</button>
-                    </div>
-                </div>
-
-                <div data-key="nav_contact" class="flex items-center space-x-2">
-                     <button class="edit-btn">✎</button>
-                    <a href="contact.html" data-editable class="hover:text-brand-blue">Contact</a>
-                   
-                </div>
-
-            </div>
-
-            <div class="flex items-center space-x-3">
-                <select id="language-selector" class="border border-gray-300 rounded-md p-1 text-sm">
-                    <option value="fr">🇫🇷 Français</option>
-                    <option value="en">🇬🇧 English</option>
-                </select>
-            </div>
-
-            <div class="extra-right-buttons flex items-center space-x-3">
-                <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
-                    Publier
+                <!-- Main toggle button -->
+                <button id="dropdownButtonFormations" class="flex items-center hover:text-brand-blue focus:outline-none px-3 py-2" data-editable>
+                    Formations & conseils
+                    <svg class="w-4 h-4 ml-1 transition-transform duration-200"
+                        fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                            clip-rule="evenodd" />
+                    </svg>
                 </button>
 
+                <!-- Dropdown menu -->
+                <div id="dropdownMenuFormations"
+                    class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
+
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="formations-vr.html" data-editable>VR</a>
+                        <button class="edit-btn text-xs">✎</button>
+                    </div>
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="formations-jeux.html" data-editable>Jeux Vidéo</a>
+                        <button class="edit-btn text-xs">✎</button>
+                    </div>
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="formations-iot.html" data-editable>Systèmes Embarquée & IOT</a>
+                        <button class="edit-btn text-xs">✎</button>
+                    </div>
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="formations-consulting.html" data-editable>Consulting et accompagnements IT</a>
+                        <button class="edit-btn text-xs">✎</button>
+                    </div>
+                                          
+                </div>
+            </div>
+
+                <div class="nav-item-wrapper">
+                    <button class="edit-btn">✎</button>
+                    <a href="recherche.html" class="hover:text-brand-blue" data-editable>Recherche</a>
+                </div>
+                <div class="relative nav-item-wrapper">
+                    <button class="edit-btn">✎</button>
+
+                    <!-- Main toggle button -->
+                    <button id="dropdownButtonBlog" 
+                            class="flex items-center hover:text-brand-blue focus:outline-none px-3 py-2 font-semibold text-brand-blue" 
+                            data-editable>
+                        Actualités / Blog
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200"
+                            fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown menu -->
+                    <div id="dropdownMenuBlog" class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
+                        <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">
+                        <a href="actualites.html" data-editable>Actualités</a>
+                        <button class="edit-btn text-xs">✎</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-item-wrapper">
+                    <button class="edit-btn">✎</button>
+                    <a href="contact.html" class="hover:text-brand-blue" data-editable>Contact</a>
+                </div>
+            </div>
+            <div class="extra-right-buttons">
+                <!-- Save Button -->
+                <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
+                    Publier 
+                </button>
+
+                <!-- Déconnexion Button -->
                 <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
                     ⏻
                 </button>
             </div>
+          
         </nav>
     </header>
 
 
+
     <main>
-    <!-- Section Héros -->
-    <section class="relative bg-white">
-        <div class="absolute inset-0">
-            <button class="edit-btn">✎</button>
-            <img src="images/ar_mr_banner.jpg" alt="Image de fond VR" class="w-full h-full object-cover" data-editable data-key="ar_mr_banner_img">
-            <div class="absolute inset-0 bg-black opacity-40"></div>
-        </div>
-        <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-            <button class="edit-btn">✎</button>
-            <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable data-key="ar_mr_hero_title">
-                Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations.
-            </h1>
-            <button class="edit-btn">✎</button>
-            <p class="text-lg max-w-3xl mx-auto" data-editable data-key="ar_mr_hero_text">
-                Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !
-            </p>
-        </div>
-    </section>
+        <!-- Section Héros -->
+        <section class="relative bg-white">
+            <div class="absolute inset-0">
+                 <button class="edit-btn">✎</button>
+                <img src="images/ar_mr_banner.jpg" alt="Image de fond VR" class="w-full h-full object-cover" data-editable>
+                <div class="absolute inset-0 bg-black opacity-40"></div>
+            </div>
+            <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
+                 <button class="edit-btn">✎</button>
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations. </h1>
+                 <button class="edit-btn">✎</button>
+                <p class="text-lg max-w-3xl mx-auto" data-editable>Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !</p>
+            </div>
+        </section>
 
-    <!-- ===== Section VR ===== -->
-    <section class="vr-section">
-        <div class="vr-container">
-
+        <!-- ===== Section VR ===== -->
+        <section class="vr-section">
+            <div class="vr-container">
+            
             <!-- Image gauche -->
             <div class="vr-image">
                 <button class="edit-btn">✎</button>
-                <img src="images/ar_mr.jpg" alt="jeux vidéo" data-editable data-key="ar_mr_image">
+                <img src="images/ar_mr.jpg" alt="jeux vidéo" data-editable>
             </div>
 
             <!-- Texte droite -->
             <div class="vr-content">
                 <button class="edit-btn">✎</button>
-                <h2 data-editable data-key="ar_mr_title"><span>AR/MR - </span>Réalité augmentée mixte</h2>
+                <h2 data-editable><span>AR/MR - </span>Réalité augmentée mixte</h2>
                 <button class="edit-btn">✎</button>
-                <p data-editable data-key="ar_mr_paragraph">
-                    La réalité augmentée et la réalité mixte redéfinissent notre rapport au monde numérique. En fusionnant harmonieusement éléments réels et contenus virtuels, 
-                    nous créons des expériences immersives qui transcendent les écrans traditionnels. Les utilisateurs ne se contentent plus d'observer : ils interagissent, 
-                    explorent et s'engagent activement dans des environnements enrichis. Que ce soit pour la formation, la visualisation de projets, la collaboration à 
-                    distance ou l'exploration de concepts complexes, ces technologies transforment radicalement notre manière d'interagir avec l'information.
+                <p data-editable>
+                La réalité augmentée et la réalité mixte redéfinissent notre rapport au monde numérique. En fusionnant harmonieusement éléments réels et contenus virtuels, 
+                nous créons des expériences immersives qui transcendent les écrans traditionnels. Les utilisateurs ne se contentent plus d'observer : ils interagissent, 
+                explorent et s'engagent activement dans des environnements enrichis. Que ce soit pour la formation, la visualisation de projets, la collaboration à 
+                distance ou l'exploration de concepts complexes, ces technologies transforment radicalement notre manière d'interagir avec l'information.
                 </p>
 
                 <button class="edit-btn">✎</button>
-                <p class="vr-subtitle" data-editable data-key="ar_mr_subtitle"><strong>Ce que nous créons pour vous</strong></p>
-
+                <p class="vr-subtitle" data-editable><strong>Ce que nous créons pour vous</strong></p>
                 <!-- Contenu à droite -->
                 <ul class="vr-list">
                     <li>
-                        <i class="bi bi-check2"></i>
-                        <div>
-                            <button class="edit-btn">✎</button>
-                            <strong data-editable data-key="ar_mr_learning_title">Apprentissage immersif :</strong>
-                            <button class="edit-btn">✎</button>
-                            <p data-editable data-key="ar_mr_learning_text">
-                                Nous écrivons des histoires captivantes et bâtissons des mondes 3D cohérents où vos joueurs auront envie de se perdre.
-                                Des environnements de formation en réalité mixte où vos équipes peuvent s'entraîner dans des conditions réalistes, répéter les gestes techniques et apprendre de leurs erreurs sans conséquences.
-                            </p>
-                        </div>
+                        
+                    <i class="bi bi-check2"></i>
+                    <div>
+                        <button class="edit-btn">✎</button>
+                        <strong data-editable>Apprentissage immersif  :</strong>
+                        <button class="edit-btn">✎</button>
+                        <p data-editable>
+                        Nous écrivons des histoires captivantes et bâtissons des mondes 3D cohérents où vos joueurs auront envie de se perdre.Des environnements de formation en réalité mixte où vos équipes peuvent s'entraîner dans des conditions réalistes, répéter les gestes techniques et apprendre de leurs erreurs sans conséquences.
+                        </p>
+                    </div>
                     </li>
 
                     <li>
-                        <i class="bi bi-check2"></i>
-                        <div>
-                            <button class="edit-btn">✎</button>
-                            <strong data-editable data-key="ar_mr_guidance_title">Guidage intelligent :</strong>
-                            <button class="edit-btn">✎</button>
-                            <p data-editable data-key="ar_mr_guidance_text">
-                                Des instructions contextuelles qui s'affichent directement sur vos machines, accompagnant vos opérateurs étape par étape dans les procédures de maintenance et d'utilisation.
-                            </p>
-                        </div>
+                    <i class="bi bi-check2"></i>
+                    <div>
+                        <button class="edit-btn">✎</button>
+                        <strong data-editable>Guidage intelligent :</strong>
+                        <button class="edit-btn">✎</button>
+                        <p data-editable>
+                        Des instructions contextuelles qui s'affichent directement sur vos machines, accompagnant vos opérateurs étape par étape dans les procédures de maintenance et d'utilisation.
+                        </p>
+                    </div>
                     </li>
 
                     <li>
-                        <i class="bi bi-check2"></i>
-                        <div>
-                            <button class="edit-btn">✎</button>
-                            <strong data-editable data-key="ar_mr_support_title">Support expert à distance :</strong>
-                            <button class="edit-btn">✎</button>
-                            <p data-editable data-key="ar_mr_support_text">
-                                Vos spécialistes peuvent assister les techniciens sur le terrain en temps réel, annoter leur champ de vision et les guider avec précision, peu importe la distance.
-                            </p>
-                        </div>
+                    <i class="bi bi-check2"></i>
+                    <div>
+                        <button class="edit-btn">✎</button>
+                        <strong data-editable>Support expert à distance :</strong>
+                        <button class="edit-btn">✎</button>
+                        <p data-editable>
+                        Vos spécialistes peuvent assister les techniciens sur le terrain en temps réel, annoter leur champ de vision et les guider avec précision, peu importe la distance.
+                        </p>
+                    </div>
                     </li>
 
                     <li>
-                        <i class="bi bi-check2"></i>
-                        <div>
-                            <button class="edit-btn">✎</button>
-                            <strong data-editable data-key="ar_mr_showroom_title">Showrooms virtuels :</strong>
-                            <button class="edit-btn">✎</button>
-                            <p data-editable data-key="ar_mr_showroom_text">
-                                Vos catalogues prennent vie : les produits apparaissent en 3D, se configurent selon les préférences, changent de couleur ou de dimension d'un simple geste.
-                            </p>
-                        </div>
+                    <i class="bi bi-check2"></i>
+                    <div>
+                        <button class="edit-btn">✎</button>
+                        <strong data-editable>Showrooms virtuels :</strong>
+                        <button class="edit-btn">✎</button>
+                        <p data-editable>
+                        Vos catalogues prennent vie : les produits apparaissent en 3D, se configurent selon les préférences, changent de couleur ou de dimension d'un simple geste.
+                        </p>
+                    </div>
                     </li>
                 </ul>
 
                 <button class="edit-btn">✎</button>
-                <a href="#" class="btn-vr" data-editable data-key="ar_mr_button">En savoir plus</a>
+                <a href="#" class="btn-vr" data-editable>En savoir plus</a>
             </div>
-        </div>
-    </section>
-</main>
 
-
+            </div>
+        </section>
+        </main>
+    
     
         <!-- =========== Pied de page du site =========== -->
     <footer class="site-footer">
@@ -283,9 +321,9 @@
                 </svg>
             </a>
             <button class="edit-btn">✎</button>
-            <a href="#" target="_blank" aria-label="Facebook">
+            <a href="#" target="_blank" aria-label="Facebook" data-editable>
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" data-editable>
-                <path d="M22.7 0h-21.4c-.7 0-1.3.6-1.3 1.3v21.4c0 .7.6 1.3 1.3 1.3h11.5v-9.3h-3.1v-3.6h3.1v-2.6c0-3.1 1.9-4.8 4.7-4.8 1.3 0 2.3.1 2.6.1v3h-1.8c-1.4 0-1.7.7-1.7 1.6v2.7h3.4l-.4 3.6h-3v9.3h5.8c.7 0 1.3-.6 1.3-1.3v-21.4c.1-.7-.5-1.3-1.2-1.3z"/>
+                <path d="M22.7 0h-21.4c-.7 0-1.3.6-1.3 1.3v21.4c0 .7.6 1.3 1.3 1.3h11.5v-9.3h-3.1v-3.6h3.1v-2.6c0-3.1 1.9-4.8 4.7-4.8 1.3 0 2.3.1 2.6.1v3h-1.8c-1.4 0-1.7.7-1.7 1.6v2.7h3.4l-.4 3.6h-3v9.3h5.8c.7 0 1.3-.6 1.3-1.3v-21.4c.1-.7-.5-1.3-1.2-1.3z" data-editable/>
                 </svg>
             </a>
             <div class="footer-logo">
@@ -303,11 +341,12 @@
     </footer>
 
 
+     
+
 
     <!-- Lien vers le script JavaScript externe -->
     <script type="module" src="scripts/admin_main.js"></script>
-    <script tupe="module" src="js/dropdown.js"></script>
-    <script src="/js/lang.js"></script>
+     <script tupe="module" src="js/dropdown.js"></script>
     <!-- Script pour le menu mobile -->
     <script>
     document.getElementById('menu-toggle').addEventListener('click', function () {
