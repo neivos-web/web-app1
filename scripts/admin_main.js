@@ -19,12 +19,14 @@ async function checkAdminSession() {
 // ======================= LOAD CONTENT =======================
 async function loadPageContent() {
   try {
-    // 1️⃣ Load page-specific content
+    //  Load page-specific content
     const resPage = await fetch(`/php/load_content.php?page=${encodeURIComponent(pageKey)}`);
     const dataPage = await resPage.json();
-    if (dataPage.success && dataPage.content?.html) {
-      const container = document.querySelector("#editable-container");
-      if (container) container.innerHTML = dataPage.content.html;
+    const container = document.querySelector("#editable-container");
+
+    if (dataPage.success && dataPage.content?.html && container) {
+      container.innerHTML = dataPage.content.html;
+      if (isAdmin) enableBlockManagement(); // <-- ensure buttons are added after content
     }
 
     // 2️⃣ Load shared menu
@@ -43,6 +45,7 @@ async function loadPageContent() {
     console.error("Erreur chargement contenu", err);
   }
 }
+
 
 
 // ======================= ADMIN EDITOR =======================
@@ -67,13 +70,17 @@ function enableInlineEditing() {
     }
 
     if (target && target.dataset.editable !== undefined) {
-      btn.addEventListener("click", e => {
+      // Remove previous listener if any
+      btn.replaceWith(btn.cloneNode(true));
+      const newBtn = btn.parentElement.querySelector(".edit-btn");
+      newBtn.onclick = e => {
         e.stopPropagation();
         openInlineEditor(target);
-      });
+      };
     }
   });
 }
+
 
 function cleanupEdit(el, inputEl) {
   inputEl.remove();
