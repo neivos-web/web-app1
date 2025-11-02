@@ -100,22 +100,22 @@ header('Content-Type: text/html; charset=UTF-8');
                     <!-- Each submenu item in its own flex row -->
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
                     <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="text-left w-full hover:text-brand-blue">Jeux Vidéo</a>
-                    <button class="submenu-edit ml-2">✎</button>
+                    <button class="edit-btn ml-2">✎</button>
                     </div>
 
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
                     <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="text-left w-full hover:text-brand-blue">AR/MR</a>
-                    <button class="submenu-edit ml-2">✎</button>
+                    <button class="edit-btn ml-2">✎</button>
                     </div>
 
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
                     <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="text-left w-full hover:text-brand-blue">VR</a>
-                    <button class="submenu-edit ml-2">✎</button>
+                    <button class="edit-btn ml-2">✎</button>
                     </div>
 
                     <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
                     <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="text-left w-full hover:text-brand-blue">CAD</a>
-                    <button class="submenu-edit ml-2">✎</button>
+                    <button class="edit-btn ml-2">✎</button>
                     </div>
 
                 </div>
@@ -140,22 +140,22 @@ header('Content-Type: text/html; charset=UTF-8');
                         <!-- Each submenu item in a flex row -->
                         <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
                             <a href="formations-vr.html" data-editable data-key="training_vr" class="text-left w-full hover:text-brand-blue">VR</a>
-                            <button class="submenu-edit ml-2">✎</button>
+                            <button class="edit-btn ml-2">✎</button>
                         </div>
 
                         <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
                             <a href="formations-jeux.html" data-editable data-key="training_games" class="text-left w-full hover:text-brand-blue">Jeux Vidéo</a>
-                            <button class="submenu-edit ml-2">✎</button>
+                            <button class="edit-btn ml-2">✎</button>
                         </div>
 
                         <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
                             <a href="formations-iot.html" data-editable data-key="training_iot" class="text-left w-full hover:text-brand-blue">Systèmes Embarqués & IOT</a>
-                            <button class="submenu-edit ml-2">✎</button>
+                            <button class="edit-btn ml-2">✎</button>
                         </div>
 
                         <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
                             <a href="formations-consulting.html" data-editable data-key="training_consulting" class="text-left w-full hover:text-brand-blue">Consulting & Accompagnement IT</a>
-                            <button class="submenu-edit ml-2">✎</button>
+                            <button class="edit-btn ml-2">✎</button>
                         </div>
 
                         </div>
