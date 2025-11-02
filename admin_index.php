@@ -42,28 +42,28 @@ header('Content-Type: text/html; charset=UTF-8');
         }
         .edit-btn:hover { background: #06a0c5; }
         /* Ensure dropdowns are hidden by default */
-[id^="dropdownMenu"] {
-  display: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-}
+            [id^="dropdownMenu"] {
+            display: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            }
 
-/* When not hidden, show dropdown smoothly */
-[id^="dropdownMenu"]:not(.hidden) {
-  display: block;
-  opacity: 1;
-  visibility: visible;
-}
+            /* When not hidden, show dropdown smoothly */
+            [id^="dropdownMenu"]:not(.hidden) {
+            display: block;
+            opacity: 1;
+            visibility: visible;
+            }
 
-/* Fix position and overflow for scrolling */
-header, nav, .relative, .group {
-  overflow: visible !important;
-}
+            /* Fix position and overflow for scrolling */
+            header, nav, .relative, .group {
+            overflow: visible !important;
+            }
 
-body {
-  overflow-y: auto !important;
-}
+            body {
+            overflow-y: auto !important;
+            }
 
     </style>
 
@@ -93,7 +93,7 @@ body {
             </button>
 
             <!-- Menu principal -->
-            <div id="menu" class="hidden md:flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">
+            <div id="menu" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">
             
                 <div data-editable data-key="nav_mission" class="flex items-center space-x-1">
                     <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
@@ -161,6 +161,16 @@ body {
                         <option value="en">🇬🇧 English</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="extra-right-buttons flex items-center space-x-3">
+                <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
+                    Publier
+                </button>
+
+                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
+                    ⏻
+                </button>
             </div>
         </nav>
     </header>
