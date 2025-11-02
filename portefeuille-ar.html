@@ -152,104 +152,110 @@
 
 
     <main>
-        <!-- Section Héros -->
-        <section class="relative bg-white">
-            <div class="absolute inset-0">
-                 <button class="edit-btn">✎</button>
-                <img src="images/ar_mr_banner.jpg" alt="Image de fond VR" class="w-full h-full object-cover" data-editable>
-                <div class="absolute inset-0 bg-black opacity-40"></div>
-            </div>
-            <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-                 <button class="edit-btn">✎</button>
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations. </h1>
-                 <button class="edit-btn">✎</button>
-                <p class="text-lg max-w-3xl mx-auto" data-editable>Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !</p>
-            </div>
-        </section>
+    <!-- Section Héros -->
+    <section class="relative bg-white">
+        <div class="absolute inset-0">
+            <button class="edit-btn">✎</button>
+            <img src="images/ar_mr_banner.jpg" alt="Image de fond VR" class="w-full h-full object-cover" data-editable data-key="ar_mr_banner_img">
+            <div class="absolute inset-0 bg-black opacity-40"></div>
+        </div>
+        <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
+            <button class="edit-btn">✎</button>
+            <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable data-key="ar_mr_hero_title">
+                Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations.
+            </h1>
+            <button class="edit-btn">✎</button>
+            <p class="text-lg max-w-3xl mx-auto" data-editable data-key="ar_mr_hero_text">
+                Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !
+            </p>
+        </div>
+    </section>
 
-        <!-- ===== Section VR ===== -->
-        <section class="vr-section">
-            <div class="vr-container">
-            
+    <!-- ===== Section VR ===== -->
+    <section class="vr-section">
+        <div class="vr-container">
+
             <!-- Image gauche -->
             <div class="vr-image">
                 <button class="edit-btn">✎</button>
-                <img src="images/ar_mr.jpg" alt="jeux vidéo" data-editable>
+                <img src="images/ar_mr.jpg" alt="jeux vidéo" data-editable data-key="ar_mr_image">
             </div>
 
             <!-- Texte droite -->
             <div class="vr-content">
                 <button class="edit-btn">✎</button>
-                <h2 data-editable><span>AR/MR - </span>Réalité augmentée mixte</h2>
+                <h2 data-editable data-key="ar_mr_title"><span>AR/MR - </span>Réalité augmentée mixte</h2>
                 <button class="edit-btn">✎</button>
-                <p data-editable>
-                La réalité augmentée et la réalité mixte redéfinissent notre rapport au monde numérique. En fusionnant harmonieusement éléments réels et contenus virtuels, 
-                nous créons des expériences immersives qui transcendent les écrans traditionnels. Les utilisateurs ne se contentent plus d'observer : ils interagissent, 
-                explorent et s'engagent activement dans des environnements enrichis. Que ce soit pour la formation, la visualisation de projets, la collaboration à 
-                distance ou l'exploration de concepts complexes, ces technologies transforment radicalement notre manière d'interagir avec l'information.
+                <p data-editable data-key="ar_mr_paragraph">
+                    La réalité augmentée et la réalité mixte redéfinissent notre rapport au monde numérique. En fusionnant harmonieusement éléments réels et contenus virtuels, 
+                    nous créons des expériences immersives qui transcendent les écrans traditionnels. Les utilisateurs ne se contentent plus d'observer : ils interagissent, 
+                    explorent et s'engagent activement dans des environnements enrichis. Que ce soit pour la formation, la visualisation de projets, la collaboration à 
+                    distance ou l'exploration de concepts complexes, ces technologies transforment radicalement notre manière d'interagir avec l'information.
                 </p>
 
                 <button class="edit-btn">✎</button>
-                <p class="vr-subtitle" data-editable><strong>Ce que nous créons pour vous</strong></p>
+                <p class="vr-subtitle" data-editable data-key="ar_mr_subtitle"><strong>Ce que nous créons pour vous</strong></p>
+
                 <!-- Contenu à droite -->
                 <ul class="vr-list">
                     <li>
-                        
-                    <i class="bi bi-check2"></i>
-                    <div>
-                        <button class="edit-btn">✎</button>
-                        <strong data-editable>Apprentissage immersif  :</strong>
-                        <button class="edit-btn">✎</button>
-                        <p data-editable>
-                        Nous écrivons des histoires captivantes et bâtissons des mondes 3D cohérents où vos joueurs auront envie de se perdre.Des environnements de formation en réalité mixte où vos équipes peuvent s'entraîner dans des conditions réalistes, répéter les gestes techniques et apprendre de leurs erreurs sans conséquences.
-                        </p>
-                    </div>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable data-key="ar_mr_learning_title">Apprentissage immersif :</strong>
+                            <button class="edit-btn">✎</button>
+                            <p data-editable data-key="ar_mr_learning_text">
+                                Nous écrivons des histoires captivantes et bâtissons des mondes 3D cohérents où vos joueurs auront envie de se perdre.
+                                Des environnements de formation en réalité mixte où vos équipes peuvent s'entraîner dans des conditions réalistes, répéter les gestes techniques et apprendre de leurs erreurs sans conséquences.
+                            </p>
+                        </div>
                     </li>
 
                     <li>
-                    <i class="bi bi-check2"></i>
-                    <div>
-                        <button class="edit-btn">✎</button>
-                        <strong data-editable>Guidage intelligent :</strong>
-                        <button class="edit-btn">✎</button>
-                        <p data-editable>
-                        Des instructions contextuelles qui s'affichent directement sur vos machines, accompagnant vos opérateurs étape par étape dans les procédures de maintenance et d'utilisation.
-                        </p>
-                    </div>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable data-key="ar_mr_guidance_title">Guidage intelligent :</strong>
+                            <button class="edit-btn">✎</button>
+                            <p data-editable data-key="ar_mr_guidance_text">
+                                Des instructions contextuelles qui s'affichent directement sur vos machines, accompagnant vos opérateurs étape par étape dans les procédures de maintenance et d'utilisation.
+                            </p>
+                        </div>
                     </li>
 
                     <li>
-                    <i class="bi bi-check2"></i>
-                    <div>
-                        <button class="edit-btn">✎</button>
-                        <strong data-editable>Support expert à distance :</strong>
-                        <button class="edit-btn">✎</button>
-                        <p data-editable>
-                        Vos spécialistes peuvent assister les techniciens sur le terrain en temps réel, annoter leur champ de vision et les guider avec précision, peu importe la distance.
-                        </p>
-                    </div>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable data-key="ar_mr_support_title">Support expert à distance :</strong>
+                            <button class="edit-btn">✎</button>
+                            <p data-editable data-key="ar_mr_support_text">
+                                Vos spécialistes peuvent assister les techniciens sur le terrain en temps réel, annoter leur champ de vision et les guider avec précision, peu importe la distance.
+                            </p>
+                        </div>
                     </li>
 
                     <li>
-                    <i class="bi bi-check2"></i>
-                    <div>
-                        <button class="edit-btn">✎</button>
-                        <strong data-editable>Showrooms virtuels :</strong>
-                        <button class="edit-btn">✎</button>
-                        <p data-editable>
-                        Vos catalogues prennent vie : les produits apparaissent en 3D, se configurent selon les préférences, changent de couleur ou de dimension d'un simple geste.
-                        </p>
-                    </div>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable data-key="ar_mr_showroom_title">Showrooms virtuels :</strong>
+                            <button class="edit-btn">✎</button>
+                            <p data-editable data-key="ar_mr_showroom_text">
+                                Vos catalogues prennent vie : les produits apparaissent en 3D, se configurent selon les préférences, changent de couleur ou de dimension d'un simple geste.
+                            </p>
+                        </div>
                     </li>
                 </ul>
 
                 <button class="edit-btn">✎</button>
-                <a href="#" class="btn-vr" data-editable>En savoir plus</a>
+                <a href="#" class="btn-vr" data-editable data-key="ar_mr_button">En savoir plus</a>
             </div>
+        </div>
+    </section>
+</main>
 
-            </div>
-        </section>
-        </main>
+
     
         <!-- =========== Pied de page du site =========== -->
     <footer class="site-footer">
