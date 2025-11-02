@@ -188,7 +188,7 @@ header('Content-Type: text/html; charset=UTF-8');
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-image">
             <div class="absolute inset-0">
-                <button class="edit-btn absolute top-4 right-4 z-50">✎</button>
+                <button class="edit-btn absolute top-4 left-4 z-50">✎</button>
                 <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
                 
 
