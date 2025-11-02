@@ -92,9 +92,9 @@ header('Content-Type: text/html; charset=UTF-8');
             </button>
 
             <!-- Menu principal -->
-            <div id="menu" class="hidden md:flex space-x-5 items-center font-medium text-gray-700">
+            <div id="menu" class="hidden md:flex space-x-8 items-center font-medium text-gray-700">
             
-                <div data-key="nav_mission" class="flex items-center space-x-1">
+                <div data-key="nav_mission" class="flex items-center space-x-2">
                     <button class="edit-btn">✎</button>
                     <a href="mission.html" class="hover:text-brand-blue" data-editable>Mission et Vision</a>
                     
@@ -136,13 +136,13 @@ header('Content-Type: text/html; charset=UTF-8');
                     </div>
                 </div>
 
-                <div data-key="nav_research" class="flex items-center space-x-1">
+                <div data-key="nav_research" class="flex items-center space-x-2">
                     <button class="edit-btn">✎</button>
                     <a href="recherche.html" class="hover:text-brand-blue" data-editable>Recherche</a>
                     
                 </div>
 
-                <div class="relative group space-x-2" data-key="nav_news">
+                <div class="relative group space-x-3" data-key="nav_news">
                     <button class="edit-btn">✎</button>
                     <button class="flex items-center text-brand-blue font-semibold focus:outline-none" data-editable>
                         Actualités / Blog
@@ -157,7 +157,7 @@ header('Content-Type: text/html; charset=UTF-8');
                     </div>
                 </div>
 
-                <div data-key="nav_contact" class="flex items-center space-x-1">
+                <div data-key="nav_contact" class="flex items-center space-x-2">
                      <button class="edit-btn">✎</button>
                     <a href="contact.html" data-editable class="hover:text-brand-blue">Contact</a>
                    
@@ -165,7 +165,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
             </div>
 
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-3">
                 <select id="language-selector" class="border border-gray-300 rounded-md p-1 text-sm">
                     <option value="fr">🇫🇷 Français</option>
                     <option value="en">🇬🇧 English</option>
@@ -188,9 +188,9 @@ header('Content-Type: text/html; charset=UTF-8');
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-image">
             <div class="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
                 <button class="edit-btn absolute top-4 right-4 z-50">✎</button>
-
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
+                
 
             </div>
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
