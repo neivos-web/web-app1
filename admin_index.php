@@ -82,26 +82,45 @@ header('Content-Type: text/html; charset=UTF-8');
                     <a href="mission.html" class="hover:text-brand-blue">Mission et Vision</a>
                     <button class="edit-btn">✎</button>
                 </div>
+                <div class="relative group" data-key="nav_portfolio">
+                <!-- Main button -->
+                <button id="dropdownButtonPortefeuille" data-editable class="flex items-center hover:text-brand-blue focus:outline-none">
+                    Portefeuille
+                    <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
 
-                <div class="relative group"  data-key="nav_portfolio">
-                    <button id="dropdownButtonPortefeuille" data-editable class="flex items-center hover:text-brand-blue focus:outline-none">
-                        Portefeuille
-                        <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-                        </svg>
-                    </button>
+                <!-- Edit button for main label -->
+                <button class="menu-edit ml-2">✎</button>
 
-                    <button class="menu-edit">✎</button>
-                    <div id="dropdownMenuPortefeuille" class="absolute top-full left-0 hidden bg-white shadow-xl rounded-lg w-64 text-center z-20 mt-2 transition-all duration-200">
-
-                        <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
-                            <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">Jeux Vidéo</a><button class="submenu-edit">✎</button>
-                            <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">AR/MR</a><button class="submenu-edit">✎</button>
-                            <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">VR</a><button class="submenu-edit">✎</button>
-                            <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue">CAD</a><button class="submenu-edit">✎</button>
-                        </div>
+                <!-- Dropdown submenu -->
+                <div id="dropdownMenuPortefeuille" class="absolute top-full left-0 hidden group-hover:block bg-white shadow-xl rounded-lg w-64 z-20 mt-2">
+                    
+                    <!-- Each submenu item in its own flex row -->
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                    <a href="portefeuille-jeux.html" data-editable data-key="portfolio_games" class="text-left w-full hover:text-brand-blue">Jeux Vidéo</a>
+                    <button class="submenu-edit ml-2">✎</button>
                     </div>
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                    <a href="portefeuille-ar.html" data-editable data-key="portfolio_ar" class="text-left w-full hover:text-brand-blue">AR/MR</a>
+                    <button class="submenu-edit ml-2">✎</button>
+                    </div>
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                    <a href="portefeuille-vr.html" data-editable data-key="portfolio_vr" class="text-left w-full hover:text-brand-blue">VR</a>
+                    <button class="submenu-edit ml-2">✎</button>
+                    </div>
+
+                    <div class="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                    <a href="portefeuille-cao.html" data-editable data-key="portfolio_cad" class="text-left w-full hover:text-brand-blue">CAD</a>
+                    <button class="submenu-edit ml-2">✎</button>
+                    </div>
+
                 </div>
+                </div>
+
 
                 <div class="relative group" data-editable data-key="nav_training">
                     <button class="flex items-center hover:text-brand-blue focus:outline-none">
