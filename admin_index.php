@@ -32,21 +32,32 @@ header('Content-Type: text/html; charset=UTF-8');
         }
     </script>
     <style>
-        .edit-btn {
-            font-size: 0.8rem;
+        /* Ensure menu and dropdowns don’t clip buttons */
+        header, nav, #menu, .group, .relative {
+            overflow: visible !important;
+        }
+
+        /* Make sure edit buttons are visible and clickable */
+        .edit-btn, .menu-edit, .image-edit {
+            position: relative;
+            z-index: 9999 !important;
             background: #22e4ac;
             color: white;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            padding: 3px 6px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            margin-right: 4px;
         }
-        .edit-btn:hover { background: #06a0c5; }
+
+        .edit-btn:hover, .menu-edit:hover, .image-edit:hover {
+            background: #0b9c77;
+  }
     </style>
+
 
 
 
