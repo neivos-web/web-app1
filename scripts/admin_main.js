@@ -15,7 +15,7 @@ let IS_ADMIN = false; // will be true if user is logged in
 
 // Check admin session
 async function checkSession() {
-  const res = await fetch("/api/check_session.php");
+  const res = await fetch("/php/check_session.php");
   const data = await res.json();
   IS_ADMIN = !!data.logged_in;
   return IS_ADMIN;
@@ -23,7 +23,7 @@ async function checkSession() {
 
 // Save a single content block (text or image)
 async function saveContent(page, key, type, value) {
-  const res = await fetch("/api/save_content.php", {
+  const res = await fetch("/php/save_content.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ page, key, type, value }),
@@ -39,7 +39,7 @@ async function uploadImage(page, key, file) {
   formData.append("type", "image");
   formData.append("file", file);
 
-  const res = await fetch("/api/save_content.php", {
+  const res = await fetch("/php/save_content.php", {
     method: "POST",
     body: formData,
   });
@@ -48,7 +48,7 @@ async function uploadImage(page, key, file) {
 
 // Load all contents from DB
 async function loadContents(page) {
-  const res = await fetch(`/api/get_contents.php?page=${encodeURIComponent(page)}`);
+  const res = await fetch(`/php/get_contents.php?page=${encodeURIComponent(page)}`);
   const data = await res.json();
   if (!data.success) return;
 
@@ -151,7 +151,7 @@ function setupAddDeleteButtons() {
       container.querySelector(".edit-btn").addEventListener("click", () => enableInlineEditing());
       container.querySelector(".delete-btn").addEventListener("click", async () => {
         if (confirm("Delete this block?")) {
-          await fetch("/api/delete_content.php", {
+          await fetch("/php/delete_content.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ key: id }),
@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Logout
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
-    await fetch("/api/logout.php");
+    await fetch("/php/logout.php");
     window.location.href = "/admin.html";
   });
 });
