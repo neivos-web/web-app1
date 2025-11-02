@@ -1,192 +1,164 @@
-// =========================
-// Admin Inline Editing Script
-// =========================
+// ======================= CONFIG / STATE =======================
+let isAdmin = false;
+const pendingChanges = {}; // { element_key: { type, value } }
 
-// Detect current page (slug)
-const PAGE_SLUG =
-  window.location.pathname.split("/").pop().replace(".php", "").replace(".html", "") || "home";
+// ======================= SESSION CHECK =======================
+async function checkAdminSession() {
+  try {
+    const res = await fetch("/php/check_session.php", { credentials: "include" });
+    if (!res.ok) throw new Error("Session check failed");
+    const data = await res.json();
+    isAdmin = data.logged_in === true;
 
-// =====================
-// Helper functions
-// =====================
+    if (!isAdmin) {
+      window.location.href = "/admin/admin.html"; // redirect if not admin
+      return;
+    }
 
-// Check if user is logged in (PHP session)
-async function checkLoginStatus() {
-  const res = await fetch("/php/check_session.php");
-  const data = await res.json().catch(() => ({}));
-  return data.logged_in || false;
+    initAdminEditor(); // start editor if admin
+  } catch (err) {
+    console.error(err);
+    window.location.href = "/admin/admin.html";
+  }
 }
 
-// Save a single content block (text or image)
-async function saveContent(page, key, type, value) {
-  const res = await fetch("/php/save_content.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ page, key, type, value }),
+// ======================= ADMIN EDITOR =======================
+function initAdminEditor() {
+  // 1️⃣ Show main menu & all dropdowns for admin
+  const menu = document.getElementById("menu");
+  if (menu) menu.classList.remove("hidden");
+
+  document.querySelectorAll(".group-hover\\:block").forEach(el => {
+    el.classList.remove("hidden");
+    el.style.display = "block";
   });
-  return res.json().catch(() => ({ success: false }));
-}
 
-// Upload an image and return its URL
-async function uploadImage(page, key, file) {
-  const formData = new FormData();
-  formData.append("page", page);
-  formData.append("key", key);
-  formData.append("type", "image");
-  formData.append("file", file);
-
-  const res = await fetch("/php/save_content.php", {
-    method: "POST",
-    body: formData,
+  // Make edit buttons above everything
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    btn.style.zIndex = 50;
+    btn.style.position = "relative";
   });
-  return res.json().catch(() => ({ success: false }));
-}
 
-// Load all contents for current page
-async function loadContents(page) {
-  const res = await fetch(`/php/get_contents.php?page=${encodeURIComponent(page)}`);
-  const data = await res.json().catch(() => ({ success: false }));
-  if (!data.success) return;
+  // 2️⃣ Attach inline editing
+  document.querySelectorAll("[data-editable]").forEach(el => {
+    const key = el.dataset.key || el.textContent.slice(0,20);
+    const editBtn = el.parentElement.querySelector(".edit-btn") || createEditButton(el);
 
-  data.contents.forEach((item) => {
-    const el = document.querySelector(`[data-key="${item.content_key}"]`);
-    if (!el) return;
-    if (item.content_type === "text") {
-      el.innerText = item.content_value;
-    } else if (item.content_type === "image") {
-      const img = el.tagName === "IMG" ? el : el.querySelector("img");
-      if (img) img.src = item.content_value;
-    }
+    editBtn.addEventListener("click", () => openInlineEditor(el, key));
   });
+
+  // 3️⃣ Attach save button
+  const saveBtn = document.getElementById("save-btn");
+  if (saveBtn) saveBtn.addEventListener("click", publishChanges);
 }
 
-// =====================
-// Inline Editing Logic
-// =====================
-function enableInlineEditing() {
-  // Make all edit buttons visible for admin
-  document.querySelectorAll(".edit-btn, .menu-edit, .image-edit, .delete-btn, .add-block-btn")
-    .forEach((btn) => (btn.style.display = "inline-flex"));
+// ======================= INLINE EDITOR =======================
+function createEditButton(el) {
+  const btn = document.createElement("button");
+  btn.textContent = "✎";
+  btn.className = "edit-btn";
+  el.parentElement.insertBefore(btn, el);
+  return btn;
+}
 
-  // Handle editing
-  document.body.addEventListener("click", async (e) => {
-    const target = e.target;
+function openInlineEditor(el, key) {
+  if (el.dataset.editing === "true") return; // already editing
+  el.dataset.editing = "true";
 
-    // Edit button click
-    if (target.classList.contains("edit-btn") || target.classList.contains("menu-edit") || target.classList.contains("image-edit")) {
-      const parent = target.closest("[data-key], .content-box");
-      if (!parent) return;
+  let inputEl;
 
-      const editable = parent.querySelector("[data-editable]") || parent;
-      const key = parent.dataset.key || Math.random().toString(36).substring(2, 10);
-      const isImage = editable.tagName.toLowerCase() === "img" || target.classList.contains("image-edit");
+  if (el.tagName === "IMG") {
+    // image upload
+    inputEl = document.createElement("input");
+    inputEl.type = "file";
+    inputEl.accept = "image/*";
+  } else if (el.tagName === "A") {
+    // link editing
+    inputEl = document.createElement("input");
+    inputEl.type = "text";
+    inputEl.value = el.textContent;
+  } else {
+    // text editing
+    const longText = el.textContent.length > 50 || el.tagName === "P" || el.tagName === "DIV";
+    inputEl = longText ? document.createElement("textarea") : document.createElement("input");
+    inputEl.value = el.textContent;
+    inputEl.style.width = "100%";
+  }
 
-      if (isImage) {
-        // Image editing
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.style.display = "none";
-        document.body.appendChild(input);
-        input.click();
+  inputEl.classList.add("border", "border-blue-400", "rounded", "p-1");
+  el.style.display = "none";
+  el.parentElement.insertBefore(inputEl, el);
 
-        input.addEventListener("change", async () => {
-          const file = input.files[0];
-          if (!file) return;
-          const result = await uploadImage(PAGE_SLUG, key, file);
-          if (result.success && result.url) {
-            editable.src = result.url;
-            await saveContent(PAGE_SLUG, key, "image", result.url);
-          } else {
-            alert("Erreur lors du téléversement de l'image.");
-          }
-          input.remove();
-        });
-      } else {
-        // Text editing
-        const textarea = document.createElement("textarea");
-        textarea.value = editable.innerText.trim();
-        textarea.className = "border border-gray-300 rounded-md p-1 w-full";
-        editable.replaceWith(textarea);
-        textarea.focus();
+  inputEl.focus();
 
-        textarea.addEventListener("blur", async () => {
-          const newValue = textarea.value;
-          textarea.replaceWith(editable);
-          editable.innerText = newValue;
-          await saveContent(PAGE_SLUG, key, "text", newValue);
-        });
-      }
-    }
-
-    // Delete block
-    if (target.classList.contains("delete-btn")) {
-      const box = target.closest(".content-box");
-      if (!box) return;
-      const key = box.dataset.key;
-      if (confirm("Supprimer ce bloc ?")) {
-        await fetch("/php/delete_content.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ page: PAGE_SLUG, key }),
-        });
-        box.remove();
-      }
-    }
-
-    // 🔵 Add new block
-    if (target.classList.contains("add-block-btn")) {
-      const container = document.getElementById("content-container") || document.body;
-      const key = "block_" + Math.random().toString(36).substring(2, 9);
-
-      const newBox = document.createElement("div");
-      newBox.className = "content-box border border-gray-200 rounded-md p-4 my-4 relative";
-      newBox.dataset.key = key;
-
-      newBox.innerHTML = `
-        <button class="edit-btn absolute top-1 right-1 bg-brand-green text-white px-2 py-1 rounded">✎</button>
-        <button class="delete-btn absolute top-1 right-10 bg-red-500 text-white px-2 py-1 rounded">🗑</button>
-        <h3 data-editable>Titre de section</h3>
-        <p data-editable>Votre contenu ici...</p>
-      `;
-
-      container.appendChild(newBox);
-    }
+  inputEl.addEventListener("blur", () => saveInlineEdit(el, inputEl, key));
+  inputEl.addEventListener("keydown", e => {
+    if (e.key === "Enter" && inputEl.tagName !== "TEXTAREA") inputEl.blur();
   });
 }
 
-// =====================
-// Init
-// =====================
-document.addEventListener("DOMContentLoaded", async () => {
-  const loggedIn = await checkLoginStatus();
+function saveInlineEdit(el, inputEl, key) {
+  let newValue = "";
 
-  if (!loggedIn) {
-    console.log("Non-admin view: hiding edit controls");
-    document.querySelectorAll(".edit-btn, .menu-edit, .image-edit, .delete-btn, .add-block-btn")
-      .forEach((btn) => (btn.style.display = "none"));
+  if (el.tagName === "IMG") {
+    const file = inputEl.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        el.src = e.target.result;
+        pendingChanges[key] = { type: "image", value: e.target.result };
+      };
+      reader.readAsDataURL(file);
+    }
+  } else if (el.tagName === "A") {
+    newValue = inputEl.value;
+    el.textContent = newValue;
+    pendingChanges[key] = { type: "link", value: newValue };
+  } else {
+    newValue = inputEl.value;
+    el.textContent = newValue;
+    pendingChanges[key] = { type: "text", value: newValue };
+  }
+
+  el.style.display = "";
+  inputEl.remove();
+  delete el.dataset.editing;
+}
+
+// ======================= PUBLISH CHANGES =======================
+function publishChanges() {
+  if (Object.keys(pendingChanges).length === 0) {
+    alert("Aucune modification à publier.");
     return;
   }
 
-  console.log("Admin mode enabled for:", PAGE_SLUG);
-  enableInlineEditing();
-  await loadContents(PAGE_SLUG);
-
-  // Save button
-  document.getElementById("save-btn")?.addEventListener("click", async () => {
-    const editableElements = document.querySelectorAll("[data-editable]");
-    for (const el of editableElements) {
-      const key = el.closest("[data-key]")?.dataset.key || Math.random().toString(36).substring(2, 10);
-      const type = el.tagName.toLowerCase() === "img" ? "image" : "text";
-      const value = type === "image" ? el.src : el.innerText.trim();
-      await saveContent(PAGE_SLUG, key, type, value);
+  fetch("/php/save_changes.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pendingChanges),
+    credentials: "include"
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Modifications publiées avec succès !");
+      Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
+    } else {
+      alert("Erreur lors de la publication.");
     }
-    alert("Modifications publiées avec succès !");
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Erreur lors de la publication.");
   });
+}
 
-  // Logout button
-  document.getElementById("logout-btn")?.addEventListener("click", async () => {
-    await fetch("/php/logout.php");
-    window.location.href = "/admin.html";
-  });
+// ======================= LOGOUT =======================
+const logoutBtn = document.getElementById("logout-btn");
+if (logoutBtn) logoutBtn.addEventListener("click", async () => {
+  await fetch("/php/logout.php", { credentials: "include" });
+  window.location.href = "/admin/admin.html";
 });
+
+// ======================= INIT =======================
+checkAdminSession();
