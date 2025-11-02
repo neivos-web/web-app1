@@ -65,56 +65,6 @@ function enableInlineEditing() {
   });
 }
 
-function openInlineEditor(el) {
-  if (el.dataset.editing === "true") return;
-  el.dataset.editing = "true";
-  let inputEl;
-
-  if (el.tagName === "IMG") {
-    inputEl = document.createElement("input");
-    inputEl.type = "file";
-    inputEl.accept = "image/*";
-    inputEl.addEventListener("change", async () => {
-      const file = inputEl.files[0];
-      if (!file) return;
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("page", pageKey);
-      try {
-        const res = await fetch("/php/upload_image.php", { method: "POST", body: formData, credentials: "include" });
-        const data = await res.json();
-        if (data.success) {
-          el.src = data.url;
-          await autoSave();
-        } else alert("Erreur upload image");
-      } catch (err) {
-        console.error(err);
-      } finally {
-        inputEl.remove();
-        delete el.dataset.editing;
-      }
-    });
-    inputEl.click();
-    return;
-  }
-
-  const isLong = el.textContent.length > 60 || ["P", "DIV"].includes(el.tagName);
-  inputEl = isLong ? document.createElement("textarea") : document.createElement("input");
-  inputEl.value = el.textContent.trim();
-  el.style.display = "none";
-  el.parentElement.insertBefore(inputEl, el);
-  inputEl.focus();
-
-  inputEl.addEventListener("blur", async () => {
-    el.textContent = inputEl.value;
-    cleanupEdit(el, inputEl);
-    await autoSave(); // auto-save after edit
-  });
-
-  inputEl.addEventListener("keydown", e => {
-    if (e.key === "Enter" && inputEl.tagName !== "TEXTAREA") inputEl.blur();
-  });
-}
 
 function cleanupEdit(el, inputEl) {
   inputEl.remove();
@@ -217,7 +167,7 @@ async function saveAndReload(page = pageKey) {
       return;
     }
 
-    console.log(`✅ Sauvegardé à ${data.updated}`);
+    console.log(`Sauvegardé à ${data.updated}`);
     await reloadPageContent(page);
   } catch (err) {
     console.error("Erreur réseau", err);
@@ -235,7 +185,7 @@ async function reloadPageContent(page = pageKey) {
       return;
     }
 
-    console.log("🔄 Rechargement depuis la base de données...");
+    console.log("Rechargement depuis la base de données...");
 
     const entries = Object.entries(data.content);
     document.querySelectorAll("[data-editable]").forEach((el, i) => {
