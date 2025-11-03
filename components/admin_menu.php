@@ -109,3 +109,4 @@
         </nav>
     </header>
 
+    <script type="module" src="scripts/admin_menu.js"></script>

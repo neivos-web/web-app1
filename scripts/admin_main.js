@@ -213,19 +213,24 @@ function enableBlockManagement() {
 // ----------------- create new block -----------------
 function createContentBox() {
   const newBox = document.createElement("div");
+  const uid = "block_" + Date.now();
   newBox.className = "content-box bg-white p-6 rounded-lg shadow-md";
   newBox.innerHTML = `
     <div class="content-image mb-4">
       <button class="edit-btn">✎</button>
-      <img src="images/default.png" alt="Nouvelle image" data-editable class="w-full h-auto rounded-lg" data-key="">
+      <img id="${uid}_img" data-editable src="images/default.png" alt="Nouvelle image" data-editable class="w-full h-auto rounded-lg" data-key="">
     </div>
     <div class="content">
       <button class="edit-btn">✎</button>
-      <h2 data-editable data-key="">Nouveau Titre</h2>
+      <h2 id="${uid}_title" data-editable >Nouveau Titre</h2>
       <button class="edit-btn">✎</button>
-      <p data-editable data-key="">Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
+      <p id="${uid}_text" data-editable >Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
     </div>
+    
   `;
+  
+ 
+  
   // attach edit buttons in newBox
   newBox.querySelectorAll(".edit-btn").forEach(btn => btn.style.display = "inline-flex");
   return newBox;
