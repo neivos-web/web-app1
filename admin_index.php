@@ -76,7 +76,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
        <!-- =========== En-tête du site =========== -->
             <?php
-            include 'components/main_admin.php'; // or require 'main_admin.php';
+            include './components/admin_menu.php'; // or require 'main_admin.php';
             ?>
 
     <main>
