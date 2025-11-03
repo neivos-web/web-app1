@@ -8,22 +8,20 @@ require_once __DIR__ . "/db_connect.php";
 
 $page = $_GET['page'] ?? '';
 if (!$page) {
-    echo json_encode(["success" => false, "error" => "Page not specified"]);
+    echo json_encode(["success" => false, "error" => "Missing page"]);
     exit;
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT * FROM pages_content WHERE page = :page LIMIT 1");
+    $stmt = $pdo->prepare("SELECT content, last_modified FROM pages_content WHERE page = :page LIMIT 1");
     $stmt->execute([':page' => $page]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
     if (!$row) {
-        echo json_encode(["success" => false, "error" => "Page not found"]);
+        echo json_encode(["success" => false, "message" => "Not found"]);
         exit;
     }
 
-    $content = json_decode($row['content'], true); // decode JSON
-
+    $content = json_decode($row['content'], true);
     echo json_encode([
         "success" => true,
         "content" => $content,
@@ -32,4 +30,3 @@ try {
 } catch (Exception $e) {
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
-?>
