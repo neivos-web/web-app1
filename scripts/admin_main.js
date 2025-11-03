@@ -19,14 +19,12 @@ async function checkAdminSession() {
 // ======================= LOAD CONTENT =======================
 async function loadPageContent() {
   try {
-    //  Load page-specific content
+    // 1️⃣ Load page-specific content
     const resPage = await fetch(`/php/load_content.php?page=${encodeURIComponent(pageKey)}`);
     const dataPage = await resPage.json();
-    const container = document.querySelector("#editable-container");
-
-    if (dataPage.success && dataPage.content?.html && container) {
-      container.innerHTML = dataPage.content.html;
-      if (isAdmin) enableBlockManagement(); // <-- ensure buttons are added after content
+    if (dataPage.success && dataPage.content?.html) {
+      const container = document.querySelector("#editable-container");
+      if (container) container.innerHTML = dataPage.content.html;
     }
 
     // 2️⃣ Load shared menu
@@ -47,7 +45,6 @@ async function loadPageContent() {
 }
 
 
-
 // ======================= ADMIN EDITOR =======================
 function initAdminEditor() {
   document.querySelectorAll(".edit-btn").forEach(btn => {
@@ -61,23 +58,15 @@ function initAdminEditor() {
 }
 
 // ======================= INLINE EDITING =======================
-function enableInlineEditing(root = document) {
-  root.querySelectorAll(".edit-btn").forEach(btn => {
-    // Avoid adding multiple listeners
-    if (btn.dataset.listenerAttached) return;
-    btn.dataset.listenerAttached = true;
-
-    let target = btn.dataset.target
-      ? document.getElementById(btn.dataset.target)
-      : btn.nextElementSibling || btn.previousElementSibling;
-
-    if (!target) return;
-
-    if (target.tagName === "A" && target.querySelector("img[data-editable]")) {
+function enableInlineEditing() {
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    const targetId = btn.dataset.target;
+    let target = targetId ? document.getElementById(targetId) : btn.nextElementSibling || btn.previousElementSibling;
+    if (target && target.tagName === "A" && target.querySelector("img[data-editable]")) {
       target = target.querySelector("img[data-editable]");
     }
 
-    if (target.dataset.editable !== undefined) {
+    if (target && target.dataset.editable !== undefined) {
       btn.addEventListener("click", e => {
         e.stopPropagation();
         openInlineEditor(target);
@@ -151,16 +140,8 @@ async function saveAndReload(page = pageKey) {
   const container = document.querySelector("#editable-container");
   if (!container) return;
 
-  // // Collect all editable elements, exclude admin buttons
-  // const content = {};
-  // container.querySelectorAll("[data-editable]").forEach(el => {
-  //   if (el.closest(".delete-btn, .add-block-btn")) return; // skip admin controls
-  //   const key = el.dataset.key || el.id || generateKey(el);
-  //   if (el.tagName === "IMG") content[key] = el.src;
-  //   else content[key] = el.textContent.trim();
-  // });
-
   const content = { html: container.innerHTML };
+
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
@@ -181,12 +162,6 @@ async function saveAndReload(page = pageKey) {
     console.error("Erreur réseau", err);
   }
 }
-
-// Generate a unique key if data-key or id is missing
-function generateKey(el) {
-  return el.tagName.toLowerCase() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
 
 // ======================= RELOAD FROM DATABASE =======================
 async function reloadPageContent(page = pageKey) {
@@ -290,13 +265,8 @@ function createContentBox() {
       <p data-editable>Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
     </div>
   `;
-
-  // Add admin buttons
   addDeleteAndAddBlockButtons(newBox);
-
-  // Attach inline editor listeners only to this new box
-  enableInlineEditing(newBox);
-
+  enableInlineEditing();
   return newBox;
 }
 

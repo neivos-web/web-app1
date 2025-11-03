@@ -14,10 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       Object.entries(data.content).forEach(([key, value]) => {
         const el = document.querySelector(`[data-key="${key}"]`);
         if (el) {
-          // Skip admin buttons
-          if (el.classList.contains("delete-btn") || el.classList.contains("add-block-btn")) return;
-
-          // Update content
           if (el.tagName === "IMG") el.src = value;
           else el.innerHTML = value;
         }
