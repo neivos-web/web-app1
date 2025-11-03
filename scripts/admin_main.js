@@ -1,6 +1,6 @@
 // ======================= CONFIG / STATE =======================
 let isAdmin = false;
-const pageKey = window.location.pathname.split("/").pop() || "index.php";
+const pageKey = window.location.pathname.split("/").pop() || "admin_index.php";
 
 // ======================= SESSION CHECK =======================
 async function checkAdminSession() {
@@ -19,7 +19,7 @@ async function checkAdminSession() {
 // ======================= LOAD CONTENT =======================
 async function loadPageContent() {
   try {
-    // 1️⃣ Load page-specific content
+    // Load page-specific content
     const resPage = await fetch(`/php/load_content.php?page=${encodeURIComponent(pageKey)}`);
     const dataPage = await resPage.json();
     if (dataPage.success && dataPage.content?.html) {
@@ -27,7 +27,7 @@ async function loadPageContent() {
       if (container) container.innerHTML = dataPage.content.html;
     }
 
-    // 2️⃣ Load shared menu
+    //  Load shared menu
     const resShared = await fetch(`/php/load_content.php?page=shared`);
     const dataShared = await resShared.json();
     if (dataShared.success && dataShared.content?.menu) {
