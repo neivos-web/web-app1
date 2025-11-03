@@ -96,7 +96,7 @@ function addDeleteAndAddBlockButtons(box) {
   delBtn.addEventListener("click", async () => {
     if (confirm("Supprimer ce bloc ?")) {
       box.remove();
-      await saveAndReload(pageKey);
+      await saveAndReloadStructured(pageKey);
     }
   });
 
@@ -108,7 +108,7 @@ function addDeleteAndAddBlockButtons(box) {
   addBtn.addEventListener("click", async () => {
     const newBox = createContentBox();
     box.parentElement.insertBefore(newBox, addBtn);
-    await saveAndReload(pageKey);
+    await saveAndReloadStructured(pageKey);
   });
 
   // === Attach ===
@@ -157,7 +157,7 @@ async function saveAndReload(page = pageKey) {
     }
 
     console.log(`Sauvegardé à ${data.updated}`);
-    await reloadPageContent(page);
+    await reloadPageContentStructured(page);
   } catch (err) {
     console.error("Erreur réseau", err);
   }
@@ -217,7 +217,7 @@ function openInlineEditor(el) {
 
         if (data.success) {
           el.src = data.url;
-          await saveAndReload(pageKey);
+          await saveAndReloadStructured(pageKey);
         } else alert("Erreur upload image.");
       } catch (err) {
         console.error(err);
@@ -241,7 +241,7 @@ function openInlineEditor(el) {
   inputEl.addEventListener("blur", async () => {
     el.textContent = inputEl.value;
     cleanupEdit(el, inputEl);
-    await saveAndReload(pageKey);
+    await saveAndReloadStructured(pageKey);
   });
 
   inputEl.addEventListener("keydown", e => {
@@ -273,5 +273,65 @@ function createContentBox() {
 // ======================= INIT =======================
 document.addEventListener("DOMContentLoaded", async () => {
   await checkAdminSession();
-  await reloadPageContent(pageKey);
+  await reloadPageContentStructured(pageKey);
 });
+
+
+async function saveAndReloadStructured(page = pageKey) {
+  const container = document.querySelector("#editable-container");
+  if (!container) return;
+
+  // Collect all editable elements
+  const contentData = [];
+  container.querySelectorAll("[data-editable]").forEach(el => {
+    contentData.push({
+      id: el.id || null,
+      key: el.dataset.key || null,
+      tag: el.tagName,
+      value: el.tagName === "IMG" ? el.src : el.textContent.trim()
+    });
+  });
+
+  try {
+    const res = await fetch("/php/save_content.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page, content: contentData }),
+      credentials: "include"
+    });
+    const data = await res.json();
+    if (!data.success) {
+      console.error("Erreur de sauvegarde:", data.error);
+      return;
+    }
+
+    console.log(`Sauvegardé à ${data.updated}`);
+    await reloadPageContentStructured(page);
+  } catch (err) {
+    console.error("Erreur réseau", err);
+  }
+}
+
+
+async function reloadPageContentStructured(page = pageKey) {
+  try {
+    const res = await fetch(`/php/load_content.php?page=${page}`, { credentials: "include" });
+    const data = await res.json();
+    if (!data.success || !data.content) return;
+
+    const container = document.querySelector("#editable-container");
+    if (!container) return;
+
+    container.querySelectorAll("[data-editable]").forEach(el => {
+      const saved = data.content.find(c => c.id === el.id || c.key === el.dataset.key);
+      if (saved) {
+        if (el.tagName === "IMG") el.src = saved.value;
+        else el.textContent = saved.value;
+      }
+    });
+
+    if (isAdmin) enableBlockManagement();
+  } catch (err) {
+    console.error("Erreur reload structured:", err);
+  }
+}
