@@ -17,7 +17,7 @@
             </button>
 
             <!-- Menu principal -->
-            <div id="menu" class="hidden md:flex space-x-8 items-center font-medium text-gray-700">
+            <div id="main-menu" data-editable-menu class="hidden md:flex space-x-8 items-center font-medium text-gray-700">
             
                 <div data-key="nav_mission" data-shared="true" class="flex items-center space-x-2">
                     <button class="edit-btn">✎</button>
@@ -98,9 +98,9 @@
             </div>
 
             <div class="extra-right-buttons flex items-center space-x-3">
-                <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
+<!--                 <button id="save-btn" class="bg-brand-green hover:bg-green-400 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
                     Publier
-                </button>
+                </button> -->
 
                 <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-md shadow-md transition">
                     ⏻
@@ -109,4 +109,3 @@
         </nav>
     </header>
 
-    

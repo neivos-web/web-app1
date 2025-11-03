@@ -151,15 +151,16 @@ async function saveAndReload(page = pageKey) {
   const container = document.querySelector("#editable-container");
   if (!container) return;
 
-  // Collect all editable elements, exclude admin buttons
-  const content = {};
-  container.querySelectorAll("[data-editable]").forEach(el => {
-    if (el.closest(".delete-btn, .add-block-btn")) return; // skip admin controls
-    const key = el.dataset.key || el.id || generateKey(el);
-    if (el.tagName === "IMG") content[key] = el.src;
-    else content[key] = el.textContent.trim();
-  });
+  // // Collect all editable elements, exclude admin buttons
+  // const content = {};
+  // container.querySelectorAll("[data-editable]").forEach(el => {
+  //   if (el.closest(".delete-btn, .add-block-btn")) return; // skip admin controls
+  //   const key = el.dataset.key || el.id || generateKey(el);
+  //   if (el.tagName === "IMG") content[key] = el.src;
+  //   else content[key] = el.textContent.trim();
+  // });
 
+  const content = { html: container.innerHTML };
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
