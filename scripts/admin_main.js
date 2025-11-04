@@ -55,71 +55,94 @@ async function checkAdminSession() {
 document.addEventListener("DOMContentLoaded", checkAdminSession);
 
 // ---- load saved content (rebuild blocks) ----
-//FIXED VERSION: renders blocks even if empty and supports newly added ones
 async function loadStructuredContent(page = pageKey) {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
-    const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
+    const savedBlocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
     const container = document.querySelector("#editable-container");
     if (!container) return console.warn("#editable-container not found");
 
-    if (!blocks.length) return; // nothing saved, keep default HTML
+    // Map existing DOM blocks by their data-blockId or id
+    const existingBlocks = [...container.querySelectorAll(".content-box")].map(b => ({
+      block: b,
+      id: b.dataset.blockId || b.id || null
+    }));
 
+    // Clear container but preserve existing blocks that have no saved version
     container.innerHTML = "";
-    blocks
-      .sort((a, b) => (a.order || 0) - (b.order || 0))
-      .forEach(blockObj => {
 
-        const block = document.createElement("div");
-        const bid = blockObj.blockId || ("block_" + Date.now() + "_" + Math.floor(Math.random() * 1000));
-        block.className = "content-box bg-white p-6 rounded-lg shadow-md";
-        block.dataset.blockId = bid;
+    // Merge saved blocks with existing ones
+    const allBlocks = [];
 
-        const innerParts = [];
-
-        // ✅ NEW: always create the block, even if no elements yet
-        if (Array.isArray(blockObj.elements) && blockObj.elements.length) {
-
-          blockObj.elements.forEach(el => {
-            const id = el.id || (bid + "_" + el.tag.toLowerCase() + "_" + Math.floor(Math.random() * 1000));
-
-            if (el.tag === "IMG") {
-              innerParts.push(`
-                <div class="content-image mb-4">
-                  <button class="edit-btn">✎</button>
-                  <img id="${id}" data-editable src="${escapeHtml(el.value || '')}" alt="" class="w-full h-auto rounded-lg" />
-                </div>`);
+    savedBlocks
+      .sort((a,b)=> (a.order||0) - (b.order||0))
+      .forEach(sb => {
+        const match = existingBlocks.find(eb => eb.id === sb.blockId);
+        if (match) {
+          // update content of existing DOM block from saved elements
+          const b = match.block;
+          sb.elements?.forEach(el => {
+            let target = b.querySelector(`#${el.id}`);
+            if (!target) {
+              // create missing element
+              const elNode = document.createElement(el.tag.toLowerCase());
+              elNode.id = el.id;
+              elNode.dataset.editable = "";
+              elNode.textContent = el.tag === "IMG" ? "" : el.value;
+              if (el.tag === "IMG") elNode.src = el.value;
+              b.appendChild(elNode);
             } else {
-              innerParts.push(`
-                <div class="content">
-                  <button class="edit-btn">✎</button>
-                  <${el.tag.toLowerCase()} id="${id}" data-editable>${escapeHtml(el.value || '')}</${el.tag.toLowerCase()}>
-                </div>`);
+              if (el.tag === "IMG") target.src = el.value;
+              else target.textContent = el.value;
             }
           });
-
+          allBlocks.push(b);
         } else {
-          // ✅ This makes EMPTY NEW BLOCK VISIBLE instead of ignored
-          innerParts.push(`
-            <div class="content empty-block text-gray-400 italic">
-              (Empty block – click edit to add content)
-            </div>`);
+          // create new block from saved data
+          const b = document.createElement("div");
+          b.className = "content-box bg-white p-6 rounded-lg shadow-md";
+          const bid = sb.blockId || ("block_" + Date.now() + "_" + Math.floor(Math.random()*1000));
+          b.dataset.blockId = bid;
+          const innerParts = [];
+          if (Array.isArray(sb.elements) && sb.elements.length) {
+            sb.elements.forEach(el => {
+              const id = el.id || (bid + "_" + el.tag.toLowerCase() + "_" + Math.floor(Math.random()*1000));
+              if (el.tag === "IMG") {
+                innerParts.push(`
+                  <div class="content-image mb-4">
+                    <button class="edit-btn">✎</button>
+                    <img id="${id}" data-editable src="${el.value || ''}" alt="" class="w-full h-auto rounded-lg"/>
+                  </div>`);
+              } else {
+                innerParts.push(`
+                  <div class="content">
+                    <button class="edit-btn">✎</button>
+                    <${el.tag.toLowerCase()} id="${id}" data-editable>${el.value || ''}</${el.tag.toLowerCase()}>
+                  </div>`);
+              }
+            });
+          } else {
+            innerParts.push(`<div class="content empty-block text-gray-400 italic">(Empty block – click edit)</div>`);
+          }
+          b.innerHTML = innerParts.join("\n");
+          allBlocks.push(b);
         }
-
-        block.innerHTML = innerParts.join("\n");
-        container.appendChild(block);
       });
 
+    // Append merged blocks
+    allBlocks.forEach(b => container.appendChild(b));
+
     if (isAdmin) initAdminEditor();
-    console.log("Structured content loaded");
+    console.log("Structured content loaded and merged with existing DOM");
 
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
+
 
 
 // ---- escape helper (prevent XSS when injecting saved text) ----
