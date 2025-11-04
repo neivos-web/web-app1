@@ -23,8 +23,8 @@ export const translations = {
     footer_legal: "Mentions légales",
     footer_privacy: "Déclaration de confidentialité",
     //page index
-    welcome_title: "Bienvenue dans notre section actualités et blogs",
-    welcome_subtitle: "Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.",
+    welcome_title: "OUTSIDERS – L’Innovation au Service du Changement",
+    welcome_subtitle: "Apprenez les technologies les plus demandées du moment grâce à nos formations interactives et pratiques.<br>OUTSIDERS vous accompagne pour développer vos compétences, booster votre carrière et devenir acteur de l’innovation numérique.",
     articles_title: "Actualités et blogs chez Outsiders",
     articles_loading: "Chargement des actualités...",
     welcome_section_title: "Bienvenue chez OUTSIDERS",
@@ -72,8 +72,8 @@ export const translations = {
     footer_legal: "Legal Notice",
     footer_privacy: "Privacy Policy",
     //page index 1
-    welcome_title: "Welcome to our news and blog section",
-    welcome_subtitle: "Discover the latest news and blog posts showcasing our vision and recent achievements.",
+    welcome_title: "OUTSIDERS – Innovation at the Service of Change",
+    welcome_subtitle: "Learn the most in-demand technologies through our interactive and practical training programs. OUTSIDERS helps you develop your skills, boost your career, and become a key player in digital innovation.",
     articles_title: "News and blogs at Outsiders",
     articles_loading: "Loading news...",
     welcome_section_title: "Welcome to OUTSIDERS",

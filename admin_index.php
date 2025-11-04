@@ -77,33 +77,27 @@ header('Content-Type: text/html; charset=UTF-8');
             <?php
             include './components/admin_menu.php'; // or require 'main_admin.php';
             ?>
-
     <main>
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-content">
             <div class="absolute inset-0">
                 <button class="edit-btn absolute top-4 left-4 z-50">✎</button>
-                <img id="hero-image" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
-                
-
+                <img id="hero-image"
+                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
+                    class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
             </div>
+
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
                 <button class="edit-btn">✎</button>
-                <h1 id="hero-title" class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue dans notre section actualités et blogs</h1>
+                <h1 id="hero-title" class="text-3xl md:text-5xl font-extrabold mb-4" data-editable data-key="welcome_title">
+                    OUTSIDERS – L’Innovation au Service du Changement
+                </h1>
                 <button class="edit-btn">✎</button>
-                <p id="hero-desc" class="text-lg max-w-3xl mx-auto" data-editable>Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.</p>
-            </div>
-        </section>
-
-        <!-- Section des articles -->
-        <section id="articles-section" class="py-16 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <button class="edit-btn">✎</button>
-                <h2 id="articles-id" class="text-3xl font-bold text-center mb-12" data-editable>Actualités et blogs chez Outsiders</h2>
-                <div id="articles-container" class="space-y-12">
-                    <button class="edit-btn">✎</button>
-                    <p id="article-loading" class="text-center text-gray-500" data-editable>Chargement des actualités...</p>
-                </div>
+                <p id="hero-desc" class="text-lg max-w-3xl mx-auto" data-editable data-key="welcome_subtitle">
+                    Apprenez les technologies les plus demandées du moment grâce à nos formations interactives et pratiques.
+                    OUTSIDERS vous accompagne pour développer vos compétences, booster votre carrière et devenir acteur de
+                    l’innovation numérique.
+                </p>
             </div>
         </section>
 
@@ -111,9 +105,11 @@ header('Content-Type: text/html; charset=UTF-8');
         <section id="welcome-container" class="welcome-section">
             <div class="welcome-box">
                 <button class="edit-btn">✎</button>
-                <h1 id="welcome-id" data-editable><strong>Bienvenue chez OUTSIDERS</strong></h1>
+                <h1 id="welcome-id" data-editable data-key="welcome_section_title">
+                    <strong>Bienvenue chez OUTSIDERS</strong>
+                </h1>
                 <button class="edit-btn">✎</button>
-                <p id="welcome-desc" data-editable>
+                <p id="welcome-desc" data-editable data-key="welcome_section_text">
                     <strong>Mission & Vision :</strong> Outsiders allie inclusion et innovation technologique.
                     Notre équipe diversifiée et interdisciplinaire réunit des talents issus de domaines variés,
                     qui travaillent ensemble et aspirent au <em>“Perfect Flow”</em> — des solutions efficaces et
@@ -131,18 +127,19 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
                 <div class="content">
                     <button class="edit-btn">✎</button>
-                    <h2  id="innovation-heading" data-editable>Innovation et Avenir</h2>
+                    <h2 id="innovation-heading" data-editable data-key="innovation_title">Innovation et Avenir</h2>
                     <button class="edit-btn">✎</button>
-                    <p id="innovation-text-1" data-editable>
-                        Chez <strong>Outsiders</strong>, nous restons toujours à la pointe de l’actualité et de la technologie.
+                    <p id="innovation-text-1" data-editable data-key="innovation_paragraph_1">
+                        Chez <strong>Outsiders</strong>, nous restons toujours à la pointe de l’actualité et de la
+                        technologie.
                         Grâce à nos vastes connaissances et à notre savoir-faire, nous soutenons tous ceux qui souhaitent
                         maîtriser ou utiliser efficacement les nouvelles technologies. Nos solutions comprennent des
                         applications de réalité virtuelle, des hologrammes, le développement sur mesure d’applications,
                         la création de jeux, ainsi que des formations et des conseils, en particulier en
                         <strong>intelligence artificielle (IA)</strong>.
-                      </p>
+                    </p>
                     <button class="edit-btn">✎</button>
-                      <p  id="innovation-text-2" data-editable>
+                    <p id="innovation-text-2" data-editable data-key="innovation_paragraph_2">
                         La numérisation a entraîné de profonds changements dans notre société. Chez Outsiders, nous
                         voyons ces évolutions comme une opportunité de croissance, d’innovation et d’inclusion.
                         Nous utilisons des technologies comme la <strong>réalité augmentée (AR)</strong>, la
@@ -150,12 +147,11 @@ header('Content-Type: text/html; charset=UTF-8');
                         pour créer de nouvelles possibilités pour les personnes les plus diverses. Notre mission est de
                         développer des technologies innovantes de manière inclusive afin de favoriser un développement
                         durable, économique et social, au service du progrès.
-                  </p>
+                    </p>
                 </div>
             </div>
-        
 
-        <!-- Section Inclusion et recherche -->
+            <!-- Section Inclusion et recherche -->
             <div class="content-box">
                 <div class="content-image">
                     <button class="edit-btn">✎</button>
@@ -163,29 +159,28 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
                 <div class="content">
                     <button class="edit-btn">✎</button>
-                    <h2 id="inclusion-title" data-editable>Inclusion & Recherche</h2>
+                    <h2 id="inclusion-title" data-editable data-key="inclusion_title">Inclusion & Recherche</h2>
                     <button class="edit-btn">✎</button>
-                    <p id="inclusion-text-1" data-editable>
-                      Pour nous, l'inclusion est bien plus qu'une simple idée. Elle est synonyme d'intégration
-                      sans faille de toutes les personnes dans la société. Chez Outsiders, nous vivons l'inclusion
-                      – non seulement par la loi, mais aussi parce qu'elle correspond à notre conviction la plus
-                      profonde. Nous reconnaissons et apprécions le caractère unique de chaque individu, ce qui
-                      se traduit par la qualité de notre travail et nos solutions innovantes.
+                    <p id="inclusion-text-1" data-editable data-key="inclusion_paragraph_1">
+                        Pour nous, l'inclusion est bien plus qu'une simple idée. Elle est synonyme d'intégration
+                        sans faille de toutes les personnes dans la société. Chez Outsiders, nous vivons l'inclusion
+                        – non seulement par la loi, mais aussi parce qu'elle correspond à notre conviction la plus
+                        profonde. Nous reconnaissons et apprécions le caractère unique de chaque individu, ce qui
+                        se traduit par la qualité de notre travail et nos solutions innovantes.
                     </p>
                     <button class="edit-btn">✎</button>
-                    <p id="inclusion-text-2" data-editable>
-                      Grâce à la collaboration et à la force de notre équipe interdisciplinaire, comprenant
-                      également des personnes ayant des besoins particuliers, nous sommes en mesure de créer des
-                      solutions qui sont à la fois économiquement viables et bénéfiques pour la société. Outsiders
-                      s'efforce de construire un avenir où chacun peut atteindre son plein potentiel. Le "Perfect
-                      Flow" n'est pas seulement une vision, mais une mission que nous partageons avec nos
-                      collaborateurs et partenaires.
+                    <p id="inclusion-text-2" data-editable data-key="inclusion_paragraph_2">
+                        Grâce à la collaboration et à la force de notre équipe interdisciplinaire, comprenant
+                        également des personnes ayant des besoins particuliers, nous sommes en mesure de créer des
+                        solutions qui sont à la fois économiquement viables et bénéfiques pour la société. Outsiders
+                        s'efforce de construire un avenir où chacun peut atteindre son plein potentiel. Le "Perfect
+                        Flow" n'est pas seulement une vision, mais une mission que nous partageons avec nos
+                        collaborateurs et partenaires.
                     </p>
                 </div>
             </div>
-    
 
-        <!-- Section Gamme de services -->
+            <!-- Section Gamme de services -->
             <div class="content-box">
                 <div class="content-image">
                     <button class="edit-btn">✎</button>
@@ -193,31 +188,29 @@ header('Content-Type: text/html; charset=UTF-8');
                 </div>
                 <div class="content">
                     <button class="edit-btn">✎</button>
-                    <h2 id="service-title" data-editable>Notre site Gamme de services</h2>
+                    <h2 id="service-title" data-editable data-key="services_title">Notre site Gamme de services</h2>
                     <button class="edit-btn">✎</button>
-                    <p id="service-text-1" data-editable>
+                    <p id="service-text-1" data-editable data-key="services_paragraph_1">
                         Nos services s'étendent sur diverses technologies virtuelles et sont personnalisés adaptés à vos besoins. 
                         Que ce soit pour une nouvelle application ou pour l'optimisation de processus existants - 
                         nous se concentre sur toujours sur l'innovation et la valeur ajoutée. Notre passion est le 
                         développement de des réalités virtuelles et leur utilisation créative intégration dans votre 
                         vie quotidienne. Notre enthousiasme pour les technologies innovations fait de nous le partenaire
                         idéal sur votre chemin vers la la transformation numérique. Et le plus le meilleur ? Nous aimons les défis !
-                      </p>
+                    </p>
                     <button class="edit-btn">✎</button>
-                    <p id="service-text-2" data-editable>
+                    <p id="service-text-2" data-editable data-key="services_paragraph_2">
                         Outsiders s'engage intensivement dans la recherche et le développement de des technologies clés, en mettant 
                         particulièrement l'accent sur les simulateurs basés sur la technologie technologie XR. Notre objectif est, 
                         grâce à ces technologies innovantes, y compris les créer des opportunités d'emploi créer et faciliter 
                         le choix d'une profession et formation pour les personnes atteintes de d'améliorer le spectre de l'autisme. 
                         Nous soutenons leur intégration active sur le marché du travail et contribue ainsi une contribution à une société plus inclusive.
-                    </p>                    
+                    </p>
                 </div>
-
-                
             </div>
-
         </section>
     </main>
+
     <footer class="site-footer">
        <!-- =========== En-tête du site =========== -->
             <?php
