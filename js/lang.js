@@ -96,7 +96,28 @@ const translations = {
     cao_ar_text: "Pour valoriser vos produits, vos campagnes publicitaires ou vos contenus pédagogiques.",
     cao_render_title: "Rendus photoréalistes :",
     cao_render_text: "Pour donner vie à vos modèles et sublimer vos concepts issus de la CAO.",
-    cao_button: "En savoir plus"
+    cao_button: "En savoir plus",
+        //page portefeuille/Jeux
+    games_banner_img: "images/jeux_banner.jpg",
+    games_hero_title: "Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations.",
+    games_hero_text: "Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !",
+    games_image: "images/jeux.jpg",
+    games_title: "Jeux et éducation",
+    games_intro: "Le jeu vidéo est un formidable vecteur d'apprentissage. Nous développons des expériences gaming adaptées à vos besoins : serious games pour la formation professionnelle, jeux éducatifs pour les jeunes publics, ou encore advergames pour dynamiser votre communication. Chaque création allie gameplay captivant et objectifs pédagogiques concrets, pour que vos utilisateurs apprennent... sans même y penser !",
+    games_subtitle: "Ce que nous créons pour vous",
+    games_story_title: "Narration et univers :",
+    games_story_text: "Nous écrivons des histoires captivantes et bâtissons des mondes 3D cohérents où vos joueurs auront envie de se perdre.",
+    games_gameplay_title: "Gameplay et progression :",
+    games_gameplay_text: "Conception de mécaniques de jeu fluides, création de systèmes de récompenses stimulants et intégration d'éléments de gamification pertinents.",
+    games_level_title: "Design de niveaux :",
+    games_level_text: "Architecture minutieuse de chaque niveau pour offrir une courbe de difficulté équilibrée et une expérience rythmée.",
+    games_creative_title: "Direction créative :",
+    games_creative_text: "Vision artistique globale qui donne une identité unique à votre jeu.",
+    games_ui_title: "Expérience utilisateur :",
+    games_ui_text: "Analyse approfondie des interfaces et optimisation de l'ergonomie pour une navigation intuitive.",
+    games_multi_title: "Développement multiplateforme :",
+    games_multi_text: "Des solutions techniques adaptables qui fonctionnent aussi bien sur mobile, console que PC.",
+    games_button: "En savoir plus",
   
   
     },
@@ -198,7 +219,31 @@ const translations = {
     cao_ar_text: "To enhance your products, advertising campaigns, or educational content.",
     cao_render_title: "Photorealistic Renderings:",
     cao_render_text: "To bring your models to life and enhance your CAD-based concepts.",
-    cao_button: "Learn more"
+    cao_button: "Learn more",
+
+    //page portefeuille/jeux 
+    games_banner_img: "images/jeux_banner.jpg",
+    games_hero_title: "Explore the universe of our projects and let yourself be amazed by the diversity of our creations.",
+    games_hero_text: "Browse through our work! Perhaps you'll find the spark for your next project? We sincerely hope so!",
+    games_image: "images/jeux.jpg",
+    games_title: "Games and Education",
+    games_intro: "Video games are a powerful learning tool. We develop gaming experiences tailored to your needs: serious games for professional training, educational games for younger audiences, and advergames to energize your communication. Each creation combines engaging gameplay with concrete educational objectives, so your users learn—almost without realizing it!",
+    games_subtitle: "What we create for you",
+    games_story_title: "Storytelling and Worlds:",
+    games_story_text: "We craft captivating stories and build consistent 3D worlds where your players will love to get lost.",
+    games_gameplay_title: "Gameplay and Progression:",
+    games_gameplay_text: "Design of smooth gameplay mechanics, creation of motivating reward systems, and integration of relevant gamification elements.",
+    games_level_title: "Level Design:",
+    games_level_text: "Meticulous architecture of each level to ensure a balanced difficulty curve and a dynamic experience.",
+    games_creative_title: "Creative Direction:",
+    games_creative_text: "A global artistic vision that gives your game a unique identity.",
+    games_ui_title: "User Experience:",
+    games_ui_text: "In-depth interface analysis and ergonomic optimization for intuitive navigation.",
+    games_multi_title: "Cross-Platform Development:",
+    games_multi_text: "Technical solutions adaptable for mobile, console, and PC alike.",
+    games_button: "Learn more"
+
+
     }
 };
 
