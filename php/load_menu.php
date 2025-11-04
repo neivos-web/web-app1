@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: *"); // replace * with domain in prod
+header("Access-Control-Allow-Origin: https://outsdrs.com"); // replace * with domain in prod
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');

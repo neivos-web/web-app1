@@ -1,5 +1,5 @@
     <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto max-w-full px-20 py-6 flex justify-between items-center gap-10">
+        <nav id="main-menu" class="container mx-auto max-w-full px-20 py-6 flex justify-between items-center gap-10">
             <!-- Logo -->
             <div class="flex items-center space-x-4">
                 <div class="nav-item-wrapper">

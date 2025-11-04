@@ -2,6 +2,23 @@ let isAdmin = false;
 let saveTimer = null;
 const SAVE_DEBOUNCE_MS = 900;
 
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  try {
+    const res = await fetch('/php/logout.php', {
+      method: 'POST',
+      credentials: 'include'  // Include cookies to ensure session is destroyed
+    });
+    const json = await res.json();
+    if (json.success) {
+      window.location.href = 'login.html';  // Redirect to login page after logout
+    } else {
+      console.error('Logout failed');
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+});
+
 // Toast helper function for feedback
 function toast(msg, timeout = 2600) {
   let t = document.getElementById("cms-toast");
@@ -56,7 +73,7 @@ function initAdminEditor() {
 }
 
 // Open inline editor (text editing)
-function openInlineEditor(el) {
+async function openInlineEditor(el) {
   if (!isAdmin) return;
   if (el.dataset.editing === "true") return;
 
@@ -73,7 +90,7 @@ function openInlineEditor(el) {
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("page", "logo"); // You may want to send specific page info to handle on the server side
+      formData.append("page", "admin_index"); // Pass the page name to identify which page is being edited
 
       try {
         const res = await fetch("/php/upload_image.php", {
@@ -84,6 +101,8 @@ function openInlineEditor(el) {
         const json = await res.json();
         if (json.success && json.url) {
           el.src = json.url; // Update the logo's source dynamically
+
+          // Now save the content including the new logo URL
           toast("Logo uploaded successfully — saving...");
           scheduleSave(); // Save after image upload
         } else {
