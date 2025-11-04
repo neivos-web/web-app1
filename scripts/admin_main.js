@@ -206,7 +206,7 @@ function addDeleteAndAddBlockButtons(box) {
 
   const addBtn = document.createElement("button");
   addBtn.innerText = "+ Ajouter un block";
-  addBtn.className = "add-block-btn";
+  addBtn.className = "add-block-btn mt-4 bg-sky-600 text-white px-4 py-2 rounded-md";
   Object.assign(addBtn.style, { display:"block", marginTop:"12px" });
   addBtn.addEventListener("click", () => {
     const newBox = createContentBox();
