@@ -220,10 +220,7 @@ function addDeleteAndAddBlockButtons(box) {
 }
 
 function enableBlockManagement() {
-  document.querySelectorAll(".content-box").forEach(b => {
-    if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + Math.floor(Math.random()*1000);
-    addDeleteAndAddBlockButtons(b);
-  });
+  document.querySelectorAll(".content-box").forEach(b => addDeleteAndAddBlockButtons(b));
 }
 
 function createContentBox() {
