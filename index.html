@@ -15,6 +15,7 @@
             theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#2AF598' } } }
         }
     </script>
+    <script src="js/lang.js"></script>
 </head>
 <body class="bg-gray-100 text-brand-dark">
 
@@ -116,19 +117,16 @@
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-content">
             <div class="absolute inset-0">
-                <button class="edit-btn absolute top-4 left-4 z-50">✎</button>
                 <img id="hero-image"
                     src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
-                    class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
+                    class="w-full h-full object-cover opacity-80" alt="Workspace">
             </div>
 
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-                <button class="edit-btn">✎</button>
-                <h1 id="hero-title" class="text-3xl md:text-5xl font-extrabold mb-4" data-editable data-key="welcome_title">
+                <h1 id="hero-title" class="text-3xl md:text-5xl font-extrabold mb-4" data-key="welcome_title">
                     OUTSIDERS – L’Innovation au Service du Changement
                 </h1>
-                <button class="edit-btn">✎</button>
-                <p id="hero-desc" class="text-lg max-w-3xl mx-auto" data-editable data-key="welcome_subtitle">
+                <p id="hero-desc" class="text-lg max-w-3xl mx-auto" data-key="welcome_subtitle">
                     Apprenez les technologies les plus demandées du moment grâce à nos formations interactives et pratiques.
                     OUTSIDERS vous accompagne pour développer vos compétences, booster votre carrière et devenir acteur de
                     l’innovation numérique.
@@ -267,7 +265,6 @@
    <!---- <script src="scripts/admin_main.js"></script>  -->
 
     <script type="module" src="js/dropdown.js"></script>
-    <script type="module" src="js/lang.js"></script>
     <!-- Script pour le menu mobile -->
     <script>
     document.getElementById('menu-toggle').addEventListener('click', function () {
