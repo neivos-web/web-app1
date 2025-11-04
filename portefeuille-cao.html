@@ -184,88 +184,99 @@
 
 
 
-    <main>
-        <!-- Section Héros -->
-        <section class="relative bg-white">
-            <div class="absolute inset-0">
-                 <button class="edit-btn">✎</button>
-                <img src="images/cao_banner.jpg" alt="Image de fond VR" class="w-full h-full object-cover" data-editable>
-                <div class="absolute inset-0 bg-black opacity-40"></div>
-            </div>
-            <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-                <button class="edit-btn">✎</button>
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations. </h1>
-                <p class="text-lg max-w-3xl mx-auto" data-editable>Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !</p>
-            </div>
-        </section>
+   <main>
+    <!-- Section Héros -->
+    <section class="relative bg-white">
+        <div class="absolute inset-0">
+            <button class="edit-btn">✎</button>
+            <img src="images/cao_banner.jpg" alt="Image de fond VR" class="w-full h-full object-cover" data-editable data-key="cao_banner_img">
+            <div class="absolute inset-0 bg-black opacity-40"></div>
+        </div>
+        <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
+            <button class="edit-btn">✎</button>
+            <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable data-key="cao_hero_title">
+                Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations.
+            </h1>
+            <p class="text-lg max-w-3xl mx-auto" data-editable data-key="cao_hero_text">
+                Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !
+            </p>
+        </div>
+    </section>
 
-        <!-- ===== Section VR ===== -->
-        <section class="vr-section">
-            <div class="vr-container">
-            
+    <!-- ===== Section VR ===== -->
+    <section class="vr-section">
+        <div class="vr-container">
+
             <!-- Image gauche -->
             <div class="vr-image">
-                 <button class="edit-btn">✎</button>
-                <img src="images/cao.jpg" alt="Réalité virtuelle industrie" data-editable>
+                <button class="edit-btn">✎</button>
+                <img src="images/cao.jpg" alt="Réalité virtuelle industrie" data-editable data-key="cao_image">
             </div>
 
             <!-- Texte droite -->
             <div class="vr-content">
                 <button class="edit-btn">✎</button>
-                <h2 data-editable> <button class="edit-btn">✎</button><span data-editable>CAO - </span>Conception assitée par ordinateur</h2>
+                <h2 data-editable data-key="cao_title">
+                    <span data-editable data-key="cao_title_prefix">CAO - </span>Conception assistée par ordinateur
+                </h2>
                 <button class="edit-btn">✎</button>
-                <p data-editable>
-                Donnez vie à vos idées grâce à des créations réalistes et minutieuses.
-                En nous appuyant sur les outils de conception assistée par ordinateur (CAO), nous concevons des environnements, 
-                des paysages, des bâtiments et des objets du quotidien avec un haut niveau de précision et de détail.
+                <p data-editable data-key="cao_intro">
+                    Donnez vie à vos idées grâce à des créations réalistes et minutieuses.
+                    En nous appuyant sur les outils de conception assistée par ordinateur (CAO), nous concevons des environnements,
+                    des paysages, des bâtiments et des objets du quotidien avec un haut niveau de précision et de détail.
                 </p>
 
-                <p class="vr-subtitle"><strong>Nos expertises en conception assistée par ordinateur (CAO) : </strong></p>
+                <p class="vr-subtitle" data-editable data-key="cao_subtitle">
+                    <strong>Nos expertises en conception assistée par ordinateur (CAO) :</strong>
+                </p>
+
                 <ul class="vr-list">
                     <li>
                         <i class="bi bi-check2"></i>
                         <div>
                             <button class="edit-btn">✎</button>
-                            <strong data-editable>Création et modélisation 3D:</strong>
-                             <button class="edit-btn">✎</button>
-                            <p data-editable>Produits, prototypes et environnements virtuels.</p>
+                            <strong data-editable data-key="cao_3d_title">Création et modélisation 3D :</strong>
+                            <button class="edit-btn">✎</button>
+                            <p data-editable data-key="cao_3d_text">Produits, prototypes et environnements virtuels.</p>
                         </div>
                     </li>
                     <li>
                         <i class="bi bi-check2"></i>
                         <div>
                             <button class="edit-btn">✎</button>
-                            <strong data-editable>Animations 3D :</strong>
+                            <strong data-editable data-key="cao_animation_title">Animations 3D :</strong>
                             <button class="edit-btn">✎</button>
-                            <p data-editable>Pour illustrer des concepts, des mécanismes ou des scénarios techniques.</p>
+                            <p data-editable data-key="cao_animation_text">Pour illustrer des concepts, des mécanismes ou des scénarios techniques.</p>
                         </div>
                     </li>
                     <li>
                         <i class="bi bi-check2"></i>
                         <div>
                             <button class="edit-btn">✎</button>
-                            <strong data-editable>Intégration en réalité augmentée (AR) :</strong>
+                            <strong data-editable data-key="cao_ar_title">Intégration en réalité augmentée (AR) :</strong>
                             <button class="edit-btn">✎</button>
-                            <p data-editable>Pour valoriser vos produits, vos campagnes publicitaires ou vos contenus pédagogiques.</p>
+                            <p data-editable data-key="cao_ar_text">Pour valoriser vos produits, vos campagnes publicitaires ou vos contenus pédagogiques.</p>
                         </div>
                     </li>
                     <li>
                         <i class="bi bi-check2"></i>
                         <div>
                             <button class="edit-btn">✎</button>
-                            <strong data-editable>Rendus photoréalistes :</strong>
+                            <strong data-editable data-key="cao_render_title">Rendus photoréalistes :</strong>
                             <button class="edit-btn">✎</button>
-                            <p data-editable>Pour donner vie à vos modèles et sublimer vos concepts issus de la CAO.</p>
+                            <p data-editable data-key="cao_render_text">Pour donner vie à vos modèles et sublimer vos concepts issus de la CAO.</p>
                         </div>
                     </li>
                 </ul>
-                 <button class="edit-btn">✎</button>
-                <a href="#" class="btn-vr" data-editable>En savoir plus</a>
+
+                <button class="edit-btn">✎</button>
+                <a href="#" class="btn-vr" data-editable data-key="cao_button">En savoir plus</a>
             </div>
 
-            </div>
-        </section>
-        </main>
+        </div>
+    </section>
+</main>
+
     
     
 <!-- =========== Pied de page du site =========== -->
