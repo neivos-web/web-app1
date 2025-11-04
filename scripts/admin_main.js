@@ -59,58 +59,33 @@ async function loadStructuredContent(page = pageKey) {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
     const data = await res.json();
-    if (!data.success) return;
+    if (!data.success) return console.info("No content saved for", page);
 
     const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
     if (!blocks.length) return;
 
-    const container = document.querySelector("#editable-container");
-    if (!container) return;
-
-    blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-    blocks.forEach(block => {
-      let blockEl = [...container.querySelectorAll(".content-box")].find(
-        b => b.dataset.blockId === block.blockId
-      );
-
-      if (!blockEl) {
-        blockEl = document.createElement("div");
-        blockEl.className = "content-box bg-white p-6 rounded-lg shadow-md";
-        blockEl.dataset.blockId = block.blockId;
-        blockEl.dataset.order = block.order;
-
-        block.elements.forEach(el => {
-          const newEl = document.createElement(el.tag.toLowerCase());
-          newEl.id = el.id;
-          newEl.dataset.editable = "true";
-          if (el.tag === "IMG") newEl.src = el.value;
-          else newEl.textContent = el.value;
-          blockEl.appendChild(newEl);
-        });
-
-        container.appendChild(blockEl);
-        addDeleteAndAddButtons(blockEl);
-        enableInlineEditingForBlock(blockEl);
-      } else {
-        block.elements.forEach(el => {
+    blocks.forEach(blockObj => {
+      if (blockObj.elements && blockObj.elements.length) {
+        blockObj.elements.forEach(el => {
           const existing = document.getElementById(el.id);
           if (existing) {
-            if (el.tag === "IMG") existing.src = el.value;
-            else existing.textContent = el.value;
+            // update text or image only
+            if (el.tag === "IMG" && existing.tagName === "IMG") existing.src = el.value;
+            else if (existing.tagName !== "IMG") existing.textContent = el.value;
           }
+          // do NOT create new elements, leave layout untouched
         });
       }
     });
 
-    if (isAdmin) initAdminEditor();
-    console.log("✅ All blocks loaded/merged");
+    console.log("✅ Structured content merged");
   } catch (err) {
-    console.error(err);
+    console.error("loadStructuredContent error", err);
   }
 }
 
-// ---- escape helper ----
+
+// ---- escape helper (prevent XSS when injecting saved text) ----
 function escapeHtml(s) {
   if (s == null) return "";
   return String(s)
@@ -127,24 +102,38 @@ function initAdminEditor() {
     b.dataset.order = i;
   });
 
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    btn.style.display = "inline-flex";
+    btn.style.zIndex = 60;
+    btn.style.cursor = "pointer";
+  });
+
   enableInlineEditing();
   enableBlockManagement();
   enableDragReorder();
 }
 
-// ---- inline editing ----
+// ---- inline editing (text + images) ----
 function enableInlineEditing() {
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    const clone = btn.cloneNode(true);
+    btn.parentNode.replaceChild(clone, btn);
+  });
+
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    const tgtSelector = btn.dataset.target;
+    let target = tgtSelector ? document.querySelector(tgtSelector) : (btn.nextElementSibling || btn.previousElementSibling);
+    if (!target) return;
+    if (target.tagName === "A" && target.querySelector("img[data-editable]")) target = target.querySelector("img[data-editable]");
+    if (!target || target.dataset.editable === undefined) return;
+    cloneAddClick(btn, target);
+  });
+
   document.querySelectorAll("[data-editable]").forEach(el => {
     el.onclick = (e) => {
       if (!isAdmin) return;
       openInlineEditor(el);
     };
-  });
-
-  document.querySelectorAll(".edit-btn").forEach(btn => {
-    const tgt = btn.nextElementSibling || btn.previousElementSibling;
-    if (!tgt || tgt.dataset.editable === undefined) return;
-    btn.addEventListener("click", (e) => { e.stopPropagation(); openInlineEditor(tgt); });
   });
 }
 
@@ -163,8 +152,16 @@ function enableInlineEditingForBlock(block) {
   });
 }
 
+function cloneAddClick(btn, target) {
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    openInlineEditor(target);
+  });
+}
+
 function openInlineEditor(el) {
-  if (!isAdmin || el.dataset.editing === "true") return;
+  if (!isAdmin) return;
+  if (el.dataset.editing === "true") return;
   el.dataset.editing = "true";
 
   if (el.tagName === "IMG") {
@@ -183,8 +180,12 @@ function openInlineEditor(el) {
           el.src = j.url;
           scheduleSave();
           toast("Image uploadée — sauvegarde en cours...");
-        } else toast("Erreur upload image");
+        } else {
+          console.error("upload_image failed", j);
+          toast("Erreur upload image");
+        }
       } catch (err) {
+        console.error("upload error", err);
         toast("Erreur réseau upload");
       } finally {
         delete el.dataset.editing;
@@ -241,13 +242,11 @@ function enableBlockManagement() {
 
 // ---- create new content box ----
 function createContentBox() {
-  const timestamp = Date.now();
-  const uid = "block_" + timestamp + "_" + Math.floor(Math.random()*1000);
+  const uid = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
   const box = document.createElement("div");
   box.className = "content-box bg-white p-6 rounded-lg shadow-md";
   box.dataset.blockId = uid;
   box.dataset.order = document.querySelectorAll(".content-box").length;
-
   box.innerHTML = `
     <div class="content-image mb-4">
       <button class="edit-btn">✎</button>
@@ -260,15 +259,10 @@ function createContentBox() {
       <p id="${uid}_text" data-editable>Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
     </div>
   `;
-
-  enableInlineEditingForBlock(box);
-  addDeleteAndAddButtons(box);
-  enableDragReorder();
-
   return box;
 }
 
-// ---- global add block button ----
+// ---- global single add block button ----
 function addGlobalAddBlockButton() {
   const existing = document.getElementById("add-global-block-btn");
   if (existing) existing.remove();
@@ -281,12 +275,14 @@ function addGlobalAddBlockButton() {
 
   btn.addEventListener("click", () => {
     const container = document.querySelector("#editable-container");
-    if (!container) return;
     const newBox = createContentBox();
     container.appendChild(newBox);
 
-    // mettre à jour les ordres et sauvegarder
-    Array.from(container.querySelectorAll(".content-box")).forEach((b, idx) => b.dataset.order = idx);
+    // Initialize only the new block
+    addDeleteAndAddButtons(newBox);
+    enableInlineEditingForBlock(newBox);
+    enableDragReorder();
+
     scheduleSave();
   });
 
@@ -324,7 +320,7 @@ function enableDragReorder() {
   });
 }
 
-// ---- collect blocks from DOM ----
+// ---- collect blocks from DOM in current order ----
 function buildBlocksFromDOM() {
   const blocks = [];
   const allEditable = document.querySelectorAll("[data-editable]");
