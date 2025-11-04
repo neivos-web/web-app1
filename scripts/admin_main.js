@@ -271,12 +271,16 @@ function enableBlockManagement() {
 }
 
 // ---- create new content box ----
+// ---- create new content box ----
 function createContentBox() {
-  const uid = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+  const timestamp = Date.now();
+  const uid = "block_" + timestamp + "_" + Math.floor(Math.random()*1000);
   const box = document.createElement("div");
   box.className = "content-box bg-white p-6 rounded-lg shadow-md";
   box.dataset.blockId = uid;
   box.dataset.order = document.querySelectorAll(".content-box").length;
+
+  // contenu initial du bloc
   box.innerHTML = `
     <div class="content-image mb-4">
       <button class="edit-btn">✎</button>
@@ -289,8 +293,42 @@ function createContentBox() {
       <p id="${uid}_text" data-editable>Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
     </div>
   `;
+
+  // initialisation inline editing + delete + drag
+  enableInlineEditingForBlock(box);
+  addDeleteAndAddButtons(box);
+  enableDragReorder();
+
   return box;
 }
+
+// ---- global single add block button ----
+function addGlobalAddBlockButton() {
+  const existing = document.getElementById("add-global-block-btn");
+  if (existing) existing.remove();
+
+  const btn = document.createElement("button");
+  btn.id = "add-global-block-btn";
+  btn.innerText = "+ Ajouter un block";
+  btn.className = "add-block-btn";
+  Object.assign(btn.style, { display: "block", marginTop: "20px" });
+
+  btn.addEventListener("click", () => {
+    const container = document.querySelector("#editable-container");
+    if (!container) return;
+
+    const newBox = createContentBox();
+    container.appendChild(newBox);
+
+    // met à jour l'ordre et sauvegarde
+    Array.from(container.querySelectorAll(".content-box")).forEach((b, idx) => b.dataset.order = idx);
+    scheduleSave();
+  });
+
+  const container = document.querySelector("#editable-container");
+  if (container) container.appendChild(btn);
+}
+
 
 // ---- global single add block button ----
 function addGlobalAddBlockButton() {
