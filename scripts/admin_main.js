@@ -248,35 +248,38 @@ function createContentBox() {
 }
 
 // ---- Global add block button ----
+// ---- Floating "Add Block" button ----
 function addGlobalAddBlockButton() {
   let btn = document.getElementById("add-global-block-btn");
   if (!btn) {
     btn = document.createElement("button");
     btn.id = "add-global-block-btn";
-    btn.innerText = "+ Ajouter un block";
-    addBtn.className = "add-block-btn mt-4 bg-sky-600 text-white px-4 py-2 rounded-md";
+    btn.innerHTML = '<span style="font-size:20px;margin-right:6px;">＋</span>Ajouter un bloc';
+    btn.className =
+      "add-block-btn fixed bottom-6 right-6 bg-sky-600 text-white px-5 py-3 rounded-full shadow-lg text-sm font-medium hover:bg-sky-700 transition transform hover:scale-110 z-[9999]";
 
-    //Object.assign(btn.style, { display: "block", marginTop: "20px" });
-    //btn.className = "add-block-btn";
     btn.addEventListener("click", () => {
       const container = document.querySelector("#editable-container");
       if (!container) return;
+
       const newBox = createContentBox();
       container.appendChild(newBox);
+
+      // Reinitialize for new block
       addDeleteAndAddButtons(newBox);
       enableInlineEditing();
       enableDragReorder();
-      container.appendChild(btn);
-      scheduleSave();
-    });
-  }
 
-  const container = document.querySelector("#editable-container");
-  if (container && !container.contains(btn)) {
-    container.appendChild(btn);
+      // Keep button always last visually
+      container.appendChild(btn);
+
+      scheduleSave();
+      toast("🧱 Nouveau bloc ajouté !");
+    });
+
+    document.body.appendChild(btn);
   }
 }
-
 
 // ---- Drag reorder ----
 function enableDragReorder() {
