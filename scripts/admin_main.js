@@ -62,51 +62,28 @@ async function loadStructuredContent(page = pageKey) {
     if (!data.success) return console.info("No content saved for", page);
 
     const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
-
     if (!blocks.length) return;
 
-    blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
     blocks.forEach(blockObj => {
-      const container = document.querySelector("#editable-container");
-      if (!container) return console.warn("No #editable-container found");
-
-      // If block exists, update elements
-      let blockEl = document.querySelector(`[data-block-id="${blockObj.blockId}"]`);
-      if (!blockEl) {
-        // create new block container
-        blockEl = document.createElement("div");
-        blockEl.className = "content-box bg-white p-6 rounded-lg shadow-md";
-        blockEl.dataset.blockId = blockObj.blockId;
-        blockEl.dataset.order = blockObj.order || 0;
-        container.appendChild(blockEl);
-      }
-
-      // Add/update elements inside the block
       if (blockObj.elements && blockObj.elements.length) {
         blockObj.elements.forEach(el => {
-          let existing = document.getElementById(el.id);
-          if (!existing) {
-            const newEl = document.createElement(el.tag.toLowerCase());
-            newEl.id = el.id;
-            newEl.dataset.editable = "true";
-            if (el.tag === "IMG") newEl.src = el.value;
-            else newEl.textContent = el.value;
-            blockEl.appendChild(newEl);
-          } else {
-            if (el.tag === "IMG") existing.src = el.value;
-            else existing.textContent = el.value;
+          const existing = document.getElementById(el.id);
+          if (existing) {
+            // update text or image only
+            if (el.tag === "IMG" && existing.tagName === "IMG") existing.src = el.value;
+            else if (existing.tagName !== "IMG") existing.textContent = el.value;
           }
+          // do NOT create new elements, leave layout untouched
         });
       }
     });
 
-
-    if (isAdmin) initAdminEditor();
-    console.log("✅ Structured content loaded");
+    console.log("✅ Structured content merged");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
+
 
 // ---- escape helper (prevent XSS when injecting saved text) ----
 function escapeHtml(s) {
