@@ -75,7 +75,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
        <!-- =========== En-tête du site =========== -->
             <?php
-            include './components/admin_menu.php'; // or require 'main_admin.php';
+            require './components/admin_menu.php';
             ?>
     <main>
         <!-- Section Héros -->
