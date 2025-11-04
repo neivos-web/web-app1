@@ -249,26 +249,31 @@ function createContentBox() {
 
 // ---- Global add block button ----
 function addGlobalAddBlockButton() {
-  if (document.getElementById("add-global-block-btn")) return;
-
-  const btn = document.createElement("button");
-  btn.id = "add-global-block-btn";
-  btn.innerText = "+ Ajouter un block";
-  btn.className = "add-block-btn";
-  Object.assign(btn.style, { display: "block", marginTop: "20px" });
-
-  btn.addEventListener("click", () => {
-    const container = document.querySelector("#editable-container");
-    const newBox = createContentBox();
-    container.appendChild(newBox);
-    addDeleteAndAddButtons(newBox);
-    enableInlineEditing();
-    enableDragReorder();
-    scheduleSave();
-  });
+  let btn = document.getElementById("add-global-block-btn");
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "add-global-block-btn";
+    btn.innerText = "+ Ajouter un block";
+    Object.assign(btn.style, { display: "block", marginTop: "20px" });
+    btn.className = "add-block-btn";
+    btn.addEventListener("click", () => {
+      const container = document.querySelector("#editable-container");
+      if (!container) return;
+      const newBox = createContentBox();
+      container.appendChild(newBox);
+      addDeleteAndAddButtons(newBox);
+      enableInlineEditing();
+      enableDragReorder();
+      // 🧩 keep button at end
+      container.appendChild(btn);
+      scheduleSave();
+    });
+  }
 
   const container = document.querySelector("#editable-container");
-  if (container) container.appendChild(btn);
+  if (container && !container.contains(btn)) {
+    container.appendChild(btn);
+  }
 }
 
 // ---- Drag reorder ----
@@ -299,13 +304,13 @@ function enableDragReorder() {
 }
 
 // ---- Build JSON structure (for legacy mode) ----
+// ---- Build JSON structure (now includes all data-editable elements everywhere) ----
 function buildBlocksFromDOM() {
   const blocks = [];
-  document.querySelectorAll("[data-editable]").forEach((el, idx) => {
+  const editableElements = document.querySelectorAll("[data-editable]");
+  editableElements.forEach((el, idx) => {
     const parentBox = el.closest(".content-box");
-    if (parentBox && !parentBox.dataset.blockId)
-      parentBox.dataset.blockId = "block_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
-    const blockId = parentBox?.dataset.blockId || ("single_" + idx + "_" + Date.now());
+    const blockId = parentBox?.dataset.blockId || ("misc_" + Date.now() + "_" + idx);
     let blk = blocks.find(b => b.blockId === blockId);
     if (!blk) {
       blk = { blockId, order: blocks.length, elements: [] };
@@ -348,7 +353,7 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 
 // ---- Save full editable section ----
 async function saveStructuredContent(page = pageKey) {
-  const container = document.querySelector("#editable-container");
+  const container = document.querySelector("#editable-container") || document.body;
   if (!container) return console.warn("No editable-container found.");
 
   const blocks = buildBlocksFromDOM();
