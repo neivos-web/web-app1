@@ -196,8 +196,7 @@ function addDeleteAndAddBlockButtons(box) {
 
   const del = document.createElement("button");
   del.innerText = "❌";
-  del.className = "delete-btn";
-  Object.assign(del.style, { position:"absolute", right:"8px", top:"8px", zIndex:60 });
+  del.className = "delete-btn absolute top-2 right-2 bg-red-500 text-white rounded-full px-2 py-1 z-50";
   del.addEventListener("click", () => {
     if (!confirm("Supprimer ce bloc ?")) return;
     box.remove();
@@ -207,7 +206,6 @@ function addDeleteAndAddBlockButtons(box) {
   const addBtn = document.createElement("button");
   addBtn.innerText = "+ Ajouter un block";
   addBtn.className = "add-block-btn mt-4 bg-sky-600 text-white px-4 py-2 rounded-md";
-  Object.assign(addBtn.style, { display:"block", marginTop:"12px" });
   addBtn.addEventListener("click", () => {
     const newBox = createContentBox();
     box.parentElement.insertBefore(newBox, addBtn);
@@ -276,8 +274,7 @@ async function saveStructuredContent(page = pageKey) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ page, blocks })
-    });
+      body: JSON.stringify({ page, content: blocks })    });
     const data = await res.json();
     if (!data.success) return showToast("Erreur sauvegarde", false);
     console.log("Saved", data.updated);
