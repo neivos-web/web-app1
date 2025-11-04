@@ -1,13 +1,10 @@
-// ================== ADMIN STRUCTURED CMS ==================
-// Upload-only images, full section save (with inline styles)
-// ==========================================================
-
+// admin_structured.js (upload-only images, saves blocks+order+elements)
 const pageKey = window.location.pathname.split("/").pop() || "admin_index.php";
 let isAdmin = false;
 let saveTimer = null;
 const SAVE_DEBOUNCE_MS = 900;
 
-// ---- Toast / badge helpers ----
+// ---- UI helpers ----
 function toast(msg, timeout = 2600) {
   let t = document.getElementById("cms-toast");
   if (!t) {
@@ -15,9 +12,8 @@ function toast(msg, timeout = 2600) {
     t.id = "cms-toast";
     Object.assign(t.style, {
       position: "fixed", right: "20px", bottom: "20px",
-      background: "rgba(0,0,0,0.8)", color: "#fff",
-      padding: "10px 14px", borderRadius: "8px",
-      zIndex: 9999, fontFamily: "Inter,system-ui,Segoe UI",
+      background: "rgba(0,0,0,0.8)", color: "#fff", padding: "10px 14px",
+      borderRadius: "8px", zIndex: 9999, fontFamily: "Inter,system-ui,Segoe UI",
       transition: "opacity .25s", opacity: 0
     });
     document.body.appendChild(t);
@@ -25,7 +21,7 @@ function toast(msg, timeout = 2600) {
   t.textContent = msg;
   t.style.opacity = "1";
   clearTimeout(t._hide);
-  t._hide = setTimeout(() => (t.style.opacity = "0"), timeout);
+  t._hide = setTimeout(() => t.style.opacity = "0", timeout);
 }
 
 function showSavedBadge() {
@@ -33,25 +29,20 @@ function showSavedBadge() {
   el.innerText = "Sauvegardé";
   Object.assign(el.style, {
     position: "fixed", right: "20px", bottom: "72px",
-    background: "#16a34a", color: "#fff", padding: "8px 12px",
-    borderRadius: "8px", zIndex: 9999, opacity: 0,
-    transition: "opacity .18s"
+    background: "#16a34a", color: "#fff", padding: "8px 12px", borderRadius: "8px",
+    zIndex: 9999, opacity: 0, transition: "opacity .18s"
   });
   document.body.appendChild(el);
-  requestAnimationFrame(() => (el.style.opacity = "1"));
-  setTimeout(() => {
-    el.style.opacity = "0";
-    setTimeout(() => el.remove(), 240);
-  }, 1400);
+  requestAnimationFrame(() => el.style.opacity = "1");
+  setTimeout(() => { el.style.opacity = "0"; setTimeout(()=>el.remove(), 240); }, 1400);
 }
 
-// ---- Session check & init ----
+// ---- session check & init ----
 async function checkAdminSession() {
   try {
     const r = await fetch("/php/check_session.php", { credentials: "include" });
     const j = await r.json();
     isAdmin = j.logged_in === true;
-    if (isAdmin) initAdminEditor();
   } catch (e) {
     console.warn("session check failed", e);
   } finally {
@@ -60,86 +51,118 @@ async function checkAdminSession() {
 }
 document.addEventListener("DOMContentLoaded", checkAdminSession);
 
-// ---- Load saved content ----
+// ---- load saved content (rebuild blocks) ----
 async function loadStructuredContent(page = pageKey) {
   try {
-    const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, {
-      credentials: "include"
-    });
+    const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
-    // === NEW: reload full editable section if HTML saved ===
-    if (data.html) {
-      const section = document.querySelector("#editable-container");
-      if (section) {
-        section.outerHTML = data.html;
-        console.log("Full editable-container reloaded from saved HTML");
-        // reinitialize admin UI so buttons work again
-        if (isAdmin) initAdminEditor();
-      }
-      return;
-    }
+    const savedBlocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
+    const container = document.querySelector("#editable-container");
+    if (!container) return;
 
-    // === Fallback structured (legacy) ===
-    const blocks = Array.isArray(data.content) ? data.content : (data.content?.blocks || []);
-    if (!blocks.length) return;
-    blocks.forEach(blockObj => {
-      if (blockObj.elements && blockObj.elements.length) {
-        blockObj.elements.forEach(el => {
-          const existing = document.getElementById(el.id);
-          if (existing) {
-            if (el.tag === "IMG" && existing.tagName === "IMG") existing.src = el.value;
-            else if (existing.tagName !== "IMG") existing.textContent = el.value;
-          }
-        });
+    // Prendre tous les blocs du DOM
+    const existingBoxes = Array.from(container.querySelectorAll(".content-box"));
+
+    // Fusionner chaque bloc sauvegardé
+    savedBlocks.forEach(blockObj => {
+      let box = existingBoxes.find(b => b.dataset.blockId === blockObj.blockId);
+      if (!box) {
+        box = document.createElement("div");
+        box.className = "content-box bg-white p-6 rounded-lg shadow-md";
+        box.dataset.blockId = blockObj.blockId;
+        box.dataset.order = blockObj.order;
+        container.appendChild(box);
       }
+
+      blockObj.elements.forEach(el => {
+        let existingEl = document.getElementById(el.id);
+        if (!existingEl) {
+          const newEl = document.createElement(el.tag.toLowerCase());
+          newEl.id = el.id;
+          newEl.dataset.editable = "true";
+          newEl.className = el.classes || "";
+          if (el.style) newEl.setAttribute("style", el.style);
+          if (el.tag === "IMG") newEl.src = el.value;
+          else newEl.textContent = el.value;
+          box.appendChild(newEl);
+        } else {
+          if (el.tag === "IMG") existingEl.src = el.value;
+          else existingEl.textContent = el.value;
+          existingEl.className = el.classes || "";
+          if (el.style) existingEl.setAttribute("style", el.style);
+        }
+      });
+
+      addDeleteAndAddButtons(box);
+      enableInlineEditingForBlock(box);
     });
-    console.log("Structured content merged (partial update)");
+
+    initAdminEditor();
+    console.log("✅ All blocks loaded and merged with DOM");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
 
-// ---- Inline edit setup ----
+// ---- escape helper ----
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// ---- admin UI init ----
 function initAdminEditor() {
   document.querySelectorAll(".content-box").forEach((b, i) => {
     if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + "_" + i;
     b.setAttribute("draggable", "true");
     b.dataset.order = i;
   });
-
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.style.display = "inline-flex";
     btn.style.zIndex = 60;
     btn.style.cursor = "pointer";
   });
-
   enableInlineEditing();
   enableBlockManagement();
   enableDragReorder();
-  addGlobalAddBlockButton();
 }
 
-// ---- Inline editing (text + images) ----
+// ---- inline editing ----
 function enableInlineEditing() {
   document.querySelectorAll(".edit-btn").forEach(btn => {
+    const clone = btn.cloneNode(true);
+    btn.parentNode.replaceChild(clone, btn);
+  });
+
+  document.querySelectorAll(".edit-btn").forEach(btn => {
     const tgtSelector = btn.dataset.target;
-    let target = tgtSelector ? document.querySelector(tgtSelector) :
-      (btn.nextElementSibling || btn.previousElementSibling);
+    let target = tgtSelector ? document.querySelector(tgtSelector) : (btn.nextElementSibling || btn.previousElementSibling);
     if (!target) return;
-    if (target.tagName === "A" && target.querySelector("img[data-editable]"))
-      target = target.querySelector("img[data-editable]");
+    if (target.tagName === "A" && target.querySelector("img[data-editable]")) target = target.querySelector("img[data-editable]");
     if (!target || target.dataset.editable === undefined) return;
-    btn.addEventListener("click", e => { e.stopPropagation(); openInlineEditor(target); });
+    cloneAddClick(btn, target);
   });
 
   document.querySelectorAll("[data-editable]").forEach(el => {
-    el.onclick = e => {
-      if (!isAdmin) return;
-      openInlineEditor(el);
-    };
+    el.onclick = (e) => { if (!isAdmin) return; openInlineEditor(el); };
   });
+}
+
+function enableInlineEditingForBlock(block) {
+  block.querySelectorAll("[data-editable]").forEach(el => {
+    el.onclick = (e) => { if (!isAdmin) return; openInlineEditor(el); };
+  });
+  block.querySelectorAll(".edit-btn").forEach(btn => {
+    const tgt = btn.nextElementSibling || btn.previousElementSibling;
+    if (!tgt || tgt.dataset.editable === undefined) return;
+    btn.addEventListener("click", (e) => { e.stopPropagation(); openInlineEditor(tgt); });
+  });
+}
+
+function cloneAddClick(btn, target) {
+  btn.addEventListener("click", e => { e.stopPropagation(); openInlineEditor(target); });
 }
 
 function openInlineEditor(el) {
@@ -157,30 +180,22 @@ function openInlineEditor(el) {
         const fd = new FormData();
         fd.append("file", f);
         fd.append("page", pageKey);
-        const res = await fetch("/php/upload_image.php", {
-          method: "POST", body: fd, credentials: "include"
-        });
+        const res = await fetch("/php/upload_image.php", { method: "POST", body: fd, credentials: "include" });
         const j = await res.json();
         if (j.success && j.url) {
           el.src = j.url;
           scheduleSave();
           toast("Image uploadée — sauvegarde en cours...");
-        } else {
-          toast("Erreur upload image");
-        }
-      } catch (err) {
-        toast("Erreur réseau upload");
-      } finally {
-        delete el.dataset.editing;
-        input.remove();
-      }
+        } else { toast("Erreur upload image"); }
+      } catch { toast("Erreur réseau upload"); }
+      finally { delete el.dataset.editing; input.remove(); }
     });
     input.click();
     return;
   }
 
   const tag = el.tagName;
-  const isLong = (el.textContent || "").length > 60 || ["P", "DIV"].includes(tag);
+  const isLong = (el.textContent || "").length > 60 || ["P","DIV"].includes(tag);
   const input = isLong ? document.createElement("textarea") : document.createElement("input");
   input.value = (el.textContent || "").trim();
   input.className = "border border-blue-300 rounded p-1 w-full";
@@ -197,12 +212,10 @@ function openInlineEditor(el) {
   }
 
   input.addEventListener("blur", finalize);
-  input.addEventListener("keydown", ev => {
-    if (ev.key === "Enter" && input.tagName !== "TEXTAREA") input.blur();
-  });
+  input.addEventListener("keydown", (ev) => { if (ev.key === "Enter" && input.tagName !== "TEXTAREA") input.blur(); });
 }
 
-// ---- Block add/delete ----
+// ---- block add/delete ----
 function addDeleteAndAddButtons(box) {
   box.querySelectorAll(".delete-btn").forEach(b => b.remove());
   const del = document.createElement("button");
@@ -225,9 +238,9 @@ function enableBlockManagement() {
   });
 }
 
-// ---- Create new block ----
+// ---- create new content box ----
 function createContentBox() {
-  const uid = "block_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+  const uid = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
   const box = document.createElement("div");
   box.className = "content-box bg-white p-6 rounded-lg shadow-md";
   box.dataset.blockId = uid;
@@ -247,43 +260,43 @@ function createContentBox() {
   return box;
 }
 
-// ---- Global add block button ----
+// ---- global add block button ----
 function addGlobalAddBlockButton() {
-  let btn = document.getElementById("add-global-block-btn");
-  if (!btn) {
-    btn = document.createElement("button");
-    btn.id = "add-global-block-btn";
-    btn.innerText = "+ Ajouter un block";
-    Object.assign(btn.style, { display: "block", marginTop: "20px" });
-    btn.className = "add-block-btn";
-    btn.addEventListener("click", () => {
-      const container = document.querySelector("#editable-container");
-      if (!container) return;
-      const newBox = createContentBox();
-      container.appendChild(newBox);
-      addDeleteAndAddButtons(newBox);
-      enableInlineEditing();
-      enableDragReorder();
-      // 🧩 keep button at end
-      container.appendChild(btn);
-      scheduleSave();
-    });
-  }
+  const existing = document.getElementById("add-global-block-btn");
+  if (existing) existing.remove();
+
+  const btn = document.createElement("button");
+  btn.id = "add-global-block-btn";
+  btn.innerText = "+ Ajouter un block";
+  btn.className = "add-block-btn";
+  Object.assign(btn.style, { display: "block", marginTop: "20px" });
+
+  btn.addEventListener("click", () => {
+    const container = document.querySelector("#editable-container");
+    const newBox = createContentBox();
+    container.appendChild(newBox);
+
+    addDeleteAndAddButtons(newBox);
+    enableInlineEditingForBlock(newBox);
+    enableDragReorder();
+    scheduleSave();
+  });
 
   const container = document.querySelector("#editable-container");
-  if (container && !container.contains(btn)) {
-    container.appendChild(btn);
-  }
+  if (container) container.appendChild(btn);
 }
 
-// ---- Drag reorder ----
+// ---- drag & drop ----
 function enableDragReorder() {
   const container = document.querySelector("#editable-container");
   if (!container) return;
   let dragSrc = null;
+
   container.querySelectorAll(".content-box").forEach(box => {
-    box.addEventListener("dragstart", e => {
-      dragSrc = box; e.dataTransfer.effectAllowed = "move"; box.style.opacity = "0.5";
+    box.addEventListener("dragstart", (e) => {
+      dragSrc = box;
+      e.dataTransfer.effectAllowed = "move";
+      box.style.opacity = "0.5";
     });
     box.addEventListener("dragend", () => {
       box.style.opacity = "";
@@ -291,8 +304,8 @@ function enableDragReorder() {
       Array.from(container.children).forEach((ch, idx) => ch.dataset.order = idx);
       scheduleSave();
     });
-    box.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
-    box.addEventListener("drop", e => {
+    box.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
+    box.addEventListener("drop", (e) => {
       e.preventDefault();
       if (!dragSrc || dragSrc === box) return;
       const rect = box.getBoundingClientRect();
@@ -303,87 +316,63 @@ function enableDragReorder() {
   });
 }
 
-// ---- Build JSON structure (for legacy mode) ----
-// ---- Build JSON structure (now includes all data-editable elements everywhere) ----
+// ---- collect blocks from DOM (includes classes & styles) ----
 function buildBlocksFromDOM() {
   const blocks = [];
-  const editableElements = document.querySelectorAll("[data-editable]");
-  editableElements.forEach((el, idx) => {
+  const allEditable = document.querySelectorAll("[data-editable]");
+  allEditable.forEach((el, idx) => {
     const parentBox = el.closest(".content-box");
-    const blockId = parentBox?.dataset.blockId || ("misc_" + Date.now() + "_" + idx);
+    if (parentBox && !parentBox.dataset.blockId) {
+      parentBox.dataset.blockId = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+    }
+    const blockId = parentBox?.dataset.blockId || ("single_" + idx + "_" + Date.now());
+
     let blk = blocks.find(b => b.blockId === blockId);
     if (!blk) {
       blk = { blockId, order: blocks.length, elements: [] };
       blocks.push(blk);
     }
+
     blk.elements.push({
       id: el.id || ("el_" + idx + "_" + Date.now()),
       tag: el.tagName,
-      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
+      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim(),
+      classes: el.className || "",
+      style: el.getAttribute("style") || ""
     });
   });
-  blocks.forEach((b, i) => (b.order = i));
+  blocks.forEach((b, i) => { b.order = i; });
   return blocks;
 }
 
-// ---- Helper: Capture full section with computed styles ----
-function getStyledOuterHTML(el) {
-  const clone = el.cloneNode(true);
-  const origNodes = el.querySelectorAll("*");
-  const cloneNodes = clone.querySelectorAll("*");
-  cloneNodes.forEach((node, i) => {
-    const style = window.getComputedStyle(origNodes[i]);
-    let cssText = "";
-    for (let prop of style) cssText += `${prop}:${style.getPropertyValue(prop)};`;
-    node.setAttribute("style", cssText);
-  });
-  const mainStyle = window.getComputedStyle(el);
-  let mainCss = "";
-  for (let prop of mainStyle) mainCss += `${prop}:${mainStyle.getPropertyValue(prop)};`;
-  clone.setAttribute("style", mainCss);
-  return clone.outerHTML;
-}
-
-// ---- Debounce + save ----
+// ---- debounce + save ----
 function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
   clearTimeout(saveTimer);
   toast("Changements détectés — sauvegarde bientôt...");
   saveTimer = setTimeout(() => saveStructuredContent(pageKey), ms);
 }
 
-// ---- Save full editable section ----
 async function saveStructuredContent(page = pageKey) {
-  const container = document.querySelector("#editable-container") || document.body;
-  if (!container) return console.warn("No editable-container found.");
-
   const blocks = buildBlocksFromDOM();
-  const html = getStyledOuterHTML(container); // includes inline styles
-
+  if (!blocks.length) return console.warn("Nothing to save (no blocks).");
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page, html, content: blocks })
+      body: JSON.stringify({ page, content: blocks })
     });
     const j = await res.json();
-    if (!j.success) {
-      console.error("Save failed:", j);
-      toast("Erreur sauvegarde");
-      return;
-    }
-    console.log("Full section saved successfully");
+    if (!j.success) { toast("Erreur sauvegarde"); return; }
     showSavedBadge();
-    toast("Section sauvegardée avec style");
-  } catch (err) {
-    console.error("save error", err);
-    toast("Erreur réseau lors de la sauvegarde");
-  }
+    toast("Sauvegardé");
+  } catch { toast("Erreur réseau lors de la sauvegarde"); }
 }
 
-// Expose manual save
+// expose manual save
 window.cms = window.cms || {};
 window.cms.saveNow = () => saveStructuredContent(pageKey);
 
-// Reinit helper
+// reinit helper
 window.addEventListener("cms:reinit", () => initAdminEditor());
+document.addEventListener("DOMContentLoaded", () => addGlobalAddBlockButton());
