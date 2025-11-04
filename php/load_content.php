@@ -6,8 +6,6 @@ header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/db_connect.php";
 
-
-
 $page = $_GET['page'] ?? '';
 
 if (!$page) {
@@ -21,14 +19,14 @@ try {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$result) {
-        echo json_encode(["success" => true, "content" => null]); // nothing saved yet
+        echo json_encode(["success" => true, "content" => []]); // empty array instead of null
         exit;
     }
 
     echo json_encode([
         "success" => true,
-        "content" => json_decode($result['content'], true)
-    ]);
+        "content" => json_decode($result['content'], true) ?? []
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
