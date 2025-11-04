@@ -1,6 +1,12 @@
 /* Ce fichier contient les styles de base partagés par les pages.
   La majorité du design est gérée par Tailwind CSS directement dans le HTML.
 */
+.hero-text {
+  background: rgba(0, 0, 0, 0.5); /* Fond noir transparent */
+  padding: 20px;
+  border-radius: 12px;
+  display: inline-block;
+}
 
 .view.active {
   display: block;
