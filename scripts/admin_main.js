@@ -13,27 +13,37 @@ function toast(msg, timeout = 2600) {
   if (!t) {
     t = document.createElement("div");
     t.id = "cms-toast";
+    Object.assign(t.style, {
+      position: "fixed", right: "20px", bottom: "20px",
+      background: "rgba(0,0,0,0.8)", color: "#fff",
+      padding: "10px 14px", borderRadius: "8px",
+      zIndex: 9999, fontFamily: "Inter,system-ui,Segoe UI",
+      transition: "opacity .25s", opacity: 0
+    });
     document.body.appendChild(t);
   }
   t.textContent = msg;
-  t.classList.add("show");
+  t.style.opacity = "1";
   clearTimeout(t._hide);
-  t._hide = setTimeout(() => t.classList.remove("show"), timeout);
+  t._hide = setTimeout(() => (t.style.opacity = "0"), timeout);
 }
 
 function showSavedBadge() {
-  let el = document.getElementById("cms-saved-badge");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "cms-saved-badge";
-    el.textContent = "✅ Sauvegardé";
-    document.body.appendChild(el);
-  }
-  el.classList.add("show");
-  clearTimeout(el._hide);
-  el._hide = setTimeout(() => el.classList.remove("show"), 1500);
+  const el = document.createElement("div");
+  el.innerText = "Sauvegardé";
+  Object.assign(el.style, {
+    position: "fixed", right: "20px", bottom: "72px",
+    background: "#16a34a", color: "#fff", padding: "8px 12px",
+    borderRadius: "8px", zIndex: 9999, opacity: 0,
+    transition: "opacity .18s"
+  });
+  document.body.appendChild(el);
+  requestAnimationFrame(() => (el.style.opacity = "1"));
+  setTimeout(() => {
+    el.style.opacity = "0";
+    setTimeout(() => el.remove(), 240);
+  }, 1400);
 }
-
 
 // ---- Session check & init ----
 async function checkAdminSession() {
@@ -197,8 +207,8 @@ function addDeleteAndAddButtons(box) {
   box.querySelectorAll(".delete-btn").forEach(b => b.remove());
   const del = document.createElement("button");
   del.innerText = "❌";
-  del.className = "delete-btn";
-  Object.assign(del.style, { position: "absolute", right: "8px", top: "8px", zIndex: 70 });
+  del.className = "delete-btn absolute top-2 right-2 bg-red-500 text-white rounded-full px-2 py-1 z-50";
+  //Object.assign(del.style, { position: "absolute", right: "8px", top: "8px", zIndex: 70 });
   del.addEventListener("click", () => {
     if (!confirm("Supprimer ce bloc ?")) return;
     box.remove(); scheduleSave();
@@ -244,8 +254,10 @@ function addGlobalAddBlockButton() {
     btn = document.createElement("button");
     btn.id = "add-global-block-btn";
     btn.innerText = "+ Ajouter un block";
-    Object.assign(btn.style, { display: "block", marginTop: "20px" });
-    btn.className = "add-block-btn";
+    addBtn.className = "add-block-btn mt-4 bg-sky-600 text-white px-4 py-2 rounded-md";
+
+    //Object.assign(btn.style, { display: "block", marginTop: "20px" });
+    //btn.className = "add-block-btn";
     btn.addEventListener("click", () => {
       const container = document.querySelector("#editable-container");
       if (!container) return;
