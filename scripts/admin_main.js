@@ -393,15 +393,13 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 // ---- Save everything (structured + full HTML snapshot) ----
 async function saveStructuredContent(page = pageKey) {
   const editableContainer = document.querySelector("#editable-container");
-  
-  // Get the full HTML snapshot but exclude the header (menu) by removing it
-  let htmlSnapshot = editableContainer ? editableContainer.outerHTML : document.body.outerHTML;
-
-  // Exclude the <header> element (menu) from the snapshot
-  htmlSnapshot = htmlSnapshot.replace(/<header[^>]*>[\s\S]*?<\/header>/g, '');
-
-  // Save the content of the page excluding the menu section (header)
   const blocks = buildBlocksFromDOM();
+
+  //  Full HTML snapshot — captures styles and layout of all editable sections
+  // If you want to limit to the editable container only, change to `editableContainer.outerHTML`
+  const htmlSnapshot = editableContainer
+    ? editableContainer.outerHTML
+    : document.body.outerHTML;
 
   try {
     const res = await fetch("/php/save_content.php", {
@@ -410,14 +408,13 @@ async function saveStructuredContent(page = pageKey) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ page, html: htmlSnapshot, content: blocks })
     });
-
     const j = await res.json();
     if (!j.success) {
       console.error("Save failed:", j);
       toast("Erreur de sauvegarde");
       return;
     }
-    console.log("Page saved successfully (structured + full HTML without header)");
+    console.log("Page saved successfully (structured + full HTML)");
     showSavedBadge();
     toast("Page sauvegardée");
   } catch (err) {
