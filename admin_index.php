@@ -91,7 +91,7 @@ header('Content-Type: text/html; charset=UTF-8');
                 <button class="edit-btn">✎</button>
                 <h1 id="hero-title" class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Bienvenue dans notre section actualités et blogs</h1>
                 <button class="edit-btn">✎</button>
-                <p d="hero-desc" class="text-lg max-w-3xl mx-auto" data-editable>Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.</p>
+                <p id="hero-desc" class="text-lg max-w-3xl mx-auto" data-editable>Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.</p>
             </div>
         </section>
 
@@ -220,7 +220,7 @@ header('Content-Type: text/html; charset=UTF-8');
     </main>
        <!-- =========== En-tête du site =========== -->
             <?php
-            include './components/admin_menu.php'; // or require 'main_admin.php';
+            include './components/admin_footer.php'; // or require 'main_admin.php';
             ?>
 
     <!-- =========== Pied de page du site =========== -->
@@ -228,7 +228,8 @@ header('Content-Type: text/html; charset=UTF-8');
     <script src="js/dropdown.js"></script>
 
 
-    <script type="module" src="scripts/admin_main.js"></script>
+    <!-- <script type="module" src="scripts/admin_main.js"></script> -->
+<script type="module" src="/scripts/admin_autosave.js"></script>
 
 
 

@@ -6,27 +6,30 @@ header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/db_connect.php";
 
+
+
 $page = $_GET['page'] ?? '';
+
 if (!$page) {
-    echo json_encode(["success" => false, "error" => "Missing page"]);
+    echo json_encode(["success" => false, "error" => "Missing page parameter"]);
     exit;
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT content, last_modified FROM pages_content WHERE page = :page LIMIT 1");
+    $stmt = $pdo->prepare("SELECT content FROM pages_content WHERE page = :page LIMIT 1");
     $stmt->execute([':page' => $page]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$row) {
-        echo json_encode(["success" => false, "message" => "Not found"]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$result) {
+        echo json_encode(["success" => true, "content" => null]); // nothing saved yet
         exit;
     }
 
-    $content = json_decode($row['content'], true);
     echo json_encode([
         "success" => true,
-        "content" => $content,
-        "last_modified" => $row['last_modified']
+        "content" => json_decode($result['content'], true)
     ]);
+
 } catch (Exception $e) {
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }

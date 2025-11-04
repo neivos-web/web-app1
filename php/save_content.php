@@ -8,21 +8,22 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json; charset=utf-8");
 
-require_once __DIR__ . "/db_connect.php"; // your PDO connection
+require_once __DIR__ . "/db_connect.php"; 
 
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $input = json_decode(file_get_contents("php://input"), true);
-$page = $input['page'] ?? '';
-$content = $input['content'] ?? null;
-$date = date("Y-m-d H:i:s");
 
-if (!$page || !$content) {
-    echo json_encode(["success" => false, "error" => "Missing page or content"]);
+$page    = $input['page'] ?? '';
+$content = $input['content'] ?? null;
+$date    = date("Y-m-d H:i:s");
+
+if (!$page || !is_array($content) || empty($content)) {
+    echo json_encode(["success" => false, "error" => "Missing or invalid data"]);
     exit;
 }
 
 try {
-    // create table if not exists
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS pages_content (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -32,7 +33,7 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
 
-    $jsonContent = json_encode($content, JSON_UNESCAPED_UNICODE);
+    $jsonContent = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
     $stmt = $pdo->prepare("
         INSERT INTO pages_content (page, content, last_modified)
@@ -47,6 +48,7 @@ try {
     ]);
 
     echo json_encode(["success" => true, "updated" => $date]);
+
 } catch (Exception $e) {
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
