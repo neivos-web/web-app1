@@ -66,32 +66,40 @@ async function loadStructuredContent(page = pageKey) {
     if (!blocks.length) return;
 
     blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
-
     blocks.forEach(blockObj => {
-      const parentSelector = blockObj.parentSelector || null;
+      const container = document.querySelector("#editable-container");
+      if (!container) return console.warn("No #editable-container found");
+
+      // If block exists, update elements
+      let blockEl = document.querySelector(`[data-block-id="${blockObj.blockId}"]`);
+      if (!blockEl) {
+        // create new block container
+        blockEl = document.createElement("div");
+        blockEl.className = "content-box bg-white p-6 rounded-lg shadow-md";
+        blockEl.dataset.blockId = blockObj.blockId;
+        blockEl.dataset.order = blockObj.order || 0;
+        container.appendChild(blockEl);
+      }
+
+      // Add/update elements inside the block
       if (blockObj.elements && blockObj.elements.length) {
         blockObj.elements.forEach(el => {
-          const existing = document.getElementById(el.id);
-          if (existing) {
+          let existing = document.getElementById(el.id);
+          if (!existing) {
+            const newEl = document.createElement(el.tag.toLowerCase());
+            newEl.id = el.id;
+            newEl.dataset.editable = "true";
+            if (el.tag === "IMG") newEl.src = el.value;
+            else newEl.textContent = el.value;
+            blockEl.appendChild(newEl);
+          } else {
             if (el.tag === "IMG") existing.src = el.value;
             else existing.textContent = el.value;
-          } else {
-            if (parentSelector) {
-              const parent = document.querySelector(parentSelector);
-              if (!parent) return console.warn("Parent not found:", parentSelector);
-              const newEl = document.createElement(el.tag.toLowerCase());
-              newEl.id = el.id;
-              newEl.dataset.editable = "true";
-              if (el.tag === "IMG") newEl.src = el.value;
-              else newEl.textContent = el.value;
-              parent.appendChild(newEl);
-            } else {
-              console.warn("Element missing and no parentSelector:", el.id);
-            }
           }
         });
       }
     });
+
 
     if (isAdmin) initAdminEditor();
     console.log("✅ Structured content loaded");
