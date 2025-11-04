@@ -16,34 +16,43 @@ $input = json_decode(file_get_contents("php://input"), true);
 
 $page    = $input['page'] ?? '';
 $content = $input['content'] ?? null;
+$html    = $input['html'] ?? null;
 $date    = date("Y-m-d H:i:s");
 
-if (!$page || !is_array($content) ) {
+if (!$page || (!$content && !$html)) {
     echo json_encode(["success" => false, "error" => "Missing or invalid data"]);
     exit;
 }
 
 try {
+    // --- Ensure table exists ---
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS pages_content (
             id INT AUTO_INCREMENT PRIMARY KEY,
             page VARCHAR(255) NOT NULL UNIQUE,
-            content LONGTEXT NOT NULL,
+            content LONGTEXT NULL,
+            html LONGTEXT NULL,
             last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
 
-    $jsonContent = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    // --- Prepare data ---
+    $jsonContent = $content ? json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : null;
 
+    // --- Insert or update ---
     $stmt = $pdo->prepare("
-        INSERT INTO pages_content (page, content, last_modified)
-        VALUES (:page, :content, :last_modified)
-        ON DUPLICATE KEY UPDATE content = :content, last_modified = :last_modified
+        INSERT INTO pages_content (page, content, html, last_modified)
+        VALUES (:page, :content, :html, :last_modified)
+        ON DUPLICATE KEY UPDATE 
+            content = VALUES(content),
+            html = VALUES(html),
+            last_modified = VALUES(last_modified)
     ");
 
     $stmt->execute([
         ':page' => $page,
         ':content' => $jsonContent,
+        ':html' => $html,
         ':last_modified' => $date
     ]);
 
