@@ -59,7 +59,7 @@ async function loadStructuredContent(page = pageKey) {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
     const data = await res.json();
-    if (!data.success) return console.info("No content saved for", page);
+    if (!data.success) return;
 
     const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
     if (!blocks.length) return;
@@ -69,49 +69,47 @@ async function loadStructuredContent(page = pageKey) {
 
     blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-    blocks.forEach(blockObj => {
-      let blockExists = false;
-      // check if any element of the block already exists
-      if (blockObj.elements && blockObj.elements.length) {
-        for (const el of blockObj.elements) {
-          const existing = document.getElementById(el.id);
-          if (existing) {
-            blockExists = true;
-            // update existing content
-            if (el.tag === "IMG" && existing.tagName === "IMG") existing.src = el.value;
-            else if (existing.tagName !== "IMG") existing.textContent = el.value;
-          }
-        }
-      }
+    blocks.forEach(block => {
+      // try to find an existing block by ID
+      let blockEl = [...container.querySelectorAll(".content-box")].find(
+        b => b.dataset.blockId === block.blockId
+      );
 
-      // if block doesn't exist yet, create it
-      if (!blockExists) {
-        const newBox = document.createElement("div");
-        newBox.className = "content-box bg-white p-6 rounded-lg shadow-md";
-        newBox.dataset.blockId = blockObj.blockId;
-        newBox.dataset.order = blockObj.order;
+      if (!blockEl) {
+        // create new block
+        blockEl = document.createElement("div");
+        blockEl.className = "content-box bg-white p-6 rounded-lg shadow-md";
+        blockEl.dataset.blockId = block.blockId;
+        blockEl.dataset.order = block.order;
 
-        blockObj.elements.forEach(el => {
+        block.elements.forEach(el => {
           const newEl = document.createElement(el.tag.toLowerCase());
           newEl.id = el.id;
           newEl.dataset.editable = "true";
           if (el.tag === "IMG") newEl.src = el.value;
           else newEl.textContent = el.value;
-          newBox.appendChild(newEl);
+          blockEl.appendChild(newEl);
         });
 
-        container.appendChild(newBox);
-        addDeleteAndAddButtons(newBox);
-        enableInlineEditingForBlock(newBox);
+        container.appendChild(blockEl);
+        addDeleteAndAddButtons(blockEl);
+        enableInlineEditingForBlock(blockEl);
+      } else {
+        // update existing elements
+        block.elements.forEach(el => {
+          const existing = document.getElementById(el.id);
+          if (existing) {
+            if (el.tag === "IMG") existing.src = el.value;
+            else existing.textContent = el.value;
+          }
+        });
       }
     });
 
-    // finally, re-init admin editor
     if (isAdmin) initAdminEditor();
-
-    console.log("✅ Structured content loaded and merged");
+    console.log("✅ All blocks loaded/merged");
   } catch (err) {
-    console.error("loadStructuredContent error", err);
+    console.error(err);
   }
 }
 
