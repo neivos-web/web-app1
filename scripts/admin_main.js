@@ -55,62 +55,72 @@ async function checkAdminSession() {
 document.addEventListener("DOMContentLoaded", checkAdminSession);
 
 // ---- load saved content (rebuild blocks) ----
+//FIXED VERSION: renders blocks even if empty and supports newly added ones
 async function loadStructuredContent(page = pageKey) {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
-    // Expect content to be array of blocks (blockId, order, elements[])
     const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
     const container = document.querySelector("#editable-container");
-    if (!container) {
-      console.warn("#editable-container not found");
-      return;
-    }
+    if (!container) return console.warn("#editable-container not found");
 
-    // if no saved blocks, leave existing DOM as-is
-    if (!blocks.length) return;
+    if (!blocks.length) return; // nothing saved, keep default HTML
 
-    // clear and rebuild using saved order
     container.innerHTML = "";
-    blocks.sort((a,b) => (a.order || 0) - (b.order || 0)).forEach(blockObj => {
-      const block = document.createElement("div");
-      const bid = blockObj.blockId || ("block_" + Date.now() + "_" + Math.floor(Math.random()*1000));
-      block.className = "content-box bg-white p-6 rounded-lg shadow-md";
-      block.dataset.blockId = bid;
+    blocks
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .forEach(blockObj => {
 
-      // build inner markup from elements array (each element: { id, tag, value })
-      const innerParts = [];
-      if (Array.isArray(blockObj.elements)) {
-        // group img elements and text elements sensibly
-        blockObj.elements.forEach(el => {
-          if (el.tag === "IMG") {
-            const id = el.id || (bid + "_img_" + Math.floor(Math.random()*1000));
-            innerParts.push(`<div class="content-image mb-4">
-                                <button class="edit-btn">✎</button>
-                                <img id="${id}" data-editable src="${escapeHtml(el.value || '')}" alt="" class="w-full h-auto rounded-lg" />
-                             </div>`);
-          } else {
-            const id = el.id || (bid + "_el_" + Math.floor(Math.random()*1000));
-            innerParts.push(`<div class="content"><button class="edit-btn">✎</button><${el.tag.toLowerCase()} id="${id}" data-editable>${escapeHtml(el.value || '')}</${el.tag.toLowerCase()}></div>`);
-          }
-        });
-      } else if (blockObj.html) {
-        // legacy: raw html stored
-        innerParts.push(blockObj.html);
-      }
+        const block = document.createElement("div");
+        const bid = blockObj.blockId || ("block_" + Date.now() + "_" + Math.floor(Math.random() * 1000));
+        block.className = "content-box bg-white p-6 rounded-lg shadow-md";
+        block.dataset.blockId = bid;
 
-      block.innerHTML = innerParts.join("\n");
-      container.appendChild(block);
-    });
+        const innerParts = [];
+
+        // ✅ NEW: always create the block, even if no elements yet
+        if (Array.isArray(blockObj.elements) && blockObj.elements.length) {
+
+          blockObj.elements.forEach(el => {
+            const id = el.id || (bid + "_" + el.tag.toLowerCase() + "_" + Math.floor(Math.random() * 1000));
+
+            if (el.tag === "IMG") {
+              innerParts.push(`
+                <div class="content-image mb-4">
+                  <button class="edit-btn">✎</button>
+                  <img id="${id}" data-editable src="${escapeHtml(el.value || '')}" alt="" class="w-full h-auto rounded-lg" />
+                </div>`);
+            } else {
+              innerParts.push(`
+                <div class="content">
+                  <button class="edit-btn">✎</button>
+                  <${el.tag.toLowerCase()} id="${id}" data-editable>${escapeHtml(el.value || '')}</${el.tag.toLowerCase()}>
+                </div>`);
+            }
+          });
+
+        } else {
+          // ✅ This makes EMPTY NEW BLOCK VISIBLE instead of ignored
+          innerParts.push(`
+            <div class="content empty-block text-gray-400 italic">
+              (Empty block – click edit to add content)
+            </div>`);
+        }
+
+        block.innerHTML = innerParts.join("\n");
+        container.appendChild(block);
+      });
 
     if (isAdmin) initAdminEditor();
     console.log("Structured content loaded");
+
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
+
 
 // ---- escape helper (prevent XSS when injecting saved text) ----
 function escapeHtml(s) {
