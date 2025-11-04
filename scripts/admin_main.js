@@ -106,7 +106,7 @@ async function loadStructuredContent(page = pageKey) {
     });
 
     if (isAdmin) initAdminEditor();
-    console.log("✅ Structured content loaded");
+    console.log("Structured content loaded");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
@@ -258,15 +258,16 @@ function addDeleteAndAddButtons(box) {
     box.remove(); scheduleSave();
   });
 
+  // Add block button
   const add = document.createElement("button");
   add.innerText = "+ Ajouter un block";
   add.className = "add-block-btn";
   Object.assign(add.style, { display: "block", marginTop: "12px" });
   add.addEventListener("click", () => {
     const newBox = createContentBox();
-    box.parentElement.insertBefore(newBox, add);
-    initAdminEditor();
-    scheduleSave();
+    box.parentElement.insertBefore(newBox, add);  // ✅ inserted right after clicked block
+    initAdminEditor();                            // ✅ rebind edit/drag/delete buttons
+    scheduleSave();                               // ✅ DB update
   });
 
   box.style.position = "relative";
