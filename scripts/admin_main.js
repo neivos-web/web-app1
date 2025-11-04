@@ -1,4 +1,6 @@
-// admin_structured.js (updated for full block preservation + inline edits + correct add/delete)
+// admin_structured.js (upload-only images, saves blocks+order+elements)
+// Drop into your project and include after DOM. Requires container with id="editable-container".
+
 const pageKey = window.location.pathname.split("/").pop() || "admin_index.php";
 let isAdmin = false;
 let saveTimer = null;
@@ -59,6 +61,7 @@ async function loadStructuredContent(page = pageKey) {
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
+    // Expect content to be array of blocks (blockId, order, elements[])
     const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
     const container = document.querySelector("#editable-container");
     if (!container) {
@@ -66,17 +69,21 @@ async function loadStructuredContent(page = pageKey) {
       return;
     }
 
+    // if no saved blocks, leave existing DOM as-is
     if (!blocks.length) return;
 
+    // clear and rebuild using saved order
     container.innerHTML = "";
     blocks.sort((a,b) => (a.order || 0) - (b.order || 0)).forEach(blockObj => {
       const block = document.createElement("div");
       const bid = blockObj.blockId || ("block_" + Date.now() + "_" + Math.floor(Math.random()*1000));
-      block.className = "content-box bg-white p-6 rounded-lg shadow-md cms-block";
+      block.className = "content-box bg-white p-6 rounded-lg shadow-md";
       block.dataset.blockId = bid;
 
+      // build inner markup from elements array (each element: { id, tag, value })
       const innerParts = [];
       if (Array.isArray(blockObj.elements)) {
+        // group img elements and text elements sensibly
         blockObj.elements.forEach(el => {
           if (el.tag === "IMG") {
             const id = el.id || (bid + "_img_" + Math.floor(Math.random()*1000));
@@ -90,6 +97,7 @@ async function loadStructuredContent(page = pageKey) {
           }
         });
       } else if (blockObj.html) {
+        // legacy: raw html stored
         innerParts.push(blockObj.html);
       }
 
@@ -104,7 +112,7 @@ async function loadStructuredContent(page = pageKey) {
   }
 }
 
-// ---- escape helper ----
+// ---- escape helper (prevent XSS when injecting saved text) ----
 function escapeHtml(s) {
   if (s == null) return "";
   return String(s)
@@ -115,10 +123,18 @@ function escapeHtml(s) {
 
 // ---- admin UI init ----
 function initAdminEditor() {
-  document.querySelectorAll(".cms-block, .content-box").forEach((b, i) => {
+  // ensure blocks have ids & draggable
+  document.querySelectorAll(".content-box").forEach((b, i) => {
     if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + "_" + i;
-    b.dataset.order = i;
     b.setAttribute("draggable", "true");
+    b.dataset.order = i;
+  });
+
+  // show edit icons
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    btn.style.display = "inline-flex";
+    btn.style.zIndex = 60;
+    btn.style.cursor = "pointer";
   });
 
   enableInlineEditing();
@@ -128,41 +144,83 @@ function initAdminEditor() {
 
 // ---- inline editing (text + images) ----
 function enableInlineEditing() {
+  // remove existing handlers by cloning nodes to avoid duplicates
   document.querySelectorAll(".edit-btn").forEach(btn => {
     const clone = btn.cloneNode(true);
     btn.parentNode.replaceChild(clone, btn);
-    const tgt = clone.nextElementSibling || clone.previousElementSibling;
-    if (!tgt || tgt.dataset.editable === undefined) return;
-    clone.addEventListener("click", e => { e.stopPropagation(); openInlineEditor(tgt); });
   });
 
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    const tgtSelector = btn.dataset.target;
+    let target = tgtSelector ? document.querySelector(tgtSelector) : (btn.nextElementSibling || btn.previousElementSibling);
+    if (!target) return;
+    if (target.tagName === "A" && target.querySelector("img[data-editable]")) target = target.querySelector("img[data-editable]");
+    if (!target || target.dataset.editable === undefined) return;
+
+    cloneAddClick(btn, target);
+  });
+
+  // also allow clicking the editable element itself to edit (nice UX)
   document.querySelectorAll("[data-editable]").forEach(el => {
-    el.onclick = (e) => { if (isAdmin) openInlineEditor(el); };
+    el.onclick = (e) => {
+      if (!isAdmin) return;
+      // avoid triggering when clicking inside inputs created by editor
+      openInlineEditor(el);
+    };
+  });
+}
+
+function cloneAddClick(btn, target) {
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    openInlineEditor(target);
   });
 }
 
 function openInlineEditor(el) {
-  if (!isAdmin || el.dataset.editing === "true") return;
+  if (!isAdmin) return;
+  if (el.dataset.editing === "true") return;
   el.dataset.editing = "true";
 
+  // IMAGE: upload-only flow
   if (el.tagName === "IMG") {
     const input = document.createElement("input");
     input.type = "file"; input.accept = "image/*";
     input.addEventListener("change", async () => {
-      const f = input.files[0]; if (!f) { delete el.dataset.editing; return; }
+      const f = input.files[0];
+      if (!f) { delete el.dataset.editing; return; }
       try {
         const fd = new FormData();
-        fd.append("file", f); fd.append("page", pageKey);
-        const res = await fetch("/php/upload_image.php", { method: "POST", body: fd, credentials: "include" });
+        fd.append("file", f);
+        fd.append("page", pageKey);
+        // call server upload endpoint
+        const res = await fetch("/php/upload_image.php", {
+          method: "POST",
+          body: fd,
+          credentials: "include"
+        });
         const j = await res.json();
-        if (j.success && j.url) { el.src = j.url; scheduleSave(); toast("Image uploadée — sauvegarde en cours..."); }
-        else toast("Erreur upload image");
-      } catch (err) { toast("Erreur réseau upload"); console.error(err); }
-      finally { delete el.dataset.editing; input.remove(); }
+        if (j.success && j.url) {
+          el.src = j.url;              // set URL returned by server
+          scheduleSave();             // schedule save of blocks
+          toast("Image uploadée — sauvegarde en cours...");
+        } else {
+          console.error("upload_image failed", j);
+          toast("Erreur upload image");
+        }
+      } catch (err) {
+        console.error("upload error", err);
+        toast("Erreur réseau upload");
+      } finally {
+        delete el.dataset.editing;
+        input.remove();
+      }
     });
-    input.click(); return;
+    input.click();
+    return;
   }
 
+  // TEXT / LONG text
   const tag = el.tagName;
   const isLong = (el.textContent || "").length > 60 || ["P","DIV"].includes(tag);
   const input = isLong ? document.createElement("textarea") : document.createElement("input");
@@ -172,35 +230,44 @@ function openInlineEditor(el) {
   el.parentElement.insertBefore(input, el);
   input.focus();
 
-  function finalize() { el.textContent = input.value; input.remove(); el.style.display = ""; delete el.dataset.editing; scheduleSave(); }
+  function finalize() {
+    el.textContent = input.value;
+    input.remove();
+    el.style.display = "";
+    delete el.dataset.editing;
+    scheduleSave();
+  }
+
   input.addEventListener("blur", finalize);
-  input.addEventListener("keydown", ev => { if (ev.key === "Enter" && input.tagName !== "TEXTAREA") input.blur(); });
+  input.addEventListener("keydown", (ev) => { if (ev.key === "Enter" && input.tagName !== "TEXTAREA") input.blur(); });
 }
 
 // ---- block add/delete ----
 function addDeleteAndAddButtons(box) {
+  // remove existing buttons
   box.querySelectorAll(".delete-btn").forEach(b => b.remove());
   const next = box.nextElementSibling;
   if (next && next.classList.contains("add-block-btn")) next.remove();
 
   const del = document.createElement("button");
-  del.innerText = "❌"; del.className = "delete-btn";
+  del.innerText = "❌";
+  del.className = "delete-btn";
   Object.assign(del.style, { position: "absolute", right: "8px", top: "8px", zIndex: 70 });
   del.addEventListener("click", () => {
     if (!confirm("Supprimer ce bloc ?")) return;
-    const nextBtn = box.nextElementSibling;
-    if (nextBtn && nextBtn.classList.contains("add-block-btn")) nextBtn.remove();
     box.remove(); scheduleSave();
   });
 
+  // Add block button
   const add = document.createElement("button");
-  add.innerText = "+ Ajouter un block"; add.className = "add-block-btn";
+  add.innerText = "+ Ajouter un block";
+  add.className = "add-block-btn";
   Object.assign(add.style, { display: "block", marginTop: "12px" });
   add.addEventListener("click", () => {
     const newBox = createContentBox();
-    box.parentElement.insertBefore(newBox, add);
-    initAdminEditor();
-    scheduleSave();
+    box.parentElement.insertBefore(newBox, add);  // ✅ inserted right after clicked block
+    initAdminEditor();                            // ✅ rebind edit/drag/delete buttons
+    scheduleSave();                               // ✅ DB update
   });
 
   box.style.position = "relative";
@@ -209,7 +276,7 @@ function addDeleteAndAddButtons(box) {
 }
 
 function enableBlockManagement() {
-  document.querySelectorAll(".cms-block, .content-box").forEach((b, idx) => {
+  document.querySelectorAll(".content-box").forEach((b, idx) => {
     if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + "_" + idx;
     b.dataset.order = idx;
     addDeleteAndAddButtons(b);
@@ -219,7 +286,7 @@ function enableBlockManagement() {
 function createContentBox() {
   const uid = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
   const box = document.createElement("div");
-  box.className = "content-box bg-white p-6 rounded-lg shadow-md cms-block";
+  box.className = "content-box bg-white p-6 rounded-lg shadow-md";
   box.dataset.blockId = uid;
   box.dataset.order = document.querySelectorAll(".content-box").length;
   box.innerHTML = `
@@ -244,12 +311,23 @@ function enableDragReorder() {
   let dragSrc = null;
 
   container.querySelectorAll(".content-box").forEach(box => {
-    box.addEventListener("dragstart", e => { dragSrc = box; e.dataTransfer.effectAllowed = "move"; box.style.opacity = "0.5"; });
-    box.addEventListener("dragend", () => { box.style.opacity = ""; dragSrc = null; Array.from(container.children).forEach((ch, idx) => ch.dataset.order = idx); scheduleSave(); });
-    box.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
-    box.addEventListener("drop", e => {
+    box.addEventListener("dragstart", (e) => {
+      dragSrc = box;
+      e.dataTransfer.effectAllowed = "move";
+      box.style.opacity = "0.5";
+    });
+    box.addEventListener("dragend", () => {
+      box.style.opacity = "";
+      dragSrc = null;
+      // reassign order attributes after drag
+      Array.from(container.children).forEach((ch, idx) => ch.dataset.order = idx);
+      scheduleSave();
+    });
+    box.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
+    box.addEventListener("drop", (e) => {
       e.preventDefault();
       if (!dragSrc || dragSrc === box) return;
+      // insert before or after based on position
       const rect = box.getBoundingClientRect();
       const halfway = rect.top + rect.height / 2;
       if (e.clientY < halfway) box.parentNode.insertBefore(dragSrc, box);
@@ -258,12 +336,16 @@ function enableDragReorder() {
   });
 }
 
-// ---- collect blocks from DOM ----
+// ---- collect blocks from DOM in current order ----
 function buildBlocksFromDOM() {
-  const blocks = [...document.querySelectorAll(".cms-block, .content-box")].map((box, idx) => {
+  const container = document.querySelector("#editable-container");
+  if (!container) return [];
+  const blocks = [...container.querySelectorAll(".content-box")].map((box, idx) => {
     const blockId = box.dataset.blockId || ("block_" + idx + "_" + Date.now());
     const elements = [...box.querySelectorAll("[data-editable]")].map(el => ({
-      id: el.id || null, tag: el.tagName, value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
+      id: el.id || null,
+      tag: el.tagName,
+      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
     }));
     return { blockId, order: idx, elements };
   });
@@ -283,17 +365,29 @@ async function saveStructuredContent(page = pageKey) {
 
   try {
     const res = await fetch("/php/save_content.php", {
-      method: "POST", credentials: "include",
+      method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ page, content: blocks })
     });
     const j = await res.json();
-    if (!j.success) { toast("Erreur sauvegarde"); console.error(j); return; }
-    showSavedBadge(); toast("Sauvegardé");
-  } catch (err) { console.error(err); toast("Erreur réseau lors de la sauvegarde"); }
+    if (!j.success) {
+      console.error("Save failed:", j);
+      toast("Erreur sauvegarde");
+      return;
+    }
+    console.log("Saved:", j.updated);
+    showSavedBadge();
+    toast("Sauvegardé");
+  } catch (err) {
+    console.error("save error", err);
+    toast("Erreur réseau lors de la sauvegarde");
+  }
 }
 
 // expose manual save
 window.cms = window.cms || {};
 window.cms.saveNow = () => saveStructuredContent(pageKey);
+
+// ---- helpful: init if user adds blocks via server / other flows ----
 window.addEventListener("cms:reinit", () => initAdminEditor());
