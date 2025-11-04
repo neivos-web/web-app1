@@ -72,11 +72,13 @@ header('Content-Type: text/html; charset=UTF-8');
 </head>
 <body class="bg-gray-100 text-brand-dark">
     
+    <header class="bg-white shadow-sm sticky top-0 z-50">
 
        <!-- =========== En-tête du site =========== -->
             <?php
             require './components/admin_menu.php';
             ?>
+    </header>
     <main>
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-content">

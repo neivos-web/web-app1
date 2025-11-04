@@ -10,7 +10,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     });
     const json = await res.json();
     if (json.success) {
-      window.location.href = 'login.html';  // Redirect to login page after logout
+      window.location.href = 'admin.html';  // Redirect to login page after logout
     } else {
       console.error('Logout failed');
     }
