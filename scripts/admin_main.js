@@ -61,7 +61,6 @@ async function loadStructuredContent(page = pageKey) {
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
-    // Expect content to be array of blocks (blockId, order, elements[])
     const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
     const container = document.querySelector("#editable-container");
     if (!container) {
@@ -69,21 +68,24 @@ async function loadStructuredContent(page = pageKey) {
       return;
     }
 
-    // if no saved blocks, leave existing DOM as-is
-    if (!blocks.length) return;
+    // --- NEW: build a map of existing blockIds in DOM ---
+    const existingBlocks = {};
+    container.querySelectorAll(".content-box").forEach(b => {
+      if (b.dataset.blockId) existingBlocks[b.dataset.blockId] = b;
+    });
 
-    // clear and rebuild using saved order
-    container.innerHTML = "";
-    blocks.sort((a,b) => (a.order || 0) - (b.order || 0)).forEach(blockObj => {
+    // --- process loaded blocks ---
+    blocks.sort((a, b) => (a.order || 0) - (b.order || 0)).forEach(blockObj => {
+      // if this block already exists, skip (preserve newly added block)
+      if (existingBlocks[blockObj.blockId]) return;
+
       const block = document.createElement("div");
       const bid = blockObj.blockId || ("block_" + Date.now() + "_" + Math.floor(Math.random()*1000));
       block.className = "content-box bg-white p-6 rounded-lg shadow-md";
       block.dataset.blockId = bid;
 
-      // build inner markup from elements array (each element: { id, tag, value })
       const innerParts = [];
       if (Array.isArray(blockObj.elements)) {
-        // group img elements and text elements sensibly
         blockObj.elements.forEach(el => {
           if (el.tag === "IMG") {
             const id = el.id || (bid + "_img_" + Math.floor(Math.random()*1000));
@@ -97,7 +99,6 @@ async function loadStructuredContent(page = pageKey) {
           }
         });
       } else if (blockObj.html) {
-        // legacy: raw html stored
         innerParts.push(blockObj.html);
       }
 
@@ -106,11 +107,12 @@ async function loadStructuredContent(page = pageKey) {
     });
 
     if (isAdmin) initAdminEditor();
-    console.log("Structured content loaded");
+    console.log("Structured content loaded (merged new blocks)");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
+
 
 // ---- escape helper (prevent XSS when injecting saved text) ----
 function escapeHtml(s) {
