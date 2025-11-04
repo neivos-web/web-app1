@@ -152,6 +152,21 @@ function enableInlineEditing() {
   });
 }
 
+// ---- enable inline editing for a single block (newly added) ----
+function enableInlineEditingForBlock(block) {
+  block.querySelectorAll("[data-editable]").forEach(el => {
+    el.onclick = (e) => {
+      if (!isAdmin) return;
+      openInlineEditor(el);
+    };
+  });
+  block.querySelectorAll(".edit-btn").forEach(btn => {
+    const tgt = btn.nextElementSibling || btn.previousElementSibling;
+    if (!tgt || tgt.dataset.editable === undefined) return;
+    btn.addEventListener("click", (e) => { e.stopPropagation(); openInlineEditor(tgt); });
+  });
+}
+
 function cloneAddClick(btn, target) {
   btn.addEventListener("click", e => {
     e.stopPropagation();
@@ -219,7 +234,6 @@ function openInlineEditor(el) {
 
 // ---- block add/delete ----
 function addDeleteAndAddButtons(box) {
-  // Only delete per block
   box.querySelectorAll(".delete-btn").forEach(b => b.remove());
   const del = document.createElement("button");
   del.innerText = "❌";
@@ -278,7 +292,12 @@ function addGlobalAddBlockButton() {
     const container = document.querySelector("#editable-container");
     const newBox = createContentBox();
     container.appendChild(newBox);
-    initAdminEditor();
+
+    // Initialize only the new block
+    addDeleteAndAddButtons(newBox);
+    enableInlineEditingForBlock(newBox);
+    enableDragReorder();
+
     scheduleSave();
   });
 
