@@ -228,8 +228,7 @@ header('Content-Type: text/html; charset=UTF-8');
     <script src="js/dropdown.js"></script>
 
 
-    <!-- <script type="module" src="scripts/admin_main.js"></script> -->
-<script type="module" src="/scripts/admin_autosave.js"></script>
+ <script type="module" src="scripts/admin_main.js"></script> 
 
 
 
