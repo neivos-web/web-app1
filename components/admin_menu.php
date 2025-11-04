@@ -5,7 +5,7 @@
                 <div class="nav-item-wrapper">
                     <button class="edit-btn">✎</button>
                     <a href="admin_index.php" data-key="logo_text" class="flex items-center space-x-2">
-                        <img src="images/logo_noir.png" data-editable alt="Outsiders Logo" class="h-10 w-auto object-contain">
+                        <img src="images/logo_noir.png" data-editable alt="Outsiders Logo" class="h-10 w-auto object-contain" id="logo">
                     </a>
                 </div>
             </div>
@@ -109,4 +109,4 @@
         </nav>
     </header>
 
-    <!-- <script type="module" src="scripts/admin_menu.js"></script> -->
+     <script type="module" src="scripts/admin_menu.js"></script> 

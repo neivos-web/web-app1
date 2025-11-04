@@ -33,12 +33,7 @@
                 </div>
             </div>
 
-            <!--logo-->
-            <div class="footer-logo">
-                <button class="edit-btn">✎</button>
-                <img src="images/logo_blanc.png" alt="Logo du site" data-editable/>
-            </div>
-            </div>
+
 
             <!-- Mentions légales -->
             <div class="footer-bottom">
