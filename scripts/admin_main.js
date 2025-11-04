@@ -106,7 +106,7 @@ async function loadStructuredContent(page = pageKey) {
     });
 
     if (isAdmin) initAdminEditor();
-    console.log("Structured content loaded");
+    console.log("✅ Structured content loaded");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
@@ -258,16 +258,15 @@ function addDeleteAndAddButtons(box) {
     box.remove(); scheduleSave();
   });
 
-  // Add block button
   const add = document.createElement("button");
   add.innerText = "+ Ajouter un block";
   add.className = "add-block-btn";
   Object.assign(add.style, { display: "block", marginTop: "12px" });
   add.addEventListener("click", () => {
     const newBox = createContentBox();
-    box.parentElement.insertBefore(newBox, add);  // ✅ inserted right after clicked block
-    initAdminEditor();                            // ✅ rebind edit/drag/delete buttons
-    scheduleSave();                               // ✅ DB update
+    box.parentElement.insertBefore(newBox, add);
+    initAdminEditor();
+    scheduleSave();
   });
 
   box.style.position = "relative";
@@ -338,19 +337,31 @@ function enableDragReorder() {
 
 // ---- collect blocks from DOM in current order ----
 function buildBlocksFromDOM() {
-  const container = document.querySelector("#editable-container");
-  if (!container) return [];
-  const blocks = [...container.querySelectorAll(".content-box")].map((box, idx) => {
-    const blockId = box.dataset.blockId || ("block_" + idx + "_" + Date.now());
-    const elements = [...box.querySelectorAll("[data-editable]")].map(el => ({
+  const blocks = [];
+  const allEditable = document.querySelectorAll("[data-editable]");
+
+  allEditable.forEach((el, idx) => {
+    // use existing blockId if inside a content-box, else create per-element blockId
+    const parentBox = el.closest(".content-box");
+    const blockId = parentBox?.dataset.blockId || ("single_" + idx + "_" + Date.now());
+
+    // check if this blockId already exists
+    let blk = blocks.find(b => b.blockId === blockId);
+    if (!blk) {
+      blk = { blockId, order: blocks.length, elements: [] };
+      blocks.push(blk);
+    }
+
+    blk.elements.push({
       id: el.id || null,
       tag: el.tagName,
       value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
-    }));
-    return { blockId, order: idx, elements };
+    });
   });
+
   return blocks;
 }
+
 
 // ---- debounce + save ----
 function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
