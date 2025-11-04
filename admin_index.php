@@ -218,15 +218,16 @@ header('Content-Type: text/html; charset=UTF-8');
 
         </section>
     </main>
+    <footer>
        <!-- =========== En-tête du site =========== -->
             <?php
             include './components/admin_footer.php'; // or require 'main_admin.php';
             ?>
 
     <!-- =========== Pied de page du site =========== -->
-
-    <script src="js/dropdown.js"></script>
-
+    <footer class="site-footer">
+        <script src="js/dropdown.js"></script>
+    </footer>
 
  <script type="module" src="scripts/admin_main.js"></script> 
 

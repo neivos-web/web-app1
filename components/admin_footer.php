@@ -1,4 +1,3 @@
-    <footer class="site-footer">
         <div class="footer-container">
             <button class="edit-btn">✎</button>
             <p class="footer-text" data-editable>
