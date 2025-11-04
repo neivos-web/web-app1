@@ -1,4 +1,6 @@
 // admin_structured.js (upload-only images, saves blocks+order+elements)
+// Drop into your project and include after DOM. Requires container with id="editable-container".
+
 const pageKey = window.location.pathname.split("/").pop() || "admin_index.php";
 let isAdmin = false;
 let saveTimer = null;
@@ -43,6 +45,7 @@ async function checkAdminSession() {
     const r = await fetch("/php/check_session.php", { credentials: "include" });
     const j = await r.json();
     isAdmin = j.logged_in === true;
+    if (isAdmin) initAdminEditor();
   } catch (e) {
     console.warn("session check failed", e);
   } finally {
@@ -58,58 +61,37 @@ async function loadStructuredContent(page = pageKey) {
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
-    const savedBlocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
-    const container = document.querySelector("#editable-container");
-    if (!container) return;
+    const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
+    if (!blocks.length) return;
 
-    // Prendre tous les blocs du DOM
-    const existingBoxes = Array.from(container.querySelectorAll(".content-box"));
-
-    // Fusionner chaque bloc sauvegardé
-    savedBlocks.forEach(blockObj => {
-      let box = existingBoxes.find(b => b.dataset.blockId === blockObj.blockId);
-      if (!box) {
-        box = document.createElement("div");
-        box.className = "content-box bg-white p-6 rounded-lg shadow-md";
-        box.dataset.blockId = blockObj.blockId;
-        box.dataset.order = blockObj.order;
-        container.appendChild(box);
+    blocks.forEach(blockObj => {
+      if (blockObj.elements && blockObj.elements.length) {
+        blockObj.elements.forEach(el => {
+          const existing = document.getElementById(el.id);
+          if (existing) {
+            // update text or image only
+            if (el.tag === "IMG" && existing.tagName === "IMG") existing.src = el.value;
+            else if (existing.tagName !== "IMG") existing.textContent = el.value;
+          }
+          // do NOT create new elements, leave layout untouched
+        });
       }
-
-      blockObj.elements.forEach(el => {
-        let existingEl = document.getElementById(el.id);
-        if (!existingEl) {
-          const newEl = document.createElement(el.tag.toLowerCase());
-          newEl.id = el.id;
-          newEl.dataset.editable = "true";
-          newEl.className = el.classes || "";
-          if (el.style) newEl.setAttribute("style", el.style);
-          if (el.tag === "IMG") newEl.src = el.value;
-          else newEl.textContent = el.value;
-          box.appendChild(newEl);
-        } else {
-          if (el.tag === "IMG") existingEl.src = el.value;
-          else existingEl.textContent = el.value;
-          existingEl.className = el.classes || "";
-          if (el.style) existingEl.setAttribute("style", el.style);
-        }
-      });
-
-      addDeleteAndAddButtons(box);
-      enableInlineEditingForBlock(box);
     });
 
-    initAdminEditor();
-    console.log("✅ All blocks loaded and merged with DOM");
+    console.log("✅ Structured content merged");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
 
-// ---- escape helper ----
+
+// ---- escape helper (prevent XSS when injecting saved text) ----
 function escapeHtml(s) {
   if (s == null) return "";
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 // ---- admin UI init ----
@@ -119,17 +101,19 @@ function initAdminEditor() {
     b.setAttribute("draggable", "true");
     b.dataset.order = i;
   });
+
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.style.display = "inline-flex";
     btn.style.zIndex = 60;
     btn.style.cursor = "pointer";
   });
+
   enableInlineEditing();
   enableBlockManagement();
   enableDragReorder();
 }
 
-// ---- inline editing ----
+// ---- inline editing (text + images) ----
 function enableInlineEditing() {
   document.querySelectorAll(".edit-btn").forEach(btn => {
     const clone = btn.cloneNode(true);
@@ -146,13 +130,20 @@ function enableInlineEditing() {
   });
 
   document.querySelectorAll("[data-editable]").forEach(el => {
-    el.onclick = (e) => { if (!isAdmin) return; openInlineEditor(el); };
+    el.onclick = (e) => {
+      if (!isAdmin) return;
+      openInlineEditor(el);
+    };
   });
 }
 
+// ---- enable inline editing for a single block (newly added) ----
 function enableInlineEditingForBlock(block) {
   block.querySelectorAll("[data-editable]").forEach(el => {
-    el.onclick = (e) => { if (!isAdmin) return; openInlineEditor(el); };
+    el.onclick = (e) => {
+      if (!isAdmin) return;
+      openInlineEditor(el);
+    };
   });
   block.querySelectorAll(".edit-btn").forEach(btn => {
     const tgt = btn.nextElementSibling || btn.previousElementSibling;
@@ -162,7 +153,10 @@ function enableInlineEditingForBlock(block) {
 }
 
 function cloneAddClick(btn, target) {
-  btn.addEventListener("click", e => { e.stopPropagation(); openInlineEditor(target); });
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    openInlineEditor(target);
+  });
 }
 
 function openInlineEditor(el) {
@@ -186,9 +180,17 @@ function openInlineEditor(el) {
           el.src = j.url;
           scheduleSave();
           toast("Image uploadée — sauvegarde en cours...");
-        } else { toast("Erreur upload image"); }
-      } catch { toast("Erreur réseau upload"); }
-      finally { delete el.dataset.editing; input.remove(); }
+        } else {
+          console.error("upload_image failed", j);
+          toast("Erreur upload image");
+        }
+      } catch (err) {
+        console.error("upload error", err);
+        toast("Erreur réseau upload");
+      } finally {
+        delete el.dataset.editing;
+        input.remove();
+      }
     });
     input.click();
     return;
@@ -260,7 +262,7 @@ function createContentBox() {
   return box;
 }
 
-// ---- global add block button ----
+// ---- global single add block button ----
 function addGlobalAddBlockButton() {
   const existing = document.getElementById("add-global-block-btn");
   if (existing) existing.remove();
@@ -276,9 +278,11 @@ function addGlobalAddBlockButton() {
     const newBox = createContentBox();
     container.appendChild(newBox);
 
+    // Initialize only the new block
     addDeleteAndAddButtons(newBox);
     enableInlineEditingForBlock(newBox);
     enableDragReorder();
+
     scheduleSave();
   });
 
@@ -286,7 +290,7 @@ function addGlobalAddBlockButton() {
   if (container) container.appendChild(btn);
 }
 
-// ---- drag & drop ----
+// ---- drag & drop ordering ----
 function enableDragReorder() {
   const container = document.querySelector("#editable-container");
   if (!container) return;
@@ -316,10 +320,11 @@ function enableDragReorder() {
   });
 }
 
-// ---- collect blocks from DOM (includes classes & styles) ----
+// ---- collect blocks from DOM in current order ----
 function buildBlocksFromDOM() {
   const blocks = [];
   const allEditable = document.querySelectorAll("[data-editable]");
+
   allEditable.forEach((el, idx) => {
     const parentBox = el.closest(".content-box");
     if (parentBox && !parentBox.dataset.blockId) {
@@ -336,11 +341,10 @@ function buildBlocksFromDOM() {
     blk.elements.push({
       id: el.id || ("el_" + idx + "_" + Date.now()),
       tag: el.tagName,
-      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim(),
-      classes: el.className || "",
-      style: el.getAttribute("style") || ""
+      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
     });
   });
+
   blocks.forEach((b, i) => { b.order = i; });
   return blocks;
 }
@@ -355,6 +359,7 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 async function saveStructuredContent(page = pageKey) {
   const blocks = buildBlocksFromDOM();
   if (!blocks.length) return console.warn("Nothing to save (no blocks).");
+
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
@@ -363,16 +368,28 @@ async function saveStructuredContent(page = pageKey) {
       body: JSON.stringify({ page, content: blocks })
     });
     const j = await res.json();
-    if (!j.success) { toast("Erreur sauvegarde"); return; }
+    if (!j.success) {
+      console.error("Save failed:", j);
+      toast("Erreur sauvegarde");
+      return;
+    }
+    console.log("Saved:", j.updated);
     showSavedBadge();
     toast("Sauvegardé");
-  } catch { toast("Erreur réseau lors de la sauvegarde"); }
+  } catch (err) {
+    console.error("save error", err);
+    toast("Erreur réseau lors de la sauvegarde");
+  }
 }
 
 // expose manual save
 window.cms = window.cms || {};
 window.cms.saveNow = () => saveStructuredContent(pageKey);
 
-// reinit helper
+// ---- helpful: init if user adds blocks via server / other flows ----
 window.addEventListener("cms:reinit", () => initAdminEditor());
-document.addEventListener("DOMContentLoaded", () => addGlobalAddBlockButton());
+
+// ---- init global add button ----
+document.addEventListener("DOMContentLoaded", () => {
+  addGlobalAddBlockButton();
+});
