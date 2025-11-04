@@ -95,6 +95,13 @@ async function loadStructuredContent(page = pageKey) {
         });
       }
     });
+    // Clean any wrong saved add-block button
+    const badBtn = document.getElementById("add-global-block-btn");
+    if (badBtn) badBtn.remove();
+
+    //  Always recreate admin button after loading saved content
+    if (isAdmin) addGlobalAddBlockButton();
+
     console.log("Structured content merged (partial update)");
   } catch (err) {
     console.error("loadStructuredContent error", err);
@@ -251,6 +258,9 @@ function createContentBox() {
 // ---- Global add block button ----
 // ---- Floating "Add Block" button ----
 function addGlobalAddBlockButton() {
+  // always remove old (in case it was saved or duplicated)
+  const oldBtn = document.getElementById("add-global-block-btn");
+  if (oldBtn) oldBtn.remove();
   let btn = document.getElementById("add-global-block-btn");
   if (!btn) {
     btn = document.createElement("button");
@@ -314,6 +324,12 @@ function buildBlocksFromDOM() {
   const blocks = [];
   const editableElements = document.querySelectorAll("[data-editable]");
   editableElements.forEach((el, idx) => {
+    if (
+      el.closest(".edit-btn") ||
+      el.closest(".delete-btn") ||
+      el.id === "add-global-block-btn" ||
+      el.dataset.admin === "true"
+    ) return;
     // detect if inside a .content-box (else fallback to misc)
     const parentBox = el.closest(".content-box");
     const blockId = parentBox?.dataset.blockId || ("misc_" + Date.now() + "_" + idx);
