@@ -1,4 +1,6 @@
-// admin_structured.js
+// admin_structured.js (upload-only images, saves blocks+order+elements)
+// Drop into your project and include after DOM. Requires container with id="editable-container".
+
 const pageKey = window.location.pathname.split("/").pop() || "admin_index.php";
 let isAdmin = false;
 let saveTimer = null;
@@ -52,7 +54,7 @@ async function checkAdminSession() {
 }
 document.addEventListener("DOMContentLoaded", checkAdminSession);
 
-// ---- load saved content (blocks + standalone elements) ----
+// ---- load saved content (rebuild blocks) ----
 async function loadStructuredContent(page = pageKey) {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
@@ -66,6 +68,7 @@ async function loadStructuredContent(page = pageKey) {
     blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
 
     blocks.forEach(blockObj => {
+      const parentSelector = blockObj.parentSelector || null; // optional for elements outside content-box
       if (blockObj.elements && blockObj.elements.length) {
         blockObj.elements.forEach(el => {
           const existing = document.getElementById(el.id);
@@ -74,16 +77,19 @@ async function loadStructuredContent(page = pageKey) {
             if (el.tag === "IMG") existing.src = el.value;
             else existing.textContent = el.value;
           } else {
-            // append new elements if parentSelector is defined
-            if (el.parentSelector) {
-              const parent = document.querySelector(el.parentSelector);
-              if (!parent) return console.warn("Parent not found:", el.parentSelector);
+            // If parentSelector is defined, append to that element
+            if (parentSelector) {
+              const parent = document.querySelector(parentSelector);
+              if (!parent) return console.warn("Parent not found:", parentSelector);
               const newEl = document.createElement(el.tag.toLowerCase());
               newEl.id = el.id;
               newEl.dataset.editable = "true";
               if (el.tag === "IMG") newEl.src = el.value;
               else newEl.textContent = el.value;
               parent.appendChild(newEl);
+            } else {
+              // fallback: ignore elements without parent or existing id
+              console.warn("Element missing and no parentSelector:", el.id);
             }
           }
         });
@@ -97,7 +103,7 @@ async function loadStructuredContent(page = pageKey) {
   }
 }
 
-// ---- escape helper ----
+// ---- escape helper (prevent XSS when injecting saved text) ----
 function escapeHtml(s) {
   if (s == null) return "";
   return String(s)
@@ -108,12 +114,14 @@ function escapeHtml(s) {
 
 // ---- admin UI init ----
 function initAdminEditor() {
+  // ensure blocks have ids & draggable
   document.querySelectorAll(".content-box").forEach((b, i) => {
     if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + "_" + i;
     b.setAttribute("draggable", "true");
     b.dataset.order = i;
   });
 
+  // show edit icons
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.style.display = "inline-flex";
     btn.style.zIndex = 60;
@@ -125,31 +133,47 @@ function initAdminEditor() {
   enableDragReorder();
 }
 
-// ---- inline editing ----
+// ---- inline editing (text + images) ----
 function enableInlineEditing() {
+  // remove existing handlers by cloning nodes to avoid duplicates
   document.querySelectorAll(".edit-btn").forEach(btn => {
     const clone = btn.cloneNode(true);
     btn.parentNode.replaceChild(clone, btn);
   });
 
   document.querySelectorAll(".edit-btn").forEach(btn => {
-    const target = btn.nextElementSibling || btn.previousElementSibling;
+    const tgtSelector = btn.dataset.target;
+    let target = tgtSelector ? document.querySelector(tgtSelector) : (btn.nextElementSibling || btn.previousElementSibling);
+    if (!target) return;
+    if (target.tagName === "A" && target.querySelector("img[data-editable]")) target = target.querySelector("img[data-editable]");
     if (!target || target.dataset.editable === undefined) return;
-    btn.addEventListener("click", e => {
-      e.stopPropagation();
-      openInlineEditor(target);
-    });
+
+    cloneAddClick(btn, target);
   });
 
+  // also allow clicking the editable element itself to edit (nice UX)
   document.querySelectorAll("[data-editable]").forEach(el => {
-    el.onclick = () => { if (isAdmin) openInlineEditor(el); };
+    el.onclick = (e) => {
+      if (!isAdmin) return;
+      // avoid triggering when clicking inside inputs created by editor
+      openInlineEditor(el);
+    };
+  });
+}
+
+function cloneAddClick(btn, target) {
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    openInlineEditor(target);
   });
 }
 
 function openInlineEditor(el) {
-  if (!isAdmin || el.dataset.editing === "true") return;
+  if (!isAdmin) return;
+  if (el.dataset.editing === "true") return;
   el.dataset.editing = "true";
 
+  // IMAGE: upload-only flow
   if (el.tagName === "IMG") {
     const input = document.createElement("input");
     input.type = "file"; input.accept = "image/*";
@@ -158,18 +182,36 @@ function openInlineEditor(el) {
       if (!f) { delete el.dataset.editing; return; }
       try {
         const fd = new FormData();
-        fd.append("file", f); fd.append("page", pageKey);
-        const res = await fetch("/php/upload_image.php", { method: "POST", body: fd, credentials: "include" });
+        fd.append("file", f);
+        fd.append("page", pageKey);
+        // call server upload endpoint
+        const res = await fetch("/php/upload_image.php", {
+          method: "POST",
+          body: fd,
+          credentials: "include"
+        });
         const j = await res.json();
-        if (j.success && j.url) { el.src = j.url; scheduleSave(); toast("Image uploadée — sauvegarde en cours..."); }
-        else toast("Erreur upload image");
-      } catch (err) { toast("Erreur réseau upload"); console.error(err); }
-      finally { delete el.dataset.editing; input.remove(); }
+        if (j.success && j.url) {
+          el.src = j.url;              // set URL returned by server
+          scheduleSave();             // schedule save of blocks
+          toast("Image uploadée — sauvegarde en cours...");
+        } else {
+          console.error("upload_image failed", j);
+          toast("Erreur upload image");
+        }
+      } catch (err) {
+        console.error("upload error", err);
+        toast("Erreur réseau upload");
+      } finally {
+        delete el.dataset.editing;
+        input.remove();
+      }
     });
     input.click();
     return;
   }
 
+  // TEXT / LONG text
   const tag = el.tagName;
   const isLong = (el.textContent || "").length > 60 || ["P","DIV"].includes(tag);
   const input = isLong ? document.createElement("textarea") : document.createElement("input");
@@ -179,26 +221,43 @@ function openInlineEditor(el) {
   el.parentElement.insertBefore(input, el);
   input.focus();
 
-  function finalize() { el.textContent = input.value; input.remove(); el.style.display = ""; delete el.dataset.editing; scheduleSave(); }
+  function finalize() {
+    el.textContent = input.value;
+    input.remove();
+    el.style.display = "";
+    delete el.dataset.editing;
+    scheduleSave();
+  }
+
   input.addEventListener("blur", finalize);
-  input.addEventListener("keydown", ev => { if (ev.key === "Enter" && input.tagName !== "TEXTAREA") input.blur(); });
+  input.addEventListener("keydown", (ev) => { if (ev.key === "Enter" && input.tagName !== "TEXTAREA") input.blur(); });
 }
 
-// ---- block management ----
+// ---- block add/delete ----
 function addDeleteAndAddButtons(box) {
+  // remove existing buttons
   box.querySelectorAll(".delete-btn").forEach(b => b.remove());
-  const next = box.nextElementSibling; if (next?.classList.contains("add-block-btn")) next.remove();
+  const next = box.nextElementSibling;
+  if (next && next.classList.contains("add-block-btn")) next.remove();
 
   const del = document.createElement("button");
-  del.innerText = "❌"; del.className = "delete-btn";
+  del.innerText = "❌";
+  del.className = "delete-btn";
   Object.assign(del.style, { position: "absolute", right: "8px", top: "8px", zIndex: 70 });
-  del.addEventListener("click", () => { if (!confirm("Supprimer ce bloc ?")) return; box.remove(); scheduleSave(); });
+  del.addEventListener("click", () => {
+    if (!confirm("Supprimer ce bloc ?")) return;
+    box.remove(); scheduleSave();
+  });
 
   const add = document.createElement("button");
-  add.innerText = "+ Ajouter un block"; add.className = "add-block-btn";
+  add.innerText = "+ Ajouter un block";
+  add.className = "add-block-btn";
   Object.assign(add.style, { display: "block", marginTop: "12px" });
   add.addEventListener("click", () => {
-    const newBox = createContentBox(); box.parentElement.insertBefore(newBox, add); initAdminEditor(); scheduleSave();
+    const newBox = createContentBox();
+    box.parentElement.insertBefore(newBox, add);
+    initAdminEditor();
+    scheduleSave();
   });
 
   box.style.position = "relative";
@@ -218,7 +277,8 @@ function createContentBox() {
   const uid = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
   const box = document.createElement("div");
   box.className = "content-box bg-white p-6 rounded-lg shadow-md";
-  box.dataset.blockId = uid; box.dataset.order = document.querySelectorAll(".content-box").length;
+  box.dataset.blockId = uid;
+  box.dataset.order = document.querySelectorAll(".content-box").length;
   box.innerHTML = `
     <div class="content-image mb-4">
       <button class="edit-btn">✎</button>
@@ -234,52 +294,105 @@ function createContentBox() {
   return box;
 }
 
-// ---- drag & reorder ----
+function addGlobalAddBlockButton() {
+  // remove existing global button if any
+  const existing = document.getElementById("add-global-block-btn");
+  if (existing) existing.remove();
+
+  const btn = document.createElement("button");
+  btn.id = "add-global-block-btn";
+  btn.innerText = "+ Ajouter un block";
+  btn.className = "add-block-btn";
+  Object.assign(btn.style, { display: "block", marginTop: "20px" });
+
+  btn.addEventListener("click", () => {
+    const container = document.querySelector("#editable-container");
+    const newBox = createContentBox();
+    container.appendChild(newBox);
+    initAdminEditor();   // re-init to attach edit/delete etc.
+    scheduleSave();      // save automatically
+  });
+
+  const container = document.querySelector("#editable-container");
+  if (container) container.appendChild(btn);
+}
+
+// call at load
+document.addEventListener("DOMContentLoaded", () => {
+  addGlobalAddBlockButton();
+});
+
+
+// ---- drag & drop ordering ----
 function enableDragReorder() {
   const container = document.querySelector("#editable-container");
   if (!container) return;
   let dragSrc = null;
 
   container.querySelectorAll(".content-box").forEach(box => {
-    box.addEventListener("dragstart", e => { dragSrc = box; e.dataTransfer.effectAllowed = "move"; box.style.opacity = "0.5"; });
+    box.addEventListener("dragstart", (e) => {
+      dragSrc = box;
+      e.dataTransfer.effectAllowed = "move";
+      box.style.opacity = "0.5";
+    });
     box.addEventListener("dragend", () => {
-      box.style.opacity = ""; dragSrc = null;
+      box.style.opacity = "";
+      dragSrc = null;
+      // reassign order attributes after drag
       Array.from(container.children).forEach((ch, idx) => ch.dataset.order = idx);
       scheduleSave();
     });
-    box.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
-    box.addEventListener("drop", e => {
-      e.preventDefault(); if (!dragSrc || dragSrc === box) return;
-      const rect = box.getBoundingClientRect(), halfway = rect.top + rect.height / 2;
+    box.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
+    box.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (!dragSrc || dragSrc === box) return;
+      // insert before or after based on position
+      const rect = box.getBoundingClientRect();
+      const halfway = rect.top + rect.height / 2;
       if (e.clientY < halfway) box.parentNode.insertBefore(dragSrc, box);
       else box.parentNode.insertBefore(dragSrc, box.nextSibling);
     });
   });
 }
 
-// ---- collect blocks ----
+// ---- collect blocks from DOM in current order ----
 function buildBlocksFromDOM() {
   const blocks = [];
-  document.querySelectorAll("[data-editable]").forEach((el, idx) => {
+  const allEditable = document.querySelectorAll("[data-editable]");
+
+  allEditable.forEach((el, idx) => {
+    // Try to find a parent content-box
     const parentBox = el.closest(".content-box");
+
+    // Assign blockId if missing (fix for newly created boxes)
+    if (parentBox && !parentBox.dataset.blockId) {
+      parentBox.dataset.blockId = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+    }
+
     const blockId = parentBox?.dataset.blockId || ("single_" + idx + "_" + Date.now());
 
+    // Find or create the block object
     let blk = blocks.find(b => b.blockId === blockId);
     if (!blk) {
       blk = { blockId, order: blocks.length, elements: [] };
       blocks.push(blk);
     }
 
+    // Push element data
     blk.elements.push({
-      id: el.id || null,
+      id: el.id || ("el_" + idx + "_" + Date.now()),
       tag: el.tagName,
-      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim(),
-      parentSelector: parentBox ? null : `#${el.id}`
+      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
     });
   });
 
+  // Assign order according to DOM
+  blocks.forEach((b, i) => { b.order = i; });
+
   return blocks;
 }
+
+
 
 // ---- debounce + save ----
 function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
@@ -300,12 +413,23 @@ async function saveStructuredContent(page = pageKey) {
       body: JSON.stringify({ page, content: blocks })
     });
     const j = await res.json();
-    if (!j.success) { toast("Erreur sauvegarde"); console.error("Save failed:", j); return; }
-    showSavedBadge(); toast("Sauvegardé");
-  } catch (err) { console.error("save error", err); toast("Erreur réseau lors de la sauvegarde"); }
+    if (!j.success) {
+      console.error("Save failed:", j);
+      toast("Erreur sauvegarde");
+      return;
+    }
+    console.log("Saved:", j.updated);
+    showSavedBadge();
+    toast("Sauvegardé");
+  } catch (err) {
+    console.error("save error", err);
+    toast("Erreur réseau lors de la sauvegarde");
+  }
 }
 
 // expose manual save
 window.cms = window.cms || {};
 window.cms.saveNow = () => saveStructuredContent(pageKey);
+
+// ---- helpful: init if user adds blocks via server / other flows ----
 window.addEventListener("cms:reinit", () => initAdminEditor());
