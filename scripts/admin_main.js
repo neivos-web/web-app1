@@ -55,51 +55,63 @@ async function checkAdminSession() {
 document.addEventListener("DOMContentLoaded", checkAdminSession);
 
 // ---- load saved content (rebuild blocks) ----
-// ---- load saved content (rebuild blocks including classes + styles) ----
 async function loadStructuredContent(page = pageKey) {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
-    const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
-    if (!blocks.length) return;
-
+    const savedBlocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
     const container = document.querySelector("#editable-container");
     if (!container) return;
 
-    container.querySelectorAll(".content-box").forEach(b => b.remove());
+    // Récupérer TOUS les blocs existants dans le HTML
+    const existingBoxes = Array.from(container.querySelectorAll(".content-box"));
 
-    blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
+    // Fusionner les blocs sauvegardés avec les blocs existants
+    savedBlocks.forEach(blockObj => {
+      // Chercher un bloc existant par blockId
+      let box = existingBoxes.find(b => b.dataset.blockId === blockObj.blockId);
+      if (!box) {
+        // créer un nouveau bloc si absent
+        box = document.createElement("div");
+        box.className = "content-box bg-white p-6 rounded-lg shadow-md";
+        box.dataset.blockId = blockObj.blockId;
+        box.dataset.order = blockObj.order;
+        container.appendChild(box);
+      }
 
-    blocks.forEach(blockObj => {
-      const box = document.createElement("div");
-      box.className = "content-box bg-white p-6 rounded-lg shadow-md";
-      box.dataset.blockId = blockObj.blockId;
-      box.dataset.order = blockObj.order;
-
+      // Recréer ou mettre à jour les éléments du bloc
       blockObj.elements.forEach(el => {
-        const newEl = document.createElement(el.tag.toLowerCase());
-        newEl.id = el.id;
-        newEl.dataset.editable = "true";
-        newEl.className = el.classes || "";
-        if (el.style) newEl.setAttribute("style", el.style);
-        if (el.tag === "IMG") newEl.src = el.value;
-        else newEl.textContent = el.value;
-        box.appendChild(newEl);
+        let existingEl = document.getElementById(el.id);
+        if (!existingEl) {
+          const newEl = document.createElement(el.tag.toLowerCase());
+          newEl.id = el.id;
+          newEl.dataset.editable = "true";
+          newEl.className = el.classes || "";
+          if (el.style) newEl.setAttribute("style", el.style);
+          if (el.tag === "IMG") newEl.src = el.value;
+          else newEl.textContent = el.value;
+          box.appendChild(newEl);
+        } else {
+          if (el.tag === "IMG") existingEl.src = el.value;
+          else existingEl.textContent = el.value;
+          existingEl.className = el.classes || "";
+          if (el.style) existingEl.setAttribute("style", el.style);
+        }
       });
 
-      container.appendChild(box);
       addDeleteAndAddButtons(box);
       enableInlineEditingForBlock(box);
     });
 
-    if (isAdmin) initAdminEditor();
-    console.log("✅ All content-boxes loaded with styles");
+    initAdminEditor();
+    console.log("✅ All blocks loaded from saved content and HTML");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
+
 
 
 // ---- escape helper (prevent XSS when injecting saved text) ----
