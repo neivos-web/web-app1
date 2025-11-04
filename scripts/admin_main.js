@@ -68,16 +68,14 @@ async function loadStructuredContent(page = pageKey) {
     blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
 
     blocks.forEach(blockObj => {
-      const parentSelector = blockObj.parentSelector || null; // optional for elements outside content-box
+      const parentSelector = blockObj.parentSelector || null;
       if (blockObj.elements && blockObj.elements.length) {
         blockObj.elements.forEach(el => {
           const existing = document.getElementById(el.id);
           if (existing) {
-            // update existing element
             if (el.tag === "IMG") existing.src = el.value;
             else existing.textContent = el.value;
           } else {
-            // If parentSelector is defined, append to that element
             if (parentSelector) {
               const parent = document.querySelector(parentSelector);
               if (!parent) return console.warn("Parent not found:", parentSelector);
@@ -88,7 +86,6 @@ async function loadStructuredContent(page = pageKey) {
               else newEl.textContent = el.value;
               parent.appendChild(newEl);
             } else {
-              // fallback: ignore elements without parent or existing id
               console.warn("Element missing and no parentSelector:", el.id);
             }
           }
@@ -114,14 +111,12 @@ function escapeHtml(s) {
 
 // ---- admin UI init ----
 function initAdminEditor() {
-  // ensure blocks have ids & draggable
   document.querySelectorAll(".content-box").forEach((b, i) => {
     if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + "_" + i;
     b.setAttribute("draggable", "true");
     b.dataset.order = i;
   });
 
-  // show edit icons
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.style.display = "inline-flex";
     btn.style.zIndex = 60;
@@ -135,7 +130,6 @@ function initAdminEditor() {
 
 // ---- inline editing (text + images) ----
 function enableInlineEditing() {
-  // remove existing handlers by cloning nodes to avoid duplicates
   document.querySelectorAll(".edit-btn").forEach(btn => {
     const clone = btn.cloneNode(true);
     btn.parentNode.replaceChild(clone, btn);
@@ -147,15 +141,12 @@ function enableInlineEditing() {
     if (!target) return;
     if (target.tagName === "A" && target.querySelector("img[data-editable]")) target = target.querySelector("img[data-editable]");
     if (!target || target.dataset.editable === undefined) return;
-
     cloneAddClick(btn, target);
   });
 
-  // also allow clicking the editable element itself to edit (nice UX)
   document.querySelectorAll("[data-editable]").forEach(el => {
     el.onclick = (e) => {
       if (!isAdmin) return;
-      // avoid triggering when clicking inside inputs created by editor
       openInlineEditor(el);
     };
   });
@@ -173,7 +164,6 @@ function openInlineEditor(el) {
   if (el.dataset.editing === "true") return;
   el.dataset.editing = "true";
 
-  // IMAGE: upload-only flow
   if (el.tagName === "IMG") {
     const input = document.createElement("input");
     input.type = "file"; input.accept = "image/*";
@@ -184,16 +174,11 @@ function openInlineEditor(el) {
         const fd = new FormData();
         fd.append("file", f);
         fd.append("page", pageKey);
-        // call server upload endpoint
-        const res = await fetch("/php/upload_image.php", {
-          method: "POST",
-          body: fd,
-          credentials: "include"
-        });
+        const res = await fetch("/php/upload_image.php", { method: "POST", body: fd, credentials: "include" });
         const j = await res.json();
         if (j.success && j.url) {
-          el.src = j.url;              // set URL returned by server
-          scheduleSave();             // schedule save of blocks
+          el.src = j.url;
+          scheduleSave();
           toast("Image uploadée — sauvegarde en cours...");
         } else {
           console.error("upload_image failed", j);
@@ -211,7 +196,6 @@ function openInlineEditor(el) {
     return;
   }
 
-  // TEXT / LONG text
   const tag = el.tagName;
   const isLong = (el.textContent || "").length > 60 || ["P","DIV"].includes(tag);
   const input = isLong ? document.createElement("textarea") : document.createElement("input");
@@ -235,11 +219,8 @@ function openInlineEditor(el) {
 
 // ---- block add/delete ----
 function addDeleteAndAddButtons(box) {
-  // remove existing buttons
+  // Only delete per block
   box.querySelectorAll(".delete-btn").forEach(b => b.remove());
-  const next = box.nextElementSibling;
-  if (next && next.classList.contains("add-block-btn")) next.remove();
-
   const del = document.createElement("button");
   del.innerText = "❌";
   del.className = "delete-btn";
@@ -248,21 +229,8 @@ function addDeleteAndAddButtons(box) {
     if (!confirm("Supprimer ce bloc ?")) return;
     box.remove(); scheduleSave();
   });
-
-  const add = document.createElement("button");
-  add.innerText = "+ Ajouter un block";
-  add.className = "add-block-btn";
-  Object.assign(add.style, { display: "block", marginTop: "12px" });
-  add.addEventListener("click", () => {
-    const newBox = createContentBox();
-    box.parentElement.insertBefore(newBox, add);
-    initAdminEditor();
-    scheduleSave();
-  });
-
   box.style.position = "relative";
   box.prepend(del);
-  box.insertAdjacentElement("afterend", add);
 }
 
 function enableBlockManagement() {
@@ -273,6 +241,7 @@ function enableBlockManagement() {
   });
 }
 
+// ---- create new content box ----
 function createContentBox() {
   const uid = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
   const box = document.createElement("div");
@@ -294,8 +263,8 @@ function createContentBox() {
   return box;
 }
 
+// ---- global single add block button ----
 function addGlobalAddBlockButton() {
-  // remove existing global button if any
   const existing = document.getElementById("add-global-block-btn");
   if (existing) existing.remove();
 
@@ -309,19 +278,13 @@ function addGlobalAddBlockButton() {
     const container = document.querySelector("#editable-container");
     const newBox = createContentBox();
     container.appendChild(newBox);
-    initAdminEditor();   // re-init to attach edit/delete etc.
-    scheduleSave();      // save automatically
+    initAdminEditor();
+    scheduleSave();
   });
 
   const container = document.querySelector("#editable-container");
   if (container) container.appendChild(btn);
 }
-
-// call at load
-document.addEventListener("DOMContentLoaded", () => {
-  addGlobalAddBlockButton();
-});
-
 
 // ---- drag & drop ordering ----
 function enableDragReorder() {
@@ -338,7 +301,6 @@ function enableDragReorder() {
     box.addEventListener("dragend", () => {
       box.style.opacity = "";
       dragSrc = null;
-      // reassign order attributes after drag
       Array.from(container.children).forEach((ch, idx) => ch.dataset.order = idx);
       scheduleSave();
     });
@@ -346,7 +308,6 @@ function enableDragReorder() {
     box.addEventListener("drop", (e) => {
       e.preventDefault();
       if (!dragSrc || dragSrc === box) return;
-      // insert before or after based on position
       const rect = box.getBoundingClientRect();
       const halfway = rect.top + rect.height / 2;
       if (e.clientY < halfway) box.parentNode.insertBefore(dragSrc, box);
@@ -361,24 +322,18 @@ function buildBlocksFromDOM() {
   const allEditable = document.querySelectorAll("[data-editable]");
 
   allEditable.forEach((el, idx) => {
-    // Try to find a parent content-box
     const parentBox = el.closest(".content-box");
-
-    // Assign blockId if missing (fix for newly created boxes)
     if (parentBox && !parentBox.dataset.blockId) {
       parentBox.dataset.blockId = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
     }
-
     const blockId = parentBox?.dataset.blockId || ("single_" + idx + "_" + Date.now());
 
-    // Find or create the block object
     let blk = blocks.find(b => b.blockId === blockId);
     if (!blk) {
       blk = { blockId, order: blocks.length, elements: [] };
       blocks.push(blk);
     }
 
-    // Push element data
     blk.elements.push({
       id: el.id || ("el_" + idx + "_" + Date.now()),
       tag: el.tagName,
@@ -386,13 +341,9 @@ function buildBlocksFromDOM() {
     });
   });
 
-  // Assign order according to DOM
   blocks.forEach((b, i) => { b.order = i; });
-
   return blocks;
 }
-
-
 
 // ---- debounce + save ----
 function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
@@ -433,3 +384,8 @@ window.cms.saveNow = () => saveStructuredContent(pageKey);
 
 // ---- helpful: init if user adds blocks via server / other flows ----
 window.addEventListener("cms:reinit", () => initAdminEditor());
+
+// ---- init global add button ----
+document.addEventListener("DOMContentLoaded", () => {
+  addGlobalAddBlockButton();
+});
