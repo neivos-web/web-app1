@@ -61,48 +61,39 @@ async function loadStructuredContent(page = pageKey) {
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
-    // Expect content to be array of blocks (blockId, order, elements[])
     const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
-    const container = document.querySelector("#editable-container");
-    if (!container) {
-      console.warn("#editable-container not found");
-      return;
-    }
 
-    // if no saved blocks, leave existing DOM as-is
     if (!blocks.length) return;
 
-    // clear and rebuild using saved order
-    container.innerHTML = "";
-    blocks.sort((a,b) => (a.order || 0) - (b.order || 0)).forEach(blockObj => {
-      const block = document.createElement("div");
-      const bid = blockObj.blockId || ("block_" + Date.now() + "_" + Math.floor(Math.random()*1000));
-      block.className = "content-box bg-white p-6 rounded-lg shadow-md";
-      block.dataset.blockId = bid;
+    blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-      // build inner markup from elements array (each element: { id, tag, value })
-      const innerParts = [];
-      if (Array.isArray(blockObj.elements)) {
-        // group img elements and text elements sensibly
+    blocks.forEach(blockObj => {
+      const parentSelector = blockObj.parentSelector || null; // optional for elements outside content-box
+      if (blockObj.elements && blockObj.elements.length) {
         blockObj.elements.forEach(el => {
-          if (el.tag === "IMG") {
-            const id = el.id || (bid + "_img_" + Math.floor(Math.random()*1000));
-            innerParts.push(`<div class="content-image mb-4">
-                                <button class="edit-btn">✎</button>
-                                <img id="${id}" data-editable src="${escapeHtml(el.value || '')}" alt="" class="w-full h-auto rounded-lg" />
-                             </div>`);
+          const existing = document.getElementById(el.id);
+          if (existing) {
+            // update existing element
+            if (el.tag === "IMG") existing.src = el.value;
+            else existing.textContent = el.value;
           } else {
-            const id = el.id || (bid + "_el_" + Math.floor(Math.random()*1000));
-            innerParts.push(`<div class="content"><button class="edit-btn">✎</button><${el.tag.toLowerCase()} id="${id}" data-editable>${escapeHtml(el.value || '')}</${el.tag.toLowerCase()}></div>`);
+            // If parentSelector is defined, append to that element
+            if (parentSelector) {
+              const parent = document.querySelector(parentSelector);
+              if (!parent) return console.warn("Parent not found:", parentSelector);
+              const newEl = document.createElement(el.tag.toLowerCase());
+              newEl.id = el.id;
+              newEl.dataset.editable = "true";
+              if (el.tag === "IMG") newEl.src = el.value;
+              else newEl.textContent = el.value;
+              parent.appendChild(newEl);
+            } else {
+              // fallback: ignore elements without parent or existing id
+              console.warn("Element missing and no parentSelector:", el.id);
+            }
           }
         });
-      } else if (blockObj.html) {
-        // legacy: raw html stored
-        innerParts.push(blockObj.html);
       }
-
-      block.innerHTML = innerParts.join("\n");
-      container.appendChild(block);
     });
 
     if (isAdmin) initAdminEditor();
@@ -341,26 +332,31 @@ function buildBlocksFromDOM() {
   const allEditable = document.querySelectorAll("[data-editable]");
 
   allEditable.forEach((el, idx) => {
-    // use existing blockId if inside a content-box, else create per-element blockId
+    // Try to find a parent content-box
     const parentBox = el.closest(".content-box");
     const blockId = parentBox?.dataset.blockId || ("single_" + idx + "_" + Date.now());
 
-    // check if this blockId already exists
+    // Find or create the block object
     let blk = blocks.find(b => b.blockId === blockId);
     if (!blk) {
       blk = { blockId, order: blocks.length, elements: [] };
       blocks.push(blk);
     }
 
+    // Push element data
     blk.elements.push({
-      id: el.id || null,
+      id: el.id || ("el_" + idx + "_" + Date.now()),
       tag: el.tagName,
       value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
     });
   });
 
+  // Assign order: content-box blocks keep DOM order; standalone elements after them
+  blocks.forEach((b, i) => { b.order = i; });
+
   return blocks;
 }
+
 
 
 // ---- debounce + save ----
