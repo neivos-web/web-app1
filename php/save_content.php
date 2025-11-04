@@ -18,7 +18,7 @@ $page    = $input['page'] ?? '';
 $content = $input['content'] ?? null;
 $date    = date("Y-m-d H:i:s");
 
-if (!$page || !is_array($content) || empty($content)) {
+if (!$page || !is_array($content) ) {
     echo json_encode(["success" => false, "error" => "Missing or invalid data"]);
     exit;
 }
