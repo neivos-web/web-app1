@@ -1,4 +1,3 @@
-// admin_structured.js
 const pageKey = window.location.pathname.split("/").pop() || "admin_index.php";
 let isAdmin = false;
 let saveTimer = null;
@@ -263,8 +262,7 @@ async function saveStructuredContent(page = pageKey) {
   const blocks = [...container.querySelectorAll(".content-box")].map((box, index) => {
     const elements = [...box.querySelectorAll("[data-editable]")].map(el => ({
       id: el.id || null,
-      tag: el.tagName,
-      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
+      html: el.outerHTML
     }));
     return {
       blockId: box.dataset.blockId || ("block_" + index + "_" + Date.now()),
