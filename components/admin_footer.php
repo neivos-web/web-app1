@@ -46,4 +46,4 @@
                 <a href="#" data-key="footer_privacy">Déclaration de confidentialité</a>
             </div>
         </div>
-    </footer>
+    
