@@ -61,28 +61,35 @@ async function loadStructuredContent(page = pageKey) {
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
+    // === NEW: if we saved full HTML of the editable section ===
+    if (data.html) {
+      const section = document.querySelector("#editable-container");
+      if (section) section.outerHTML = data.html;
+      console.log("Full editable-container section reloaded from saved HTML");
+      return;
+    }
+
+    // === Fallback (old block merging mode) ===
     const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
     if (!blocks.length) return;
-
     blocks.forEach(blockObj => {
       if (blockObj.elements && blockObj.elements.length) {
         blockObj.elements.forEach(el => {
           const existing = document.getElementById(el.id);
           if (existing) {
-            // update text or image only
             if (el.tag === "IMG" && existing.tagName === "IMG") existing.src = el.value;
             else if (existing.tagName !== "IMG") existing.textContent = el.value;
           }
-          // do NOT create new elements, leave layout untouched
         });
       }
     });
-
-    console.log("✅ Structured content merged");
+    console.log("Structured content merged (partial update)");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
+
+
 
 
 // ---- escape helper (prevent XSS when injecting saved text) ----
@@ -356,16 +363,21 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
   saveTimer = setTimeout(() => saveStructuredContent(pageKey), ms);
 }
 
+// ---- save full HTML of editable section ----
 async function saveStructuredContent(page = pageKey) {
+  const container = document.querySelector("#editable-container");
+  if (!container) return console.warn("No editable-container found.");
+
+  // Build JSON structure for backward compatibility
   const blocks = buildBlocksFromDOM();
-  if (!blocks.length) return console.warn("Nothing to save (no blocks).");
+  const html = container.outerHTML; // Save full section
 
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page, content: blocks })
+      body: JSON.stringify({ page, html, content: blocks })
     });
     const j = await res.json();
     if (!j.success) {
@@ -373,14 +385,15 @@ async function saveStructuredContent(page = pageKey) {
       toast("Erreur sauvegarde");
       return;
     }
-    console.log("Saved:", j.updated);
+    console.log(" Full section saved successfully");
     showSavedBadge();
-    toast("Sauvegardé");
+    toast("Section sauvegardée");
   } catch (err) {
     console.error("save error", err);
     toast("Erreur réseau lors de la sauvegarde");
   }
 }
+
 
 // expose manual save
 window.cms = window.cms || {};
