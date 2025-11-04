@@ -112,40 +112,41 @@
     </header>
 
     <main>
+       
         <!-- Section Héros -->
-        <section class="relative bg-white">
+        <section class="relative bg-white" id="hero-content">
             <div class="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" class="w-full h-full object-cover opacity-80" alt="Workspace">
-                <div class="absolute inset-0 bg-black opacity-40"></div>
+                <button class="edit-btn absolute top-4 left-4 z-50">✎</button>
+                <img id="hero-image"
+                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
+                    class="w-full h-full object-cover opacity-80" alt="Workspace" data-editable>
             </div>
+
             <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-key="welcome_title">Bienvenue dans notre section actualités et blogs</h1>
-                <p class="text-lg max-w-3xl mx-auto" data-key="welcome_subtitle">Découvrez les dernières nouvelles et des articles de blog qui illustrent notre vision et nos derniers progrès réalisés.</p>
-            </div>
-        </section>
-        
-        <!-- Section des articles -->
-        <section id="articles-section" class="py-16 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-bold text-center mb-12" data-key="articles_title">Actualités et blogs chez Outsiders</h2>
-                <div id="articles-container" class="space-y-12">
-                    <p id="loading-public" class="text-center text-gray-500" data-key="articles_loading">Chargement des actualités...</p>
-                </div>
+                <button class="edit-btn">✎</button>
+                <h1 id="hero-title" class="text-3xl md:text-5xl font-extrabold mb-4" data-editable data-key="welcome_title">
+                    OUTSIDERS – L’Innovation au Service du Changement
+                </h1>
+                <button class="edit-btn">✎</button>
+                <p id="hero-desc" class="text-lg max-w-3xl mx-auto" data-editable data-key="welcome_subtitle">
+                    Apprenez les technologies les plus demandées du moment grâce à nos formations interactives et pratiques.
+                    OUTSIDERS vous accompagne pour développer vos compétences, booster votre carrière et devenir acteur de
+                    l’innovation numérique.
+                </p>
             </div>
         </section>
 
         <!-- Section de bienvenue -->
-       <div class="hero-text text-white text-center">
-            <h1 id="hero-title" class="text-3xl md:text-5xl font-extrabold mb-4" data-editable data-key="welcome_title">
-                OUTSIDERS – L’Innovation au Service du Changement
-            </h1>
-            <p id="hero-desc" class="text-lg max-w-3xl mx-auto" data-editable data-key="welcome_subtitle">
-                Apprenez les technologies les plus demandées du moment grâce à nos formations interactives et pratiques.
-                OUTSIDERS vous accompagne pour développer vos compétences, booster votre carrière et devenir acteur de
-                l’innovation numérique.
-            </p>
-        </div>
-
+        <section class="welcome-section">
+            <div class="welcome-box">
+                <h1 data-key="welcome_section_title"><strong>Bienvenue chez OUTSIDERS</strong></h1>
+                <p data-key="welcome_section_text">
+                    Chez Outsiders Studio, nous sommes enthousiastes à l’idée de vous accompagner dans <strong>la découverte des opportunités offertes par 
+                    la transformation numérique</strong>. Posons ensemble les bases de <em>l’innovation de demain</em>, en alliant <strong>créativité et performance</strong> 
+                    pour atteindre de nouveaux sommets.
+                </p>
+            </div>
+        </section>
 
         <!-- Section Innovation et Avenir -->
         <section class="content-section">
