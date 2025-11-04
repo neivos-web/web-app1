@@ -1,180 +1,195 @@
 // admin_structured.js
-// Requires: page elements marked with data-editable and data-key (option 1)
-
 const pageKey = window.location.pathname.split("/").pop() || "admin_index.php";
 let isAdmin = false;
 let saveTimer = null;
-const SAVE_DEBOUNCE_MS = 1200;
+const SAVE_DEBOUNCE_MS = 900;
 
-// small toast helper
-function showToast(msg, ok = true) {
-  let toast = document.getElementById("cms-toast");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.id = "cms-toast";
-    toast.style = `
-      position: fixed; right: 20px; bottom: 20px;
-      background: rgba(0,0,0,0.8); color: white;
-      padding: 10px 14px; border-radius: 8px; z-index: 9999;
-      font-family: Inter, system-ui, sans-serif; font-size: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    `;
-    document.body.appendChild(toast);
+function showToast(msg) {
+  let t = document.getElementById("cms-toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "cms-toast";
+    Object.assign(t.style, {
+      position: "fixed", right: "20px", bottom: "20px",
+      background: "rgba(0,0,0,0.8)", color: "white", padding: "10px 14px",
+      borderRadius: "8px", zIndex: 9999, fontFamily: "Inter,system-ui",
+    });
+    document.body.appendChild(t);
   }
-  toast.textContent = msg;
-  toast.style.opacity = "1";
-  toast.style.transition = "opacity 0.4s";
-  clearTimeout(toast._hideTimeout);
-  toast._hideTimeout = setTimeout(() => { toast.style.opacity = "0"; }, 3000);
+  t.textContent = msg;
+  t.style.opacity = "1";
+  clearTimeout(t._hide);
+  t._hide = setTimeout(()=> t.style.opacity = "0", 2600);
 }
 
 function showSaveTooltip() {
-  let tooltip = document.createElement("div");
-  tooltip.innerText = " Sauvegardé";
-  tooltip.className =
-    "fixed bottom-4 right-4 bg-green-600 text-white px-3 py-2 rounded shadow-md z-50 opacity-0 transition-opacity";
-  document.body.appendChild(tooltip);
-
-  setTimeout(() => (tooltip.style.opacity = "1"), 10);
-  setTimeout(() => {
-    tooltip.style.opacity = "0";
-    setTimeout(() => tooltip.remove(), 500);
-  }, 2000);
+  const tip = document.createElement("div");
+  tip.innerText = "Sauvegardé";
+  Object.assign(tip.style, {
+    position: "fixed", right: "20px", bottom: "72px",
+    background: "#16a34a", color: "white", padding: "8px 12px", borderRadius: "8px",
+    zIndex: 9999, opacity: "0", transition: "opacity .2s"
+  });
+  document.body.appendChild(tip);
+  requestAnimationFrame(()=> tip.style.opacity = "1");
+  setTimeout(()=> { tip.style.opacity = "0"; setTimeout(()=> tip.remove(), 300); }, 1600);
 }
 
-// ----------------- session & init -----------------
+// ---- session check & load ----
 async function checkAdminSession() {
   try {
     const res = await fetch("/php/check_session.php", { credentials: "include" });
-    const data = await res.json();
-    isAdmin = data.logged_in === true;
+    const json = await res.json();
+    isAdmin = json.logged_in === true;
     if (isAdmin) initAdminEditor();
-    await loadStructuredContent();
-  } catch (err) {
-    console.warn("session check failed", err);
+  } catch(e) {
+    console.warn("session check failed", e);
+  } finally {
     await loadStructuredContent();
   }
 }
+document.addEventListener("DOMContentLoaded", checkAdminSession);
 
-document.addEventListener("DOMContentLoaded", () => {
-  checkAdminSession();
-});
-
-// ----------------- load structured content -----------------
+// ---- load structured content (blocks) ----
 async function loadStructuredContent(page = pageKey) {
   try {
-    const res = await fetch(`/php/load_content.php?page=${page}`, { credentials: "include" });
+    const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
     const data = await res.json();
+    if (!data.success) return console.warn("No content for", page);
 
-    if (!data.success || !Array.isArray(data.content)) return;
+    // Expect data.content to be JSON array of blocks OR old format (we try to auto-detect)
+    const blocks = Array.isArray(data.content) ? data.content : (data.content.blocks || []);
+    if (!blocks.length) {
+      // fallback: if stored as a single HTML string, do nothing here (your previous save method)
+      if (typeof data.content === "string") {
+        const container = document.querySelector("#editable-container");
+        if (container) container.innerHTML = data.content;
+      }
+      return;
+    }
 
-    data.content.forEach(saved => {
-      const el = document.getElementById(saved.id);
-      if (!el) return;
+    // Clear existing container then rebuild from saved blocks (preserve order)
+    const container = document.querySelector("#editable-container");
+    if (!container) return console.warn("#editable-container missing");
+    container.innerHTML = ""; // rebuild
 
-      if (el.tagName === "IMG") el.src = saved.value;
-      else el.textContent = saved.value;
+    blocks.sort((a,b) => (a.order||0) - (b.order||0)).forEach(blockObj => {
+      const block = document.createElement("div");
+      const bid = blockObj.blockId || ("block_" + Date.now() + Math.floor(Math.random()*1000));
+      block.className = "content-box";
+      block.dataset.blockId = bid;
+
+      // build inner HTML from blockObj.elements or blockObj.html (legacy)
+      if (Array.isArray(blockObj.elements)) {
+        const markup = [];
+        blockObj.elements.forEach(el => {
+          if (el.tag === "IMG") {
+            const id = el.id || (bid + "_img_" + Math.floor(Math.random()*1000));
+            markup.push(`<div class="content-image"><button class="edit-btn">✎</button><img id="${id}" data-editable src="${el.value}" /></div>`);
+          } else {
+            const id = el.id || (bid + "_el_" + Math.floor(Math.random()*1000));
+            markup.push(`<div class="content"><button class="edit-btn">✎</button><${el.tag.toLowerCase()} id="${id}" data-editable>${(el.value||"")}</${el.tag.toLowerCase()}></div>`);
+          }
+        });
+        block.innerHTML = markup.join("");
+      } else if (blockObj.html) {
+        block.innerHTML = blockObj.html;
+      }
+
+      // append and set up controls
+      container.appendChild(block);
     });
 
-    console.log("✅ Content loaded for", page);
+    // re-init admin UI
+    if (isAdmin) initAdminEditor();
+    console.log("Loaded structured content");
   } catch (err) {
-    console.error("Load error:", err);
+    console.error("loadStructuredContent error", err);
   }
 }
 
-
-// ----------------- Admin UI -----------------
+// ---- admin UI initialization ----
 function initAdminEditor() {
+  // ensure every content-box has data-block-id
+  document.querySelectorAll(".content-box").forEach((b,i) => {
+    if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + "_" + i;
+  });
+
   // show edit buttons
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.style.display = "inline-flex";
     btn.style.zIndex = 50;
     btn.style.cursor = "pointer";
-    // allow mapping to specific target via data-target attribute if desired
   });
 
   enableInlineEditing();
   enableBlockManagement();
 }
 
-// ----------------- Inline editing -----------------
+// ---- inline editing ----
 function enableInlineEditing() {
-  // Attach click handler to edit buttons which are placed next to editable elements
   document.querySelectorAll(".edit-btn").forEach(btn => {
-    // compute target: dataset.target (selector) OR nextElementSibling/previousElementSibling
-    const tgtSelector = btn.dataset.target;
-    let target = null;
-    if (tgtSelector) target = document.querySelector(tgtSelector);
-    if (!target) target = btn.nextElementSibling || btn.previousElementSibling;
-    if (!target) return;
-
-    // if anchor containing img, target image
-    if (target.tagName === "A" && target.querySelector("img[data-editable]")) {
-      target = target.querySelector("img[data-editable]");
-    }
-
+    // avoid duplicate listeners: remove previous if present
+    btn.replaceWith(btn.cloneNode(true));
+  });
+  // re-query after clone
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    const tgt = btn.dataset.target ? document.querySelector(btn.dataset.target) : (btn.nextElementSibling || btn.previousElementSibling);
+    if (!tgt) return;
+    let target = tgt.tagName === "A" && tgt.querySelector("img[data-editable]") ? tgt.querySelector("img[data-editable]") : tgt;
     if (!target || target.dataset.editable === undefined) return;
 
-    btn.addEventListener("click", (ev) => {
-      ev.stopPropagation();
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
       openInlineEditor(target);
     });
   });
 }
 
-function cleanupEdit(el, inputEl) {
-  inputEl.remove();
-  el.style.display = "";
-  delete el.dataset.editing;
-}
-
-// ----------------- open editor -----------------
 function openInlineEditor(el) {
   if (el.dataset.editing === "true") return;
   el.dataset.editing = "true";
 
-  // image upload (convert to base64 client-side)
   if (el.tagName === "IMG") {
-    const inputFile = document.createElement("input");
-    inputFile.type = "file";
-    inputFile.accept = "image/*";
-    inputFile.addEventListener("change", () => {
-      const f = inputFile.files[0];
-      if (!f) {
-        delete el.dataset.editing;
-        return;
-      }
+    const input = document.createElement("input");
+    input.type = "file"; input.accept = "image/*";
+    input.addEventListener("change", () => {
+      const f = input.files[0];
+      if (!f) { delete el.dataset.editing; return; }
       const reader = new FileReader();
-      reader.onload = async (e) => {
-        el.src = e.target.result; // dataURL base64
+      reader.onload = (ev) => {
+        el.src = ev.target.result; // dataURL
         delete el.dataset.editing;
         scheduleSave();
-        showToast("Image prête — sauvegarde programmée");
+        showToast("Image sélectionnée — sauvegarde prévue");
       };
       reader.readAsDataURL(f);
     });
-    inputFile.click();
+    input.click();
     return;
   }
 
-  const isLong = (el.textContent || "").length > 60 || ["P", "DIV"].includes(el.tagName);
+  const isLong = (el.textContent||"").length > 60 || ["P","DIV"].includes(el.tagName);
   const input = isLong ? document.createElement("textarea") : document.createElement("input");
-  input.value = (el.textContent || "").trim();
-  input.className = "border border-blue-400 rounded p-1 w-full";
+  input.value = (el.textContent||"").trim();
+  input.className = "border rounded p-1 w-full";
   el.style.display = "none";
   el.parentElement.insertBefore(input, el);
   input.focus();
-  input.addEventListener("blur", async () => {
+
+  input.addEventListener("blur", () => {
     el.textContent = input.value;
-    cleanupEdit(el, input);
+    input.remove();
+    el.style.display = "";
+    delete el.dataset.editing;
     scheduleSave();
   });
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && input.tagName !== "TEXTAREA") input.blur();
+  input.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" && input.tagName !== "TEXTAREA") input.blur();
   });
 }
 
-// ----------------- block management -----------------
+// ---- block management ----
 function addDeleteAndAddBlockButtons(box) {
   box.querySelectorAll(".delete-btn").forEach(b => b.remove());
   const next = box.nextElementSibling;
@@ -182,8 +197,9 @@ function addDeleteAndAddBlockButtons(box) {
 
   const del = document.createElement("button");
   del.innerText = "❌";
-  del.className = "delete-btn absolute top-2 right-2 bg-red-500 text-white rounded-full px-2 py-1 z-50";
-  del.addEventListener("click", async () => {
+  del.className = "delete-btn";
+  Object.assign(del.style, { position:"absolute", right:"8px", top:"8px", zIndex:60 });
+  del.addEventListener("click", () => {
     if (!confirm("Supprimer ce bloc ?")) return;
     box.remove();
     scheduleSave();
@@ -191,13 +207,12 @@ function addDeleteAndAddBlockButtons(box) {
 
   const addBtn = document.createElement("button");
   addBtn.innerText = "+ Ajouter un block";
-  addBtn.className = "add-block-btn mt-4 bg-sky-600 text-white px-4 py-2 rounded-md";
+  addBtn.className = "add-block-btn";
+  Object.assign(addBtn.style, { display:"block", marginTop:"12px" });
   addBtn.addEventListener("click", () => {
     const newBox = createContentBox();
     box.parentElement.insertBefore(newBox, addBtn);
-    // re-init
-    enableInlineEditing();
-    addDeleteAndAddBlockButtons(newBox);
+    initAdminEditor();
     scheduleSave();
   });
 
@@ -207,89 +222,75 @@ function addDeleteAndAddBlockButtons(box) {
 }
 
 function enableBlockManagement() {
-  document.querySelectorAll(".content-box").forEach(b => addDeleteAndAddBlockButtons(b));
+  document.querySelectorAll(".content-box").forEach(b => {
+    if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + Math.floor(Math.random()*1000);
+    addDeleteAndAddBlockButtons(b);
+  });
 }
 
-// ----------------- create new block -----------------
 function createContentBox() {
-  const newBox = document.createElement("div");
-  const uid = "block_" + Date.now();
-  newBox.className = "content-box bg-white p-6 rounded-lg shadow-md";
-  newBox.innerHTML = `
-    <div class="content-image mb-4">
+  const uid = "block_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+  const box = document.createElement("div");
+  box.className = "content-box";
+  box.dataset.blockId = uid;
+  box.innerHTML = `
+    <div class="content-image">
       <button class="edit-btn">✎</button>
-      <img id="${uid}_img" data-editable src="images/default.png" alt="Nouvelle image" data-editable class="w-full h-auto rounded-lg" data-key="">
+      <img id="${uid}_img" data-editable src="images/default.png" alt="Nouvelle image" />
     </div>
     <div class="content">
       <button class="edit-btn">✎</button>
-      <h2 id="${uid}_title" data-editable >Nouveau Titre</h2>
+      <h2 id="${uid}_title" data-editable>Nouveau Titre</h2>
       <button class="edit-btn">✎</button>
-      <p id="${uid}_text" data-editable >Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
+      <p id="${uid}_text" data-editable>Nouveau paragraphe. Cliquez pour modifier ce texte.</p>
     </div>
-    
   `;
-  
- 
-  
-  // attach edit buttons in newBox
-  newBox.querySelectorAll(".edit-btn").forEach(btn => btn.style.display = "inline-flex");
-  return newBox;
+  return box;
 }
 
-// ----------------- collect structured content -----------------
-function collectStructuredContent(containerSelector = "#editable-container") {
-  const container = document.querySelector(containerSelector);
-  if (!container) return [];
-  const out = [];
-  container.querySelectorAll("[data-editable]").forEach(el => {
-    const key = el.dataset.key || null;
-    const id = el.id || null;
-    const tag = el.tagName;
-    const value = tag === "IMG" ? el.src : (el.textContent || "").trim();
-    out.push({ key, id, tag, value });
-  });
-  return out;
-}
-
-// ----------------- debounce save -----------------
+// ---- saving ----
 function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => saveStructuredContent(pageKey), ms);
   showToast("Changements détectés — sauvegarde bientôt...");
+  saveTimer = setTimeout(() => saveStructuredContent(pageKey), ms);
 }
 
-// ----------------- save structured content -----------------
 async function saveStructuredContent(page = pageKey) {
-  const editableElements = document.querySelectorAll("[data-editable][id]");
+  const container = document.querySelector("#editable-container");
+  if (!container) return console.warn("editable container not found");
 
-  if (!editableElements.length) return console.warn("No editable elements found!");
-
-  const contentData = [...editableElements].map(el => ({
-    id: el.id,
-    tag: el.tagName,
-    value: el.tagName === "IMG" ? el.src : el.textContent.trim()
-  }));
+  // build blocks array in DOM order
+  const blocks = [...container.querySelectorAll(".content-box")].map((box, index) => {
+    const elements = [...box.querySelectorAll("[data-editable]")].map(el => ({
+      id: el.id || null,
+      tag: el.tagName,
+      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
+    }));
+    return {
+      blockId: box.dataset.blockId || ("block_" + index + "_" + Date.now()),
+      order: index,
+      elements
+    };
+  });
 
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page, content: contentData }),
-      credentials: "include"
+      credentials: "include",
+      body: JSON.stringify({ page, blocks })
     });
-
     const data = await res.json();
-    if (!data.success) return console.error("Save error:", data.error);
-
-    console.log("Saved at", data.updated);
-    showSaveTooltip(); 
+    if (!data.success) return showToast("Erreur sauvegarde", false);
+    console.log("Saved", data.updated);
+    showSaveTooltip();
+    showToast("Sauvegardé");
   } catch (err) {
-    console.error("Network error saving:", err);
+    console.error("save error", err);
+    showToast("Erreur réseau lors de la sauvegarde");
   }
 }
 
-
-// ----------------- Expose manual save (optional) -----------------
+// optional manual save
 window.cms = window.cms || {};
 window.cms.saveNow = () => saveStructuredContent(pageKey);
-
