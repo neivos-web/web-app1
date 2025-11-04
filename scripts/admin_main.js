@@ -55,7 +55,7 @@ async function checkAdminSession() {
 document.addEventListener("DOMContentLoaded", checkAdminSession);
 
 // ---- load saved content (rebuild blocks) ----
-// ---- load saved content (rebuild blocks completely) ----
+// ---- load saved content (rebuild blocks including classes + styles) ----
 async function loadStructuredContent(page = pageKey) {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, { credentials: "include" });
@@ -68,7 +68,6 @@ async function loadStructuredContent(page = pageKey) {
     const container = document.querySelector("#editable-container");
     if (!container) return;
 
-    // Clean current blocks before rebuilding
     container.querySelectorAll(".content-box").forEach(b => b.remove());
 
     blocks.sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -83,6 +82,8 @@ async function loadStructuredContent(page = pageKey) {
         const newEl = document.createElement(el.tag.toLowerCase());
         newEl.id = el.id;
         newEl.dataset.editable = "true";
+        newEl.className = el.classes || "";
+        if (el.style) newEl.setAttribute("style", el.style);
         if (el.tag === "IMG") newEl.src = el.value;
         else newEl.textContent = el.value;
         box.appendChild(newEl);
@@ -93,14 +94,12 @@ async function loadStructuredContent(page = pageKey) {
       enableInlineEditingForBlock(box);
     });
 
-    // Re-init admin editor for drag & buttons
     if (isAdmin) initAdminEditor();
-    console.log("✅ All content-boxes loaded and initialized");
+    console.log("✅ All content-boxes loaded with styles");
   } catch (err) {
     console.error("loadStructuredContent error", err);
   }
 }
-
 
 
 // ---- escape helper (prevent XSS when injecting saved text) ----
@@ -359,7 +358,9 @@ function buildBlocksFromDOM() {
     blk.elements.push({
       id: el.id || ("el_" + idx + "_" + Date.now()),
       tag: el.tagName,
-      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim()
+      value: el.tagName === "IMG" ? el.src : (el.textContent || "").trim(),
+      classes: el.className || "",
+      style: el.getAttribute("style") || ""
     });
   });
 
