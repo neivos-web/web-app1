@@ -16,7 +16,7 @@
             </button>
 
             <!-- Menu principal -->
-            <div id="main-menu" data-editable-menu class="hidden md:flex space-x-8 items-center font-medium text-gray-700">
+            <div id="menu" data-editable-menu class="hidden md:flex space-x-8 items-center font-medium text-gray-700">
             
                 <div data-key="nav_mission" data-shared="true" class="flex items-center space-x-2">
                     <button class="edit-btn">✎</button>

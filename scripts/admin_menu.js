@@ -320,7 +320,7 @@ window.addEventListener("beforeunload", () => {
       const navEl = document.querySelector("nav#main-menu") || document.querySelector("#main-menu");
       if (navEl) {
         const clone = navEl.cloneNode(true);
-        clone.querySelectorAll(".edit-btn, .delete-btn, input, textarea").forEach(e => e.remove());
+       // clone.querySelectorAll(".edit-btn, .delete-btn, input, textarea").forEach(e => e.remove());
         const html = getStyledOuterHTML(clone);
         const payload = JSON.stringify({ page: pageKey, html, content: null });
         if (navigator.sendBeacon) {
