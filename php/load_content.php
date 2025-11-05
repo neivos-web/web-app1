@@ -39,12 +39,6 @@ try {
         echo json_encode(["success" => false, "message" => "No content found for this page"]);
         exit;
     }
-    $html = $row['html'] ?? null;
-    if ($html) {
-        // Normalize encoding and ensure no unwanted BOM or whitespace
-        $html = trim(mb_convert_encoding($html, 'UTF-8', 'UTF-8'));
-    }
-
 
     // --- Decode structured JSON if available ---
     $contentData = null;
@@ -56,11 +50,10 @@ try {
     echo json_encode([
         "success" => true,
         "page" => $page,
-        "html" => $html,
+        "html" => $row['html'] ?? null,
         "content" => $contentData,
         "last_modified" => $row['last_modified']
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-
 
 } catch (Exception $e) {
     echo json_encode(["success" => false, "error" => $e->getMessage()]);

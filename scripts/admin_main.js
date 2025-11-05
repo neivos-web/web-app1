@@ -70,23 +70,32 @@ async function loadStructuredContent(page = pageKey) {
     if (!data.success) return console.info("No content saved for", page);
 
     // ===  reload full editable section if HTML saved ===
-  if (data.html) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(data.html, "text/html");
-    const newMain = doc.querySelector("main");
+if (data.html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(data.html, "text/html");
 
-    if (newMain) {
-      const mainEl = document.querySelector("main");
-      mainEl.innerHTML = newMain.innerHTML;
-      console.log("Full <main> reloaded from saved HTML");
-    }
-
-    if (isAdmin) {
-      initAdminEditor();
-      addGlobalAddBlockButton();
-    }
-    return;
+  // Replace <main> content entirely
+  const newMain = doc.querySelector("main");
+  const mainEl = document.querySelector("main");
+  if (newMain && mainEl) {
+    mainEl.innerHTML = newMain.innerHTML;
+    console.log("✅ <main> content reloaded from saved HTML");
   }
+
+  // Re-init admin tools after DOM update
+  if (window.cms && typeof window.cms.reinit === "function") {
+    setTimeout(() => {
+      window.cms.reinit();
+    }, 150);
+  } else if (typeof initAdminEditor === "function") {
+    setTimeout(() => {
+      initAdminEditor();
+    }, 150);
+  }
+
+  return;
+}
+
 
 
     // === Fallback structured (legacy) ===
@@ -394,6 +403,7 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 // ---- Save everything (structured + full HTML snapshot) ----
 // ---- Save everything (structured + full HTML snapshot) ----
 // ---- Save everything (structured + full HTML snapshot) ----
+// ---- Save everything (structured + full HTML snapshot) ----
 async function saveStructuredContent(page = pageKey) {
   const mainEl = document.querySelector("main");
   if (!mainEl) {
@@ -402,17 +412,17 @@ async function saveStructuredContent(page = pageKey) {
     return;
   }
 
-  // Build structured backup
+  // Build structured backup (for JSON)
   const blocks = buildBlocksFromDOM();
 
-  // Clone main content (everything inside <main>)
+  // Clone main content to clean admin UI before saving
   const clone = mainEl.cloneNode(true);
 
-  // Remove admin UI controls before saving
+  // Remove admin UI elements
   clone.querySelectorAll(".edit-btn, .delete-btn, #add-global-block-btn, input, textarea")
        .forEach(el => el.remove());
 
-  // Remove non-content sections (header/footer)
+  // Remove non-content sections
   ["header", "footer", "nav"].forEach(sel => {
     clone.querySelectorAll(sel).forEach(el => el.remove());
   });
@@ -423,36 +433,61 @@ async function saveStructuredContent(page = pageKey) {
     if (style.display === "none" || style.visibility === "hidden") el.remove();
   });
 
-  // Capture full styled HTML for <main>
+  // Capture full styled HTML snapshot for <main>
   const styledHTML = getStyledOuterHTML(clone);
+
+  // Payload for saving
+  const payload = {
+    page,
+    content: blocks,
+    html: styledHTML
+  };
 
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
-      credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        page,
-        html: styledHTML,
-        content: blocks
-      })
+      body: JSON.stringify(payload)
     });
 
-    const j = await res.json();
-    if (!j.success) throw new Error(j.error || "Unknown error");
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || "Erreur inconnue");
 
-    showSavedBadge();
-    toast("Contenu principal sauvegardé !");
+    console.log("✅ Contenu sauvegardé :", data.updated);
+
+    // --- Success toast ---
+    const notice = document.createElement("div");
+    notice.textContent = "✅ Modifications enregistrées. Rafraîchissement…";
+    Object.assign(notice.style, {
+      position: "fixed",
+      bottom: "20px",
+      right: "20px",
+      background: "#08B3E5",
+      color: "white",
+      padding: "10px 16px",
+      borderRadius: "8px",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+      zIndex: "999999",
+      fontFamily: "Inter, system-ui, Segoe UI",
+    });
+    document.body.appendChild(notice);
+
+    // --- Auto refresh after short delay ---
+    setTimeout(() => location.reload(), 1200);
   } catch (err) {
-    console.error("Erreur de sauvegarde", err);
-    toast("Erreur réseau lors de la sauvegarde");
+    console.error("❌ Erreur de sauvegarde :", err);
+    toast("Erreur réseau ou serveur lors de la sauvegarde");
   }
 }
 
 
-
 // Expose manual save
 window.cms = window.cms || {};
+window.cms.reinit = () => {
+  console.log("♻️ Reinitializing admin editor...");
+  initAdminEditor();
+  addGlobalAddBlockButton();
+};
 window.cms.saveNow = () => saveStructuredContent(pageKey);
 
 // Reinit helper
