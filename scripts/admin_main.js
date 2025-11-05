@@ -81,10 +81,13 @@ async function loadStructuredContent(page = pageKey) {
       console.log("Full <main> reloaded from saved HTML");
     }
 
-    if (isAdmin) {
+  if (isAdmin) {
+    setTimeout(() => {
       initAdminEditor();
       addGlobalAddBlockButton();
-    }
+    }, 120);
+  }
+
     return;
   }
 

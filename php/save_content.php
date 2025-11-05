@@ -9,7 +9,6 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/db_connect.php"; 
-
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $input = json_decode(file_get_contents("php://input"), true);
@@ -36,7 +35,32 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
 
-    // --- Prepare data ---
+    // --- Sanitize HTML while preserving CMS markers ---
+    if ($html) {
+        $allowed_attrs = [
+            'class', 'data-editable', 'data-type', 'data-block-id',
+            'data-order', 'draggable', 'contenteditable', 'id', 'style'
+        ];
+
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $xpath = new DOMXPath($dom);
+
+        foreach ($xpath->query('//*') as $node) {
+            if ($node->hasAttributes()) {
+                foreach (iterator_to_array($node->attributes) as $attr) {
+                    if (!in_array($attr->nodeName, $allowed_attrs)) {
+                        $node->removeAttribute($attr->nodeName);
+                    }
+                }
+            }
+        }
+
+        $html = $dom->saveHTML();
+    }
+
+    // --- Prepare JSON version of structured content ---
     $jsonContent = $content ? json_encode($content, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : null;
 
     // --- Insert or update ---
