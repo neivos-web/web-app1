@@ -392,8 +392,7 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 
 // ---- Save full editable section ----
 // ---- Save everything (structured + full HTML snapshot) ----
-// ---- Save everything (structured + full HTML snapshot) ----
-// ---- Save everything (structured + full HTML snapshot) ----
+
 async function saveStructuredContent(page = pageKey) {
   const mainEl = document.querySelector("main");
   if (!mainEl) {
