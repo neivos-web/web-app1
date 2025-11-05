@@ -117,17 +117,21 @@ async function loadStructuredContent(page = pageKey) {
 }
 
 function initAdminEditor() {
-  // Avoid duplicates if reloaded
+  // Avoid duplicates
   document.querySelectorAll(".delete-btn").forEach(btn => btn.remove());
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.style.display = "inline-flex";
-    btn.style.zIndex = 60;
+    btn.style.position = "absolute";
+    btn.style.top = "8px";
+    btn.style.right = "8px";
+    btn.style.zIndex = "1000";
   });
 
   document.querySelectorAll(".content-box").forEach((b, i) => {
     if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + "_" + i;
     b.setAttribute("draggable", "true");
     b.dataset.order = i;
+    b.style.position = b.style.position || "relative"; // ensure edit-btn stays positioned
   });
 
   enableInlineEditing();
@@ -135,6 +139,7 @@ function initAdminEditor() {
   enableDragReorder();
   addGlobalAddBlockButton();
 }
+
 
 
 // ---- Inline editing (text + images) ----
@@ -383,6 +388,33 @@ function getStyledOuterHTML(el) {
   return clone.outerHTML;
 }
 
+async function reloadMainContent() {
+  try {
+    const res = await fetch(`/php/load_content.php?page=${pageKey}`, { credentials: "include" });
+    const data = await res.json();
+    if (!data.html) return;
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data.html, "text/html");
+    const newMain = doc.querySelector("main");
+    if (!newMain) return;
+
+    const mainEl = document.querySelector("main");
+    mainEl.innerHTML = newMain.innerHTML;
+
+    // Reinitialize admin tools immediately
+    initAdminEditor();
+    addGlobalAddBlockButton();
+    toast("Zone principale rechargée !");
+    document.dispatchEvent(new Event("cms:content-reloaded"));
+
+  } catch (err) {
+    console.error("Erreur de rechargement du contenu :", err);
+    toast("Erreur lors du rechargement du contenu");
+  }
+}
+
+
 // ---- Debounce + save ----
 function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
   clearTimeout(saveTimer);
@@ -440,9 +472,10 @@ async function saveStructuredContent(page = pageKey) {
 
     const j = await res.json();
     if (!j.success) throw new Error(j.error || "Unknown error");
-
-    showSavedBadge();
+    
     toast("Contenu principal sauvegardé !");
+    showSavedBadge();
+    await reloadMainContent()
   } catch (err) {
     console.error("Erreur de sauvegarde", err);
     toast("Erreur réseau lors de la sauvegarde");
@@ -454,6 +487,7 @@ async function saveStructuredContent(page = pageKey) {
 // Expose manual save
 window.cms = window.cms || {};
 window.cms.saveNow = () => saveStructuredContent(pageKey);
+window.cms.reinit = () => initAdminEditor();
 
 // Reinit helper
 window.addEventListener("cms:reinit", () => initAdminEditor());
