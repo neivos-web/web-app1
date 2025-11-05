@@ -392,29 +392,36 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 // ---- Save full editable section ----
 // ---- Save everything (structured + full HTML snapshot) ----
 // ---- Save everything (structured + full HTML snapshot) ----
+// ---- Save everything (structured + full HTML snapshot) ----
 async function saveStructuredContent(page = pageKey) {
   const editableContainer = document.querySelector("#editable-container");
   const blocks = buildBlocksFromDOM();
 
-  // Clone the page to avoid editing the live DOM
-  const clone = document.body.cloneNode(true);
-
-  // 🔹 Remove header & footer
-  clone.querySelectorAll("header, footer").forEach(el => el.remove());
-
-  // 🔹 Remove admin UI elements
-  clone.querySelectorAll(".edit-btn, .delete-btn, #add-global-block-btn").forEach(el => el.remove());
-
-  // 🔹 Keep only the editable content (no need for full <html>)
-  const editableClone = clone.querySelector("#editable-container");
-  if (!editableClone) {
-    console.error("❌ No #editable-container found to save");
-    toast("Erreur: zone éditable introuvable");
+  if (!editableContainer) {
+    console.error("❌ Aucun conteneur #editable-container trouvé");
+    toast("Erreur : zone éditable introuvable");
     return;
   }
 
-  // 🔹 Preserve computed inline styles (so appearance is saved)
-  const styledHTML = getStyledOuterHTML(editableClone);
+  // ✅ Clone only the editable container (not the whole body)
+  const clone = editableContainer.cloneNode(true);
+
+  // 🔹 Remove admin/editor UI elements (buttons, temp fields, etc.)
+  clone.querySelectorAll(
+    ".edit-btn, .delete-btn, #add-global-block-btn, input, textarea"
+  ).forEach(el => el.remove());
+
+  // 🔹 Remove any accidental header/footer inside editable zone (safety)
+  clone.querySelectorAll("header, footer").forEach(el => el.remove());
+
+  // 🔹 Remove any elements that are hidden (display:none)
+  clone.querySelectorAll("*").forEach(el => {
+    const style = window.getComputedStyle(el);
+    if (style.display === "none" || style.visibility === "hidden") el.remove();
+  });
+
+  // 🔹 Preserve computed inline styles for every node
+  const styledHTML = getStyledOuterHTML(clone);
 
   try {
     const res = await fetch("/php/save_content.php", {
@@ -423,23 +430,23 @@ async function saveStructuredContent(page = pageKey) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         page,
-        html: styledHTML, // full styled editable zone only
-        content: blocks   // structured backup
+        html: styledHTML, // fully styled editable HTML only
+        content: blocks   // structured data backup
       })
     });
 
     const j = await res.json();
     if (!j.success) {
-      console.error("Save failed:", j);
+      console.error("❌ Save failed:", j);
       toast("Erreur de sauvegarde");
       return;
     }
 
-    console.log("✅ Page saved successfully (with style, excluding header/footer/admin)");
+    console.log("✅ Page sauvegardée (style inclus, header/footer/admin exclus)");
     showSavedBadge();
-    toast("Page sauvegardée !");
+    toast("Contenu sauvegardé !");
   } catch (err) {
-    console.error("save error", err);
+    console.error("Erreur de sauvegarde", err);
     toast("Erreur réseau lors de la sauvegarde");
   }
 }
