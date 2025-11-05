@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // Define button IDs and their corresponding menu IDs
   const dropdownPairs = [
-    { buttonId: "dropdownButtonPortefeuille", menuId: "menuPortefeuille" },
-    { buttonId: "dropdownButtonFormations", menuId: "menuFormations" },
-    { buttonId: "dropdownButtonBlog", menuId: "menuActualites" }
+    { buttonId: "dropdownButtonPortefeuille", menuId: "dropdownMenuPortefeuille" },
+    { buttonId: "dropdownButtonFormations", menuId: "dropdownMenuFormations" },
+    { buttonId: "dropdownButtonBlog", menuId: "dropdownMenuBlog" }
   ];
 
   dropdownPairs.forEach(({ buttonId, menuId }) => {
@@ -12,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const menu = document.getElementById(menuId);
 
     if (button && menu) {
-      // Toggle menu visibility on button click
       button.addEventListener("click", (e) => {
         e.stopPropagation();
 
@@ -30,7 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Close all menus when clicking outside
   document.addEventListener("click", (e) => {
     dropdownPairs.forEach(({ buttonId, menuId }) => {
       const button = document.getElementById(buttonId);
@@ -41,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Close all menus on pressing Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       dropdownPairs.forEach(({ menuId }) => {
