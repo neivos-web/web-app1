@@ -61,66 +61,47 @@ async function checkAdminSession() {
 document.addEventListener("DOMContentLoaded", checkAdminSession);
 
 // ---- Load saved content ----
+// ---- Load page content (HTML + structured blocks) ----
 async function loadStructuredContent(page = pageKey) {
   try {
     const res = await fetch(`/php/load_content.php?page=${encodeURIComponent(page)}`, {
       credentials: "include"
     });
-    const data = await res.json();
-    if (!data.success) return console.info("No content saved for", page);
+    const j = await res.json();
 
-    // === NEW: reload full editable section if HTML saved ===
-  // === NEW: Full-page restore (all editable sections, not only content-box) ===
-  if (data.html) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(data.html, "text/html");
-    
-    const savedEditable = doc.querySelector("#editable-container");
-    const currentEditable = document.querySelector("#editable-container");
-
-    if (savedEditable && currentEditable) {
-      currentEditable.replaceWith(savedEditable);
-      console.warn("Full editable section restored (welcome, hero, content, etc.)");
-
-      // Rebind admin UI events (because DOM replaced)
-      if (isAdmin) {
-        initAdminEditor();
-        enableInlineEditing();
-        enableBlockManagement();
-        enableDragReorder();
-        addGlobalAddBlockButton();
-      }
-    } else {
-      console.warn("Saved HTML does not contain #editable-container");
+    if (!j.success) {
+      console.warn("⚠️ Aucun contenu trouvé pour cette page :", page);
+      return;
     }
-    return;
-  }
 
+    // --- Restore styled HTML into editable roots ---
+    if (j.html) {
+      const temp = document.createElement("div");
+      temp.innerHTML = j.html;
 
-    // === Fallback structured (legacy) ===
-    const blocks = Array.isArray(data.content) ? data.content : (data.content?.blocks || []);
-    if (!blocks.length) return;
-    blocks.forEach(blockObj => {
-      if (blockObj.elements && blockObj.elements.length) {
-        blockObj.elements.forEach(el => {
-          const existing = document.getElementById(el.id);
-          if (existing) {
-            if (el.tag === "IMG" && existing.tagName === "IMG") existing.src = el.value;
-            else if (existing.tagName !== "IMG") existing.textContent = el.value;
-          }
-        });
-      }
-    });
-    // Clean any wrong saved add-block button
-    const badBtn = document.getElementById("add-global-block-btn");
-    if (badBtn) badBtn.remove();
+      // Each section in saved HTML corresponds to a data-editable-root
+      const savedSections = temp.querySelectorAll("[data-editable-root]");
+      const currentSections = document.querySelectorAll("[data-editable-root]");
 
-    //  Always recreate admin button after loading saved content
-    if (isAdmin) addGlobalAddBlockButton();
+      currentSections.forEach((section, i) => {
+        if (savedSections[i]) {
+          section.innerHTML = savedSections[i].innerHTML;
+        }
+      });
 
-    console.log("Structured content merged (partial update)");
+      console.log("✅ HTML restauré avec style (zones éditables uniquement)");
+    }
+
+    // --- Restore structured blocks (optional extra data) ---
+    if (j.content && Array.isArray(j.content)) {
+      rebuildDOMFromBlocks(j.content);
+      console.log("✅ Structure restaurée depuis JSON");
+    }
+
+    toast("Contenu chargé");
   } catch (err) {
-    console.error("loadStructuredContent error", err);
+    console.error("Erreur de chargement :", err);
+    toast("Erreur réseau lors du chargement");
   }
 }
 
