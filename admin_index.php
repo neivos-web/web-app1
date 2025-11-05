@@ -29,7 +29,7 @@ header('Content-Type: text/html; charset=UTF-8');
     <style>
         .edit-btn {
             font-size: 0.8rem;
-            background: #08B3E5;
+            background: #08e564ff;
             color: white;
             border-radius: 50%;
             width: 22px;
@@ -39,6 +39,8 @@ header('Content-Type: text/html; charset=UTF-8');
             justify-content: center;
             cursor: pointer;
             margin-right: 4px;
+            z-index: 9999 !important;
+            position: relative;
         }
         .edit-btn:hover { background: #06a0c5; }
         /* Ensure dropdowns are hidden by default */
@@ -66,17 +68,19 @@ header('Content-Type: text/html; charset=UTF-8');
             }
 
     </style>
-    <header class="bg-white shadow-sm sticky top-0 z-50">
+
+
+
+</head>
+
+<body class="bg-gray-100 text-brand-dark">
+        <header class="bg-white shadow-sm sticky top-0 z-50">
 
        <!-- =========== En-tête du site =========== -->
             <?php
             require './components/admin_menu.php';
             ?>
     </header>
-
-
-</head>
-<body class="bg-gray-100 text-brand-dark">
     
 
     <main>
@@ -223,7 +227,6 @@ header('Content-Type: text/html; charset=UTF-8');
         <script type="module" src="scripts/admin_main.js"></script> 
         <script src="js/lang.js"></script>
 
-     <script type="module" src="scripts/admin_menu.js"></script> 
 
 
 </body>
