@@ -71,19 +71,31 @@ async function loadStructuredContent(page = pageKey) {
 
     // ===  reload full editable section if HTML saved ===
     if (data.html) {
-      // Remove any saved version of the button inside the HTML (bad saved state)
+      // parse saved HTML
       const parser = new DOMParser();
       const doc = parser.parseFromString(data.html, "text/html");
+
+      // remove any saved admin button in that saved html (just in case)
       const savedBtn = doc.getElementById("add-global-block-btn");
       if (savedBtn) savedBtn.remove();
 
+      // find the saved editable container inside returned html
+      const savedContainer = doc.querySelector("#editable-container");
       const section = document.querySelector("#editable-container");
-      if (section) {
-        section.outerHTML = doc.body.innerHTML;
-        console.log("Full editable-container reloaded from saved HTML");
+
+      if (section && savedContainer) {
+        // Replace only innerHTML of your page's container (keep container element)
+        section.innerHTML = savedContainer.innerHTML;
+        console.log("Editable-container content replaced from saved HTML");
+      } else if (!section && savedContainer) {
+        // If container missing in page, insert the saved container
+        document.body.insertAdjacentHTML("afterbegin", savedContainer.outerHTML);
+        console.log("Inserted editable-container from saved HTML");
+      } else {
+        console.warn("editable-container not present in saved html or current page");
       }
 
-      // Recreate a fresh working button
+      // Recreate a fresh working button and reinitialize admin features
       if (isAdmin) addGlobalAddBlockButton();
       initAdminEditor();
       return;
@@ -331,25 +343,20 @@ function enableDragReorder() {
 function buildBlocksFromDOM() {
   const blocks = [];
   const editableElements = document.querySelectorAll("[data-editable]");
-  editableElements.forEach((el, idx) => {
-    if (
-      el.closest(".edit-btn") ||
-      el.closest(".delete-btn") ||
-      el.id === "add-global-block-btn" ||
-      el.dataset.admin === "true"
-    ) return;
-    // detect if inside a .content-box (else fallback to misc)
-    const parentBox = el.closest(".content-box");
-    const blockId = parentBox?.dataset.blockId || ("misc_" + Date.now() + "_" + idx);
 
-    // find or create block
+  editableElements.forEach((el, idx) => {
+    // skip admin UI elements themselves
+    if (el.matches(".edit-btn, .delete-btn, #add-global-block-btn") || el.closest("[data-admin='true']")) return;
+
+    const parentBox = el.closest(".content-box");
+    const blockId = parentBox?.dataset.blockId || ("global_" + (parentBox ? parentBox.dataset.blockId : "misc") + "_" + idx);
+
     let blk = blocks.find(b => b.blockId === blockId);
     if (!blk) {
       blk = { blockId, order: blocks.length, elements: [] };
       blocks.push(blk);
     }
 
-    // push element
     blk.elements.push({
       id: el.id || ("el_" + idx + "_" + Date.now()),
       tag: el.tagName,
@@ -357,7 +364,6 @@ function buildBlocksFromDOM() {
     });
   });
 
-  // maintain proper order
   blocks.forEach((b, i) => (b.order = i));
   return blocks;
 }
@@ -365,20 +371,56 @@ function buildBlocksFromDOM() {
 
 
 // ---- Helper: Capture full section with computed styles ----
-function getStyledOuterHTML(el) {
-  const clone = el.cloneNode(true);
-  const origNodes = el.querySelectorAll("*");
-  const cloneNodes = clone.querySelectorAll("*");
-  cloneNodes.forEach((node, i) => {
-    const style = window.getComputedStyle(origNodes[i]);
-    let cssText = "";
-    for (let prop of style) cssText += `${prop}:${style.getPropertyValue(prop)};`;
-    node.setAttribute("style", cssText);
+// ---- Build a styled, cleaned clone of #editable-container ----
+function getStyledCleanHTML() {
+  const editableContainer = document.querySelector("#editable-container");
+  if (!editableContainer) return "";
+
+  // Deep clone original (structure still identical)
+  const clone = editableContainer.cloneNode(true);
+
+  // 1) Copy computed styles from original -> clone (walk both trees in parallel)
+  // Using queue ensures we visit nodes in same pre-order.
+  const origQueue = [editableContainer];
+  const cloneQueue = [clone];
+
+  while (origQueue.length) {
+    const origNode = origQueue.shift();
+    const cloneNode = cloneQueue.shift();
+
+    // copy computed style for element nodes only
+    if (origNode.nodeType === Node.ELEMENT_NODE && cloneNode && cloneNode.nodeType === Node.ELEMENT_NODE) {
+      const style = window.getComputedStyle(origNode);
+      let cssText = "";
+      for (let i = 0; i < style.length; i++) {
+        const prop = style[i];
+        cssText += `${prop}:${style.getPropertyValue(prop)};`;
+      }
+      cloneNode.setAttribute("style", cssText);
+    }
+
+    // enqueue children (element children only) in order
+    const origChildren = Array.from(origNode.children || []);
+    const cloneChildren = Array.from(cloneNode.children || []);
+    for (let i = 0; i < origChildren.length; i++) {
+      origQueue.push(origChildren[i]);
+      // push the corresponding clone child if exists (it should, since we haven't removed anything yet)
+      cloneQueue.push(cloneChildren[i]);
+    }
+  }
+
+  // 2) Remove admin-only and header/footer elements from clone (clean saved HTML)
+  clone.querySelectorAll(
+    "header, footer, .edit-btn, .delete-btn, #add-global-block-btn, [data-admin='true']"
+  ).forEach(el => el.remove());
+
+  // 3) Remove draggable/data-order attributes from clone (not needed in saved HTML)
+  clone.querySelectorAll("[draggable], [data-order]").forEach(el => {
+    el.removeAttribute("draggable");
+    el.removeAttribute("data-order");
   });
-  const mainStyle = window.getComputedStyle(el);
-  let mainCss = "";
-  for (let prop of mainStyle) mainCss += `${prop}:${mainStyle.getPropertyValue(prop)};`;
-  clone.setAttribute("style", mainCss);
+
+  // Return clean + styled HTML
   return clone.outerHTML;
 }
 
@@ -390,40 +432,23 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 }
 
 // ---- Save full editable section ----
-// ---- Save full editable section (with styles, but skip header/footer/admin UI) ----
+// ---- Save full editable section (styled, header/footer/admin skipped) ----
 async function saveStructuredContent(page = pageKey) {
-  
   const editableContainer = document.querySelector("#editable-container");
   if (!editableContainer) {
     console.warn("No editable container found.");
     return;
   }
 
+  // structured JSON (unchanged)
   const blocks = buildBlocksFromDOM();
 
-  // Clone the container to clean it safely
-  const clone = editableContainer.cloneNode(true);
-
-  // Remove header, footer, and admin UI elements
-  clone.querySelectorAll("header, footer, .edit-btn, .delete-btn, #add-global-block-btn").forEach(el => el.remove());
-
-  // Apply computed styles inline (preserve appearance)
-  const origNodes = editableContainer.querySelectorAll("*");
-  const cloneNodes = clone.querySelectorAll("*");
-  cloneNodes.forEach((node, i) => {
-    const style = window.getComputedStyle(origNodes[i]);
-    let cssText = "";
-    for (let prop of style) cssText += `${prop}:${style.getPropertyValue(prop)};`;
-    node.setAttribute("style", cssText);
-  });
-
-  const mainStyle = window.getComputedStyle(editableContainer);
-  let mainCss = "";
-  for (let prop of mainStyle) mainCss += `${prop}:${mainStyle.getPropertyValue(prop)};`;
-  clone.setAttribute("style", mainCss);
-
-  // Get final HTML snapshot
-  const htmlSnapshot = clone.outerHTML;
+  // styled + cleaned HTML (preserves appearance, strips admin UI)
+  const htmlSnapshot = getStyledCleanHTML();
+  if (!htmlSnapshot) {
+    toast("Aucun contenu à sauvegarder");
+    return;
+  }
 
   try {
     const res = await fetch("/php/save_content.php", {
@@ -432,13 +457,14 @@ async function saveStructuredContent(page = pageKey) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ page, html: htmlSnapshot, content: blocks })
     });
+
     const j = await res.json();
     if (!j.success) {
       console.error("Save failed:", j);
       toast("Erreur de sauvegarde");
       return;
     }
-    console.log("✅ Page saved successfully (styled HTML, header/footer/admin skipped)");
+    console.log("✅ Page saved successfully (styled HTML + structure, admin/header skipped)");
     showSavedBadge();
     toast("Page sauvegardée");
   } catch (err) {
@@ -446,7 +472,6 @@ async function saveStructuredContent(page = pageKey) {
     toast("Erreur réseau lors de la sauvegarde");
   }
 }
-
 
 
 // Expose manual save
