@@ -391,32 +391,53 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 
 // ---- Save full editable section ----
 // ---- Save everything (structured + full HTML snapshot) ----
+// ---- Save everything (structured + full HTML snapshot) ----
 async function saveStructuredContent(page = pageKey) {
   const editableContainer = document.querySelector("#editable-container");
   const blocks = buildBlocksFromDOM();
 
-  //  Full HTML snapshot — captures styles and layout of all editable sections
-  // If you want to limit to the editable container only, change to `editableContainer.outerHTML`
-  const htmlSnapshot = editableContainer
-    ? editableContainer.outerHTML
-    : document.body.outerHTML;
+  // Clone the page to avoid editing the live DOM
+  const clone = document.body.cloneNode(true);
+
+  // 🔹 Remove header & footer
+  clone.querySelectorAll("header, footer").forEach(el => el.remove());
+
+  // 🔹 Remove admin UI elements
+  clone.querySelectorAll(".edit-btn, .delete-btn, #add-global-block-btn").forEach(el => el.remove());
+
+  // 🔹 Keep only the editable content (no need for full <html>)
+  const editableClone = clone.querySelector("#editable-container");
+  if (!editableClone) {
+    console.error("❌ No #editable-container found to save");
+    toast("Erreur: zone éditable introuvable");
+    return;
+  }
+
+  // 🔹 Preserve computed inline styles (so appearance is saved)
+  const styledHTML = getStyledOuterHTML(editableClone);
 
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page, html: htmlSnapshot, content: blocks })
+      body: JSON.stringify({
+        page,
+        html: styledHTML, // full styled editable zone only
+        content: blocks   // structured backup
+      })
     });
+
     const j = await res.json();
     if (!j.success) {
       console.error("Save failed:", j);
       toast("Erreur de sauvegarde");
       return;
     }
-    console.log("Page saved successfully (structured + full HTML)");
+
+    console.log("✅ Page saved successfully (with style, excluding header/footer/admin)");
     showSavedBadge();
-    toast("Page sauvegardée");
+    toast("Page sauvegardée !");
   } catch (err) {
     console.error("save error", err);
     toast("Erreur réseau lors de la sauvegarde");
