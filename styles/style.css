@@ -1,0 +1,809 @@
+/* Ce fichier contient les styles de base partagés par les pages.
+  La majorité du design est gérée par Tailwind CSS directement dans le HTML.
+*/
+.hero-section {
+  position: relative;
+  background: url("images/cao_banner.jpg") center/cover no-repeat;
+  height: 100vh; /* ou selon ton design */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* noir semi-transparent */
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2; /* au-dessus du fond noir */
+  max-width: 800px;
+  padding: 20px;
+}
+
+
+.view.active {
+  display: block;
+  /* Ajoute une petite animation de fondu à l'apparition */
+  animation: fadeIn 0.5s ease-in-out;
+}
+  /* Section de bienvenue */
+  .welcome-section {
+    background: url('images/banner-bg.jpg') no-repeat center/cover; 
+    padding: 80px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  .welcome-box {
+    background: #ffffff;
+    padding: 50px 60px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+  }
+
+  .welcome-box h1 {
+    font-size: 2.2rem;
+    color: #0FBED8;
+    margin-bottom: 20px;
+  }
+
+  .welcome-box p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #333;
+  }
+
+  
+  /* ==== Sections de contenu (Innovation, Inclusion, Services, ...) ==== */
+/* ==== Sections de contenu (Innovation, Inclusion, Services, ...) ==== */
+.content-section {
+  background: #f8f9fb;
+  padding: 60px 0;
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 3rem; /* space between each box */
+  align-items: center;
+}
+
+/* each content box */
+.content-box {
+  background: #ffffff;
+  padding: 50px 60px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 1100px;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 50px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* image zone */
+.content-image {
+  flex: 1;
+  text-align: center;
+}
+
+.content-image img {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+/* text zone */
+.content {
+  flex: 1.2;
+}
+
+.content h2 {
+  font-size: 2rem;
+  color: #0FBED8;
+  margin-bottom: 20px;
+}
+
+.content p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+/* responsive behavior */
+@media (max-width: 1024px) {
+  .content-box {
+    flex-direction: column;
+    gap: 30px;
+    padding: 30px 20px;
+    text-align: center;
+  }
+
+  .content h2 {
+    font-size: 1.8rem;
+  }
+
+  .content p {
+    font-size: 1rem;
+  }
+
+  .content-image img {
+    max-width: 100%;
+  }
+}
+
+
+
+@media (max-width: 640px) {
+  .welcome-box {
+    padding: 30px 20px;
+  }
+
+  .welcome-box h1 {
+    font-size: 1.8rem;
+  }
+
+  .welcome-box p {
+    font-size: 0.95rem;
+  }
+}
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+
+  /* === FOOTER === */
+  .site-footer {
+  background: linear-gradient(135deg, #08B3E5, #22E4AC);
+  color: white;
+  text-align: center;
+  padding: 50px 20px;
+  font-family: "Poppins", sans-serif;
+}
+
+  .footer-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .footer-logo img {
+    width: 120px;
+    margin-bottom: 20px;
+  }
+
+  .footer-text {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+
+  .footer-text span {
+    font-weight: 600;
+  }
+
+  .footer-btn {
+    display: inline-block;
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 10px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .footer-btn:hover {
+    background: white;
+    color: #0fbed8;
+  }
+
+  .footer-social {
+    margin: 30px 0 15px;
+  }
+
+  .footer-social a {
+    margin: 0 10px;
+    display: inline-block;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .footer-social a:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+
+  .footer-bottom {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    font-size: 0.95rem;
+  }
+
+  .footer-bottom a {
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.3s;
+  }
+
+  .footer-bottom a:hover {
+    opacity: 0.7;
+  }
+
+  /* === Responsive === */
+  @media (max-width: 768px) {
+    .footer-logo img {
+      width: 100px;
+    }
+    .footer-text {
+      font-size: 1rem;
+    }
+    .footer-btn {
+      padding: 8px 20px;
+    }
+    .footer-social a svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  /* === Responsive === */
+  @media (max-width: 768px) {
+    .footer-text {
+      font-size: 1rem;
+    }
+    .footer-btn {
+      padding: 8px 20px;
+    }
+    .footer-social a {
+      font-size: 1.3rem;
+      margin: 0 8px;
+    }
+  }
+
+  /* ===== Section contact ===== */
+  .contact-section {
+    background: #fff;
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+  }
+
+  .contact-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+
+  .contact-section p {
+    font-size: 1.1rem;
+    margin-bottom: 50px;
+    color: #f1f1f1;
+  }
+
+  .contact-container {
+    max-width: 1100px;
+    margin: auto;
+    background: linear-gradient(135deg, #08B3E5, #22E4AC);
+    color: #333;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 50px;
+  }
+
+  /* ===== Contenu principal ===== */
+  .contact-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 70px;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  /* ===== Formulaire ===== */
+  .contact-form {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #feffff;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #0FBED8;
+  }
+
+  .send-btn {
+    background: #e0e0e0;
+    color: black;
+    border: black;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+  }
+
+  .send-btn:hover {
+    background: linear-gradient(135deg, #0FBED8, #1BD7BB);
+  }
+
+
+
+
+  /* ===== Responsive ===== */
+  @media (max-width: 900px) {
+    .contact-content {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+  /* ===== Fin section contact ===== */
+
+
+  /* ==== Autres ajustements ==== */
+  @media (max-width: 768px) {
+    section.relative .container {
+      padding: 5rem 1.5rem;
+    }
+
+    .welcome-box {
+      padding: 2rem;
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ==== Boutons et tooltip ==== */
+
+
+  .tooltip {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #16a34a;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    font-weight: 500;
+    z-index: 9999;
+  }
+
+  .tooltip.show {
+    opacity: 1;
+  }
+
+  /* Ce fichier contient les styles de base partagés par les pages.
+  La majorité du design est gérée par Tailwind CSS directement dans le HTML.
+*/
+
+.view.active {
+  display: block;
+  /* Ajoute une petite animation de fondu à l'apparition */
+  animation: fadeIn 0.5s ease-in-out;
+}
+  /* Section de bienvenue */
+  .welcome-section {
+    background: url('images/banner-bg.jpg') no-repeat center/cover; 
+    padding: 80px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  .welcome-box {
+    background: #ffffff;
+    padding: 50px 60px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+  }
+
+  .welcome-box h1 {
+    font-size: 2.2rem;
+    color: #0FBED8;
+    margin-bottom: 20px;
+  }
+
+  .welcome-box p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #333;
+  }
+
+  
+  /* ==== Sections de contenu (Innovation, Inclusion, Services, ...) ==== */
+  .content-section {
+    background: #f8f9fb;
+    padding: 60px 0; /* Espace autour de la section */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -40px;
+  }
+
+  .content-box {
+    background: #ffffff;
+    padding: 50px 60px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    max-width: 1100px;
+    width: 90%;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    gap: 50px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .content-image {
+    flex: 1;
+    text-align: center;
+  }
+
+  .content-image img {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+  }
+
+  .content {
+    flex: 1.2;
+  }
+
+  .content h2 {
+    font-size: 2rem;
+    color: #0FBED8;
+    margin-bottom: 20px;
+  }
+
+  .content p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  /* === FOOTER === */
+
+  .site-footer {
+  background-color: #222;
+  color: white;
+  text-align: center;
+  padding: 30px 20px;
+  }
+
+  .footer-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .footer-logo img {
+    width: 120px;
+    margin: 20px auto;
+    display: block;
+  }
+
+  .footer-social {
+    margin: 20px 0;
+  }
+
+  .footer-bottom {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 14px;
+  }
+
+  .footer-bottom a {
+    color: #fffbfb;
+    text-decoration: none;
+  }
+
+  .footer-bottom a:hover {
+    color: linear-gradient(135deg, #0FBED8, #1BD7BB);
+  }
+
+
+  /* === Responsive === */
+  @media (max-width: 768px) {
+    .footer-text {
+      font-size: 1rem;
+    }
+    .footer-btn {
+      padding: 8px 20px;
+    }
+    .footer-social a {
+      font-size: 1.3rem;
+      margin: 0 8px;
+    }
+  }
+
+
+  /* ==== Autres ajustements ==== */
+  @media (max-width: 768px) {
+    section.relative .container {
+      padding: 5rem 1.5rem;
+    }
+
+    .welcome-box {
+      padding: 2rem;
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ==== Boutons et tooltip ==== */
+ 
+
+  .tooltip {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #16a34a;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    font-weight: 500;
+    z-index: 9999;
+  }
+
+  .tooltip.show {
+    opacity: 1;
+  }
+/**/
+
+
+
+/* Tooltip */
+.tooltip {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #16a34a;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  font-weight: 500;
+  z-index: 9999;
+}
+.tooltip.show {
+  opacity: 1;
+}
+
+
+/* ====== Align edit buttons inline for nav items ====== */
+.nav-item-wrapper {
+    display: inline-flex;        /* Keep text/button and edit button inline */
+    align-items: center;         /* Vertically center the edit button */
+    gap: 4px;                    /* Small space between text/button and edit button */
+    position: relative;          /* For dropdowns if needed */
+}
+
+/* Dropdown menu items */
+.nav-item-wrapper .group > button {
+    display: inline-flex;        /* Ensure main button stays inline */
+    align-items: center;
+}
+
+/* Keep the edit button small and circular */
+.nav-item-wrapper .edit-btn {
+    font-size: 0.75rem;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #08B3E5;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    
+}
+
+
+.nav-item-wrapper .edit-btn:hover {
+    transform: scale(1.2);
+    background: #22e4ac
+}
+
+/* Optional: make the dropdown itself unaffected */
+.nav-item-wrapper .group:hover .group-hover\\:block {
+    display: block;
+}
+
+/* Container to push buttons to the extreme right */
+.extra-right-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;       /* space between buttons */
+    margin-left: auto; /* push container to extreme right */
+}
+
+/* Regular rectangular button style */
+.extra-right-buttons button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+    font-size: 0.95rem;
+}
+
+/* Save button style */
+.extra-right-buttons .save-btn {
+    background-color: #2AF598;
+    color: white;
+}
+.extra-right-buttons .save-btn:hover {
+    background-color: #25e08a;
+}
+
+/* Logout button style */
+.extra-right-buttons .logout-btn {
+    background-color: #EF4444;
+    color: white;
+}
+.extra-right-buttons .logout-btn:hover {
+    background-color: #DC2626;
+}
+
+
+/* Make only the top-level menu text larger */
+nav > .md\:flex > .nav-item-wrapper > a,
+nav > .md\:flex > .nav-item-wrapper > button {
+  font-size: 1.2rem; /* you can increase to 1.3rem or 1.4rem if you want */
+  font-weight: 600; /* keeps it bold and visible */
+}
+
+/* Optional: keep dropdown items smaller for contrast */
+[id^="dropdownMenu"] a {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Adjust vertical spacing slightly so the bigger text fits nicely */
+nav {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+
+.move-controls button {
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 4px;
+  background: #f5f5f5;
+  transition: background 0.2s;
+}
+.move-controls button:hover {
+  background: #ddd;
+}
+.up-btn, .down-btn, .delete-btn {
+  margin-left: 4px;
+}
+
+.edit-btn {
+    font-size: 0.8rem;
+    background: #22e4ac;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 4px;
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: transform 0.2s ease;
+}
+.edit-btn:hover { background: #22e4ac; }
+
+
+  .edit-btn:hover {
+    transform: scale(1.2);
+  }
+
+
+/* Hover image upload overlay */
+.image-edit-hover-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.image-edit-hover-wrapper .image-upload-btn {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0,0,0,0.75);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 10;
+}
+
+.image-edit-hover-wrapper:hover .image-upload-btn {
+  opacity: 1;
+}
+
+
+

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outsiders - VR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Lien vers la feuille de style externe -->
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/submenu.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#2AF598' } } }
+        }
+    </script>
+    <style>
+        .edit-btn {
+            font-size: 0.8rem;
+            background: #1bd7bb;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 4px;
+        }
+        .edit-btn:hover { background: #22e4ac; }
+    </style>
+</head>
+<body class="bg-gray-100 text-brand-dark">
+
+     
+    <!-- =========== En-tête du site =========== -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+
+       <!-- =========== En-tête du site =========== -->
+            <?php
+            require './components/admin_menu.php';
+            ?>
+    </header> 
+   
+    <main>
+        <!-- Section Héros -->
+        <section class="relative bg-white">
+            <div class="absolute inset-0">
+                <button class="edit-btn">✎</button>
+                <img src="images/vr_banner.jpg" alt="Image de fond VR" class="w-full h-full object-cover" data-editable>
+                <div class="absolute inset-0 bg-black opacity-40"></div>
+            </div>
+            <div class="relative container mx-auto px-6 py-24 md:py-32 text-center text-white">
+                <button class="edit-btn">✎</button>
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4" data-editable>Explorez l'univers de nos projets et laissez-vous surprendre par la diversité de nos créations. </h1>
+                <button class="edit-btn">✎</button>
+                <p class="text-lg max-w-3xl mx-auto" data-editable>Parcourrir nos traveaux ! Peut-être y trouverez-vous l'étincelle pour votre prochain projet ? Nous l'espérons sincèrement !</p>
+            </div>
+        </section>
+
+        <!-- ===== Section VR ===== -->
+        <section class="vr-section">
+            <div class="vr-container"> 
+            
+            <!-- Image gauche -->
+            <div class="vr-image">
+                <button class="edit-btn">✎</button>
+                <img src="images/vr.jpg" alt="Réalité virtuelle industrie" data-editable>
+            </div>
+
+            <!-- Texte droite -->
+            <div class="vr-content">
+                <button class="edit-btn">✎</button>
+                <h2 data-editable><button class="edit-btn">✎</button><span data-editable>VR - </span>Réalité virtuelle</h2>
+                <button class="edit-btn">✎</button>
+                <p data-editable>
+                Plongez dans l'action, pas dans le manuel.
+                Nos univers en réalité virtuelle ne se contentent pas d'être visualisés ; ils sont vécus. 
+                Imaginez former vos équipes au cœur de situations ultra-réalistes, sans le moindre risque. 
+                Présentez votre dernier prototype à des clients qui pourront littéralement tourner autour, 
+                en explorer chaque détail. Faites voyager vos collaborateurs dans une usine ou sur un 
+                chantier qui n'existe encore que sur les plans. Ce n'est pas de la science-fiction, 
+                c'est la puissance de nos solutions VR sur-mesure, conçues pour donner vie à vos projets les plus ambitieux.
+                </p>
+
+                <button class="edit-btn">✎</button>
+                <p class="vr-subtitle" data-editable><strong>Nous concevons et développons des expériences immersives adaptées à de nombreux domaines : :</strong></p>
+                <ul class="vr-list">
+                    <li>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable>Visualisation architecturale :</strong>
+                            <p data-editable>Réaliste de bâtiments, d’espaces urbains ou d’aménagements avant leur construction.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable>Ingénierie et robotique :</strong>
+                            <p>représentation virtuelle de machines, d’installations industrielles ou de processus automatisés.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable>Visite interactives :</strong>
+                            <button class="edit-btn">✎</button>
+                            <p data-editable>découverte dynamique de logements, de showrooms ou de locaux professionnels.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable>Formations immersives :</strong>
+                            <button class="edit-btn">✎</button>
+                            <p data-editable>création de modules d’apprentissage, d’ateliers interactifs et d’escape rooms pédagogiques en réalité virtuelle.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="bi bi-check2"></i>
+                        <div>
+                            <button class="edit-btn">✎</button>
+                            <strong data-editable>Modélisation 3D :</strong>
+                            <p data-editable>mise en valeur de produits, prototypes et concepts grâce à des rendus interactifs et détaillés.</p>
+                        </div>
+                    </li>
+                </ul>
+                <button class="edit-btn">✎</button>
+                <a href="#" class="btn-vr" data-editable>En savoir plus</a>
+            </div>
+
+            </div>
+        </section>
+    </main>
+    
+    
+      <!-- =========== Pied de page du site =========== -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <button class="edit-btn">✎</button>
+            <p class="footer-text" data-editable>
+            Vous avez des questions ? <span data-editable>Contactez-nous</span> — nous sommes à votre disposition.
+            </p>
+
+            <!--contact -->
+            <a href="contact.html" class="footer-btn">Contactez-nous !</a>
+
+            <!-- Réseaux sociaux-->
+            <div class="footer-social">
+            <button class="edit-btn">✎</button>
+            <a href="#" target="_blank" aria-label="LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" data-editable>
+                <path d="M19 0h-14c-2.8 0-5 2.2-5 5v14c0 2.8 2.2 5 5 5h14c2.8 0 5-2.2 5-5v-14c0-2.8-2.2-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.4c-.9 0-1.6-.8-1.6-1.6 0-.9.7-1.6 1.6-1.6s1.6.7 1.6 1.6c0 .8-.7 1.6-1.6 1.6zm13.5 11.4h-3v-5.5c0-1.3-.5-2.2-1.7-2.2-1 0-1.6.7-1.8 1.4-.1.2-.1.5-.1.8v5.5h-3s.1-8.9 0-9.8h3v1.4c.4-.7 1.1-1.7 2.8-1.7 2 0 3.8 1.3 3.8 4.3v5.8z" />
+                </svg>
+            </a>
+            <button class="edit-btn">✎</button>
+            <a href="#" target="_blank" aria-label="Instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" data-editable>
+                <path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.3 2.3.5.6.3 1.1.7 1.6 1.2.5.5.9 1 1.2 1.6.2.4.4 1.1.5 2.3.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.9-.5 2.3-.3.6-.7 1.1-1.2 1.6-.5.5-1 .9-1.6 1.2-.4.2-1.1.4-2.3.5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.3-2.3-.5-.6-.3-1.1-.7-1.6-1.2-.5-.5-.9-1-1.2-1.6-.2-.4-.4-1.1-.5-2.3-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.3-1.9.5-2.3.3-.6.7-1.1 1.2-1.6.5-.5 1-.9 1.6-1.2.4-.2 1.1-.4 2.3-.5 1.3-.1 1.7-.1 4.9-.1zm0 1.8c-3.1 0-3.5 0-4.7.1-1 .1-1.6.2-2 .4-.5.2-.9.5-1.3.9-.4.4-.7.8-.9 1.3-.2.4-.3 1-.4 2-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 1 .2 1.6.4 2 .2.5.5.9.9 1.3.4.4.8.7 1.3.9.4.2 1 .3 2 .4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1-.1 1.6-.2 2-.4.5-.2.9-.5 1.3-.9.4-.4.7-.8.9-1.3.2-.4.3-1 .4-2 .1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1-.2-1.6-.4-2-.2-.5-.5-.9-.9-1.3-.4-.4-.8-.7-1.3-.9-.4-.2-1-.3-2-.4-1.2-.1-1.6-.1-4.7-.1zm0 3.3a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zm0 10.8a4.3 4.3 0 1 0 0-8.6 4.3 4.3 0 0 0 0 8.6zm5.5-11.8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
+                </svg>
+            </a>
+            <button class="edit-btn">✎</button>
+            <a href="#" target="_blank" aria-label="Facebook" data-editable>
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" data-editable>
+                <path d="M22.7 0h-21.4c-.7 0-1.3.6-1.3 1.3v21.4c0 .7.6 1.3 1.3 1.3h11.5v-9.3h-3.1v-3.6h3.1v-2.6c0-3.1 1.9-4.8 4.7-4.8 1.3 0 2.3.1 2.6.1v3h-1.8c-1.4 0-1.7.7-1.7 1.6v2.7h3.4l-.4 3.6h-3v9.3h5.8c.7 0 1.3-.6 1.3-1.3v-21.4c.1-.7-.5-1.3-1.2-1.3z" data-editable/>
+                </svg>
+            </a>
+            <div class="footer-logo">
+                <button class="edit-btn">✎</button>
+                <img src="images/logo_blanc.png" alt="Logo du site" data-editable/>
+            </div>
+            </div>
+
+            <!-- Mentions légales -->
+            <div class="footer-bottom">
+            <a href="#">Mentions légales</a>
+            <a href="#">Déclaration de confidentialité</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Lien vers le script JavaScript externe -->
+    <script type="module" src="scripts/admin_main.js"></script>
+    <script tupe="module" src="js/dropdown.js"></script>
+     <!-- Script pour le menu mobile -->
+    <script>
+    document.getElementById('menu-toggle').addEventListener('click', function () {
+        document.getElementById('menu').classList.toggle('hidden');
+    });
+    </script>
+</body>
+</html>
