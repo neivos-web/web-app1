@@ -69,23 +69,15 @@ async function loadStructuredContent(page = pageKey) {
     const data = await res.json();
     if (!data.success) return console.info("No content saved for", page);
 
-    // ===  reload full editable section if HTML saved ===
+    // === NEW: reload full editable section if HTML saved ===
     if (data.html) {
-      // Remove any saved version of the button inside the HTML (bad saved state)
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(data.html, "text/html");
-      const savedBtn = doc.getElementById("add-global-block-btn");
-      if (savedBtn) savedBtn.remove();
-
       const section = document.querySelector("#editable-container");
       if (section) {
-        section.outerHTML = doc.body.innerHTML;
+        section.outerHTML = data.html;
         console.log("Full editable-container reloaded from saved HTML");
+        // reinitialize admin UI so buttons work again
+        if (isAdmin) initAdminEditor();
       }
-
-      // Recreate a fresh working button
-      if (isAdmin) addGlobalAddBlockButton();
-      initAdminEditor();
       return;
     }
 
@@ -244,7 +236,7 @@ function enableBlockManagement() {
 function createContentBox() {
   const uid = "block_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
   const box = document.createElement("div");
-  box.className = "content-box bg-white p-6 rounded-lg shadow-md";
+  Box.className = "content-box bg-white p-6 rounded-lg shadow-md";
   box.dataset.blockId = uid;
   box.dataset.order = document.querySelectorAll(".content-box").length;
   box.innerHTML = `
