@@ -81,7 +81,7 @@ header('Content-Type: text/html; charset=UTF-8');
     </header>
     <main>
         <!-- Section Héros -->
-        <section class="relative bg-white" id="editable-container">
+        <section class="relative bg-white" id="hero-content">
             <div class="absolute inset-0">
                 <button class="edit-btn absolute top-4 left-4 z-50">✎</button>
                 <img id="hero-image"
@@ -104,7 +104,7 @@ header('Content-Type: text/html; charset=UTF-8');
         </section>
 
         <!-- Section de bienvenue -->
-        <section id="editable-container" class="welcome-section">
+        <section id="welcome-container" class="welcome-section">
             <div class="welcome-box">
                 <button class="edit-btn">✎</button>
                 <h1 id="welcome-id" data-editable data-key="welcome_section_title">
