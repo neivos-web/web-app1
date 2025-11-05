@@ -419,7 +419,7 @@ async function saveStructuredContent(page = pageKey) {
   const clone = mainEl.cloneNode(true);
 
   // Remove admin UI elements
-  clone.querySelectorAll(".edit-btn, .delete-btn, #add-global-block-btn, input, textarea")
+  clone.querySelectorAll(" .delete-btn, #add-global-block-btn, input, textarea")
        .forEach(el => el.remove());
 
   // Remove non-content sections
