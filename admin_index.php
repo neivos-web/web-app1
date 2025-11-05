@@ -79,7 +79,7 @@ header('Content-Type: text/html; charset=UTF-8');
             require './components/admin_menu.php';
             ?>
     </header>
-    <main id="editable-root">
+    <main>
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-content" data-editable-root>
             <div class="absolute inset-0">
