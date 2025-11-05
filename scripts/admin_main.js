@@ -70,24 +70,24 @@ async function loadStructuredContent(page = pageKey) {
     if (!data.success) return console.info("No content saved for", page);
 
     // ===  reload full editable section if HTML saved ===
-    if (data.html) {
-      // Remove any saved version of the button inside the HTML (bad saved state)
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(data.html, "text/html");
-      const savedBtn = doc.getElementById("add-global-block-btn");
-      if (savedBtn) savedBtn.remove();
+  if (data.html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data.html, "text/html");
+    const newMain = doc.querySelector("main");
 
-      const section = document.querySelector("#editable-container");
-      if (section) {
-        section.outerHTML = doc.body.innerHTML;
-        console.log("Full editable-container reloaded from saved HTML");
-      }
-
-      // Recreate a fresh working button
-      if (isAdmin) addGlobalAddBlockButton();
-      initAdminEditor();
-      return;
+    if (newMain) {
+      const mainEl = document.querySelector("main");
+      mainEl.innerHTML = newMain.innerHTML;
+      console.log("Full <main> reloaded from saved HTML");
     }
+
+    if (isAdmin) {
+      initAdminEditor();
+      addGlobalAddBlockButton();
+    }
+    return;
+  }
+
 
     // === Fallback structured (legacy) ===
     const blocks = Array.isArray(data.content) ? data.content : (data.content?.blocks || []);
@@ -116,18 +116,18 @@ async function loadStructuredContent(page = pageKey) {
   }
 }
 
-// ---- Inline edit setup ----
 function initAdminEditor() {
+  // Avoid duplicates if reloaded
+  document.querySelectorAll(".delete-btn").forEach(btn => btn.remove());
+  document.querySelectorAll(".edit-btn").forEach(btn => {
+    btn.style.display = "inline-flex";
+    btn.style.zIndex = 60;
+  });
+
   document.querySelectorAll(".content-box").forEach((b, i) => {
     if (!b.dataset.blockId) b.dataset.blockId = "block_" + Date.now() + "_" + i;
     b.setAttribute("draggable", "true");
     b.dataset.order = i;
-  });
-
-  document.querySelectorAll(".edit-btn").forEach(btn => {
-    btn.style.display = "inline-flex";
-    btn.style.zIndex = 60;
-    btn.style.cursor = "pointer";
   });
 
   enableInlineEditing();
@@ -135,6 +135,7 @@ function initAdminEditor() {
   enableDragReorder();
   addGlobalAddBlockButton();
 }
+
 
 // ---- Inline editing (text + images) ----
 function enableInlineEditing() {
@@ -394,35 +395,35 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 // ---- Save everything (structured + full HTML snapshot) ----
 // ---- Save everything (structured + full HTML snapshot) ----
 async function saveStructuredContent(page = pageKey) {
-  const editableContainer = document.querySelector("#editable-container");
-  if (!editableContainer) {
-    console.error("❌ Aucun conteneur #editable-container trouvé");
-    toast("Erreur : zone éditable introuvable");
+  const mainEl = document.querySelector("main");
+  if (!mainEl) {
+    console.error(" Aucun <main> trouvé");
+    toast("Erreur : balise <main> introuvable");
     return;
   }
 
   // Build structured backup
   const blocks = buildBlocksFromDOM();
 
-  // --- Clone only editable section (main part) ---
-  const clone = editableContainer.cloneNode(true);
+  // Clone main content (everything inside <main>)
+  const clone = mainEl.cloneNode(true);
 
-  // --- Remove admin/editor UI elements ---
-  clone.querySelectorAll(
-    ".edit-btn, .delete-btn, #add-global-block-btn, input, textarea"
-  ).forEach(el => el.remove());
+  // Remove admin UI controls before saving
+  clone.querySelectorAll(".edit-btn, .delete-btn, #add-global-block-btn, input, textarea")
+       .forEach(el => el.remove());
 
-  // --- Important: ensure NO header, footer, or menu is saved ---
-  const forbidden = ["header", "footer", "nav", ".site-header", ".admin-menu"];
-  forbidden.forEach(sel => clone.querySelectorAll(sel).forEach(el => el.remove()));
+  // Remove non-content sections (header/footer)
+  ["header", "footer", "nav"].forEach(sel => {
+    clone.querySelectorAll(sel).forEach(el => el.remove());
+  });
 
-  // --- Remove any hidden nodes ---
+  // Remove hidden elements
   clone.querySelectorAll("*").forEach(el => {
     const style = window.getComputedStyle(el);
     if (style.display === "none" || style.visibility === "hidden") el.remove();
   });
 
-  // --- Capture computed styles for saved zone only ---
+  // Capture full styled HTML for <main>
   const styledHTML = getStyledOuterHTML(clone);
 
   try {
@@ -432,19 +433,14 @@ async function saveStructuredContent(page = pageKey) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         page,
-        html: styledHTML,  // ✅ only the main editable zone
-        content: blocks    // structured backup
+        html: styledHTML,
+        content: blocks
       })
     });
 
     const j = await res.json();
-    if (!j.success) {
-      console.error("❌ Save failed:", j);
-      toast("Erreur de sauvegarde");
-      return;
-    }
+    if (!j.success) throw new Error(j.error || "Unknown error");
 
-    console.log("✅ Contenu principal sauvegardé (header/menu exclus)");
     showSavedBadge();
     toast("Contenu principal sauvegardé !");
   } catch (err) {
