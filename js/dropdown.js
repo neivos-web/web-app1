@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const dropdownGroups = document.querySelectorAll(".relative.group");
 
   dropdownGroups.forEach(group => {
-    const button = group.querySelector("button:not(.edit-btn)"); // skip edit buttons
+    const button = group.querySelector("button"); 
     const menu = group.querySelector("div.absolute");
 
     if (button && menu) {
