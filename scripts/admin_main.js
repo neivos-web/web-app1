@@ -395,34 +395,32 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 // ---- Save everything (structured + full HTML snapshot) ----
 async function saveStructuredContent(page = pageKey) {
   const editableContainer = document.querySelector("#editable-container");
+  const blocks = buildBlocksFromDOM();
+
   if (!editableContainer) {
     console.error("❌ Aucun conteneur #editable-container trouvé");
     toast("Erreur : zone éditable introuvable");
     return;
   }
 
-  // Build structured backup
-  const blocks = buildBlocksFromDOM();
-
-  // --- Clone only editable section (main part) ---
+  // ✅ Clone only the editable container (not the whole body)
   const clone = editableContainer.cloneNode(true);
 
-  // --- Remove admin/editor UI elements ---
+  // 🔹 Remove admin/editor UI elements (buttons, temp fields, etc.)
   clone.querySelectorAll(
     ".edit-btn, .delete-btn, #add-global-block-btn, input, textarea"
   ).forEach(el => el.remove());
 
-  // --- Important: ensure NO header, footer, or menu is saved ---
-  const forbidden = ["header", "footer", "nav", ".site-header", ".admin-menu"];
-  forbidden.forEach(sel => clone.querySelectorAll(sel).forEach(el => el.remove()));
+  // 🔹 Remove any accidental header/footer inside editable zone (safety)
+  clone.querySelectorAll("header, footer").forEach(el => el.remove());
 
-  // --- Remove any hidden nodes ---
+  // 🔹 Remove any elements that are hidden (display:none)
   clone.querySelectorAll("*").forEach(el => {
     const style = window.getComputedStyle(el);
     if (style.display === "none" || style.visibility === "hidden") el.remove();
   });
 
-  // --- Capture computed styles for saved zone only ---
+  // 🔹 Preserve computed inline styles for every node
   const styledHTML = getStyledOuterHTML(clone);
 
   try {
@@ -432,8 +430,8 @@ async function saveStructuredContent(page = pageKey) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         page,
-        html: styledHTML,  // ✅ only the main editable zone
-        content: blocks    // structured backup
+        html: styledHTML, // fully styled editable HTML only
+        content: blocks   // structured data backup
       })
     });
 
@@ -444,15 +442,14 @@ async function saveStructuredContent(page = pageKey) {
       return;
     }
 
-    console.log("✅ Contenu principal sauvegardé (header/menu exclus)");
+    console.log("Page sauvegardée (style inclus, header/footer/admin exclus)");
     showSavedBadge();
-    toast("Contenu principal sauvegardé !");
+    toast("Contenu sauvegardé !");
   } catch (err) {
     console.error("Erreur de sauvegarde", err);
     toast("Erreur réseau lors de la sauvegarde");
   }
 }
-
 
 
 // Expose manual save
