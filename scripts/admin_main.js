@@ -70,16 +70,32 @@ async function loadStructuredContent(page = pageKey) {
     if (!data.success) return console.info("No content saved for", page);
 
     // === NEW: reload full editable section if HTML saved ===
-    if (data.html) {
-      const section = document.querySelector("#editable-container");
-      if (section) {
-        section.outerHTML = data.html;
-        console.log("Full editable-container reloaded from saved HTML");
-        // reinitialize admin UI so buttons work again
-        if (isAdmin) initAdminEditor();
+  // === NEW: Full-page restore (all editable sections, not only content-box) ===
+  if (data.html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data.html, "text/html");
+    
+    const savedEditable = doc.querySelector("#editable-container");
+    const currentEditable = document.querySelector("#editable-container");
+
+    if (savedEditable && currentEditable) {
+      currentEditable.replaceWith(savedEditable);
+      console.warn("Full editable section restored (welcome, hero, content, etc.)");
+
+      // Rebind admin UI events (because DOM replaced)
+      if (isAdmin) {
+        initAdminEditor();
+        enableInlineEditing();
+        enableBlockManagement();
+        enableDragReorder();
+        addGlobalAddBlockButton();
       }
-      return;
+    } else {
+      console.warn("Saved HTML does not contain #editable-container");
     }
+    return;
+  }
+
 
     // === Fallback structured (legacy) ===
     const blocks = Array.isArray(data.content) ? data.content : (data.content?.blocks || []);
@@ -382,38 +398,76 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 }
 
 // ---- Save full editable section ----
-// ---- Save everything (structured + full HTML snapshot) ----
+// ---- Save all editable sections (hero, welcome, content) with styles ----
 async function saveStructuredContent(page = pageKey) {
-  const editableContainer = document.querySelector("#editable-container");
+  const editableSections = document.querySelectorAll("[data-editable-root]");
   const blocks = buildBlocksFromDOM();
 
-  //  Full HTML snapshot — captures styles and layout of all editable sections
-  // If you want to limit to the editable container only, change to `editableContainer.outerHTML`
-  const htmlSnapshot = editableContainer
-    ? editableContainer.outerHTML
-    : document.body.outerHTML;
+  if (!editableSections.length) {
+    console.error("❌ Aucune section éditable trouvée");
+    toast("Erreur : aucune zone éditable détectée");
+    return;
+  }
+
+  // ✅ Clone all editable zones (hero, welcome, content)
+  const combinedClone = document.createElement("div");
+
+  editableSections.forEach(section => {
+    const clone = section.cloneNode(true);
+
+    // 🧹 Remove admin/editor UI elements
+    clone.querySelectorAll(
+      ".edit-btn, .delete-btn, #add-global-block-btn, input, textarea"
+    ).forEach(el => el.remove());
+
+    // 🧹 Remove accidental header/footer tags (safety)
+    clone.querySelectorAll("header, footer").forEach(el => el.remove());
+
+    // 🧹 Remove hidden elements
+    clone.querySelectorAll("*").forEach(el => {
+      const style = window.getComputedStyle(el);
+      if (style.display === "none" || style.visibility === "hidden") el.remove();
+    });
+
+    // 🎨 Apply inline computed styles
+    const styled = getStyledOuterHTML(clone);
+
+    // Combine each section
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = styled;
+    combinedClone.appendChild(wrapper);
+  });
+
+  const fullStyledHTML = combinedClone.innerHTML;
 
   try {
     const res = await fetch("/php/save_content.php", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page, html: htmlSnapshot, content: blocks })
+      body: JSON.stringify({
+        page,
+        html: fullStyledHTML,
+        content: blocks
+      })
     });
+
     const j = await res.json();
     if (!j.success) {
-      console.error("Save failed:", j);
+      console.error("❌ Échec de la sauvegarde:", j);
       toast("Erreur de sauvegarde");
       return;
     }
-    console.log("Page saved successfully (structured + full HTML)");
+
+    console.log("✅ Page sauvegardée (sections éditables + styles, admin exclus)");
     showSavedBadge();
-    toast("Page sauvegardée");
+    toast("Page sauvegardée avec succès !");
   } catch (err) {
-    console.error("save error", err);
+    console.error("Erreur réseau lors de la sauvegarde", err);
     toast("Erreur réseau lors de la sauvegarde");
   }
 }
+
 
 
 // Expose manual save
