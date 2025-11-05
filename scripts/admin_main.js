@@ -390,16 +390,40 @@ function scheduleSave(ms = SAVE_DEBOUNCE_MS) {
 }
 
 // ---- Save full editable section ----
-// ---- Save everything (structured + full HTML snapshot) ----
+// ---- Save full editable section (with styles, but skip header/footer/admin UI) ----
 async function saveStructuredContent(page = pageKey) {
+  
   const editableContainer = document.querySelector("#editable-container");
+  if (!editableContainer) {
+    console.warn("No editable container found.");
+    return;
+  }
+
   const blocks = buildBlocksFromDOM();
 
-  //  Full HTML snapshot — captures styles and layout of all editable sections
-  // If you want to limit to the editable container only, change to `editableContainer.outerHTML`
-  const htmlSnapshot = editableContainer
-    ? editableContainer.outerHTML
-    : document.body.outerHTML;
+  // Clone the container to clean it safely
+  const clone = editableContainer.cloneNode(true);
+
+  // Remove header, footer, and admin UI elements
+  clone.querySelectorAll("header, footer, .edit-btn, .delete-btn, #add-global-block-btn").forEach(el => el.remove());
+
+  // Apply computed styles inline (preserve appearance)
+  const origNodes = editableContainer.querySelectorAll("*");
+  const cloneNodes = clone.querySelectorAll("*");
+  cloneNodes.forEach((node, i) => {
+    const style = window.getComputedStyle(origNodes[i]);
+    let cssText = "";
+    for (let prop of style) cssText += `${prop}:${style.getPropertyValue(prop)};`;
+    node.setAttribute("style", cssText);
+  });
+
+  const mainStyle = window.getComputedStyle(editableContainer);
+  let mainCss = "";
+  for (let prop of mainStyle) mainCss += `${prop}:${mainStyle.getPropertyValue(prop)};`;
+  clone.setAttribute("style", mainCss);
+
+  // Get final HTML snapshot
+  const htmlSnapshot = clone.outerHTML;
 
   try {
     const res = await fetch("/php/save_content.php", {
@@ -414,7 +438,7 @@ async function saveStructuredContent(page = pageKey) {
       toast("Erreur de sauvegarde");
       return;
     }
-    console.log("Page saved successfully (structured + full HTML)");
+    console.log("✅ Page saved successfully (styled HTML, header/footer/admin skipped)");
     showSavedBadge();
     toast("Page sauvegardée");
   } catch (err) {
@@ -422,6 +446,7 @@ async function saveStructuredContent(page = pageKey) {
     toast("Erreur réseau lors de la sauvegarde");
   }
 }
+
 
 
 // Expose manual save
