@@ -1,47 +1,36 @@
-// js/dropdown.js
-document.addEventListener("DOMContentLoaded", () => {
-  const dropdownGroups = document.querySelectorAll(".relative.group");
+// ======================= DROPDOWN MENU (CLICK-TO-OPEN) =======================
 
-  dropdownGroups.forEach(group => {
-    const button = group.querySelector("button");
-    const menu = group.querySelector("div.absolute");
+// Select only dropdown parents (those with a <button> inside)
+const dropdownParents = document.querySelectorAll('#main-menu .relative.group');
 
-    if (button && menu) {
-      // Cache le menu au chargement
-      menu.classList.add("hidden");
+dropdownParents.forEach(parent => {
+    const button = parent.querySelector('button');
+    const menu = parent.querySelector('div:not(button)');
 
-      // Toggle on click
-      button.addEventListener("click", e => {
-        e.stopPropagation();
+    if (!button || !menu) return; // safety check
 
-        // Ferme les autres menus avant d'ouvrir celui-ci
-        dropdownGroups.forEach(otherGroup => {
-          const otherMenu = otherGroup.querySelector("div.absolute");
-          if (otherMenu && otherMenu !== menu) {
-            otherMenu.classList.add("hidden");
-          }
-        });
-
-        menu.classList.toggle("hidden");
-      });
-    }
-  });
-
-  // Ferme tout si on clique ailleurs
-  document.addEventListener("click", () => {
-    dropdownGroups.forEach(group => {
-      const menu = group.querySelector("div.absolute");
-      if (menu) menu.classList.add("hidden");
+    // Toggle dropdown on button click
+    button.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevents closing immediately
+        closeAllDropdowns(parent);
+        menu.classList.toggle('hidden');
     });
-  });
-
-  // Ferme tout avec ESC
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") {
-      dropdownGroups.forEach(group => {
-        const menu = group.querySelector("div.absolute");
-        if (menu) menu.classList.add("hidden");
-      });
-    }
-  });
 });
+
+// Close dropdowns when clicking elsewhere
+document.addEventListener('click', () => closeAllDropdowns());
+
+// Close dropdowns when pressing Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllDropdowns();
+});
+
+// Helper to close all except current
+function closeAllDropdowns(except = null) {
+    dropdownParents.forEach(parent => {
+        if (parent !== except) {
+            const menu = parent.querySelector('div:not(button)');
+            if (menu) menu.classList.add('hidden');
+        }
+    });
+}
