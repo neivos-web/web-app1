@@ -807,3 +807,20 @@ nav {
 
 
 
+/* Curseur interactif sur les boutons du menu */
+#main-menu button {
+    cursor: pointer;
+}
+
+/* Animation d'apparition du dropdown */
+#main-menu .relative.group > div {
+    transition: opacity .15s ease, transform .15s ease;
+    transform-origin: top;
+    opacity: 0;
+    transform: scaleY(0.9);
+}
+
+#main-menu .relative.group > div:not(.hidden) {
+    opacity: 1;
+    transform: scaleY(1);
+}
