@@ -106,6 +106,3 @@
                 </button>
             </div>
         </nav>
-
-     <script type="module" src="scripts/admin_menu.js"></script> 
-        <script src="js/dropdown.js"></script>

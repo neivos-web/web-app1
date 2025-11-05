@@ -224,9 +224,10 @@ header('Content-Type: text/html; charset=UTF-8');
             ?>
    </footer>
     <!-- =========== Pied de page du site =========== -->
-        <script type="module" src="scripts/admin_main.js"></script> 
-        <script src="js/lang.js"></script>
-
+<script type="module" src="/scripts/admin_main.js" defer></script>
+<script src="/js/lang.js" defer></script>
+<script type="module" src="/scripts/admin_menu.js" defer></script>
+<script src="/js/dropdown.js" defer></script>
 
 
 </body>
