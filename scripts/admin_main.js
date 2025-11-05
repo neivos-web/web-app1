@@ -334,7 +334,7 @@ function buildBlocksFromDOM() {
   const editableElements = document.querySelectorAll("[data-editable]");
   editableElements.forEach((el, idx) => {
     if (
-      el.closest(".edit-btn") ||
+      
       el.closest(".delete-btn") ||
       el.id === "add-global-block-btn" ||
       el.dataset.admin === "true"
