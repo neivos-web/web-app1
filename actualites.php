@@ -18,10 +18,13 @@
 </head>
 <body class="bg-gray-100 text-brand-dark">
 
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+
        <!-- =========== En-tête du site =========== -->
             <?php
-            include 'components/main_admin.php'; // or require 'main_admin.php';
+            require './components/admin_menu.php';
             ?>
+    </header>
 
     <main>
         <!-- Section Héros -->
