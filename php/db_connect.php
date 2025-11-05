@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
-$username = "outsdrsc_outsiders";
-$password = "AQW8759mlouK123vgyhn";
+$username = "root";
+$password = "";
 $dbname = "outsdrsc_cms_site";
 
 $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
