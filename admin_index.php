@@ -66,12 +66,6 @@ header('Content-Type: text/html; charset=UTF-8');
             }
 
     </style>
-
-
-
-</head>
-<body class="bg-gray-100 text-brand-dark">
-    
     <header class="bg-white shadow-sm sticky top-0 z-50">
 
        <!-- =========== En-tête du site =========== -->
@@ -79,6 +73,12 @@ header('Content-Type: text/html; charset=UTF-8');
             require './components/admin_menu.php';
             ?>
     </header>
+
+
+</head>
+<body class="bg-gray-100 text-brand-dark">
+    
+
     <main>
         <!-- Section Héros -->
         <section class="relative bg-white" id="hero-content" data-editable-root>

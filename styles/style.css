@@ -807,33 +807,3 @@ nav {
 
 
 
-.edit-btn,
-.delete-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 1000;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
-}
-
-.edit-btn:hover,
-.delete-btn:hover {
-  opacity: 1;
-}
-
-/* Tooltip adjustments */
-.edit-btn[title]:hover::after,
-.delete-btn[title]:hover::after {
-  content: attr(title);
-  position: absolute;
-  top: -28px;
-  right: 0;
-  background: #000;
-  color: #fff;
-  font-size: 12px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  z-index: 2000;
-}
