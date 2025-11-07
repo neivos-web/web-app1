@@ -824,3 +824,26 @@ nav {
     opacity: 1;
     transform: scaleY(1);
 }
+/* === Scroll Down Button Fix === */
+.scroll-down {
+  position: absolute;
+  bottom: 40px; /* Move it higher from the bottom so it’s visible */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10; /* Make sure it's above the hero and header */
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.scroll-down:hover {
+  color: #ffcc00; /* soft yellow instead of blue */
+  transform: translateX(-50%) translateY(3px); /* slight move on hover */
+}
+
+/* optional if your hero section cuts it off */
+.hero {
+  position: relative;
+  overflow: visible;
+}
