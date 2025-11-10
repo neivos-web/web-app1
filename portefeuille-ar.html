@@ -18,6 +18,23 @@
             theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#2AF598' } } }
         }
     </script>
+    <style>
+         /* ✅ Rend le scroll fluide à l’intérieur des dropdowns */
+    .dropdown-scrollable {
+      max-height: 250px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #ccc transparent;
+    }
+    .dropdown-scrollable::-webkit-scrollbar {
+      width: 6px;
+    }
+    .dropdown-scrollable::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 10px;
+    }
+  
+    </style>
 </head>
 <body class="bg-gray-100 text-brand-dark">
 
