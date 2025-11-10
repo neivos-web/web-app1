@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <!--CSS externe-->
+    <!-- Lien vers la feuille de style externe -->
     <link rel="stylesheet" href="styles/style.css">
     <link rel="stylesheet" href="styles/submenu.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
@@ -18,34 +18,20 @@
             theme: { extend: { colors: { 'brand-blue': '#08B3E5', 'brand-green': '#2AF598' } } }
         }
     </script>
-    <style>
-         /* ✅ Rend le scroll fluide à l’intérieur des dropdowns */
-    .dropdown-scrollable {
-      max-height: 250px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #ccc transparent;
-    }
-    .dropdown-scrollable::-webkit-scrollbar {
-      width: 6px;
-    }
-    .dropdown-scrollable::-webkit-scrollbar-thumb {
-      background-color: #ccc;
-      border-radius: 10px;
-    }
   
-    </style>
 </head>
 <body class="bg-gray-100 text-brand-dark">
 
-    <!-- =========== En-tête du site =========== -->
-  <header class="bg-white shadow-sm sticky top-0 z-[9999]">
+  <!-- =========== En-tête du site =========== -->
+ <header class="bg-white shadow-sm sticky top-0 z-[9999]">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
       <!-- Logo -->
       <div class="flex items-center space-x-3">
-        <a href="index.html" data-key="logo_text" class="flex items-center space-x-2">
-          <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
-        </a>
+        <div class="nav-item-wrapper">
+          <a href="index.html" data-key="logo_text" class="flex items-center space-x-2">
+            <img src="images/logo_noir.png" alt="Outsiders Logo" class="h-10 w-auto object-contain">
+          </a>
+        </div>
       </div>
 
       <!-- Bouton hamburger (mobile) -->
@@ -56,65 +42,69 @@
       </button>
 
       <!-- Menu principal -->
-      <div id="menu" class="hidden md:flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">        
+        <div id="menu" class="hidden md:flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 font-medium text-gray-700 absolute md:relative top-full left-0 w-full md:w-auto bg-white md:bg-transparent shadow-md md:shadow-none p-4 md:p-0">        
         
-        <a href="mission.html" class="hover:text-brand-blue" data-key="nav_mission">Mission et Vision</a>           
+          <a href="mission.html" class="hover:text-brand-blue" data-key="nav_mission">Mission et Vision</a>           
+       
 
-        <!-- Portefeuille -->
+            <!-- Portefeuille -->
         <div class="relative group">
-          <button class="flex items-center hover:text-brand-blue focus:outline-none" data-key="nav_portfolio">
+            <button class="flex items-center hover:text-brand-blue focus:outline-none" data-key="nav_portfolio">
             Portefeuille
             <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
-              fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd" />
+                fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd" />
             </svg>
-          </button>
-          <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20 dropdown-scrollable">
+            </button>
+            <div
+            class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-40 text-center z-20">
             <a href="portefeuille-jeux.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="portfolio_games">Jeux Vidéo</a>
             <a href="portefeuille-ar.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="portfolio_ar">AR/MR</a>
             <a href="portefeuille-vr.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="portfolio_vr">VR</a>
             <a href="portefeuille-cao.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="portfolio_cad">CAD</a>
-          </div>
+            </div>
         </div>
 
         <!-- Formations & conseils -->
         <div class="relative group">
-          <button class="flex items-center hover:text-brand-blue focus:outline-none" data-key="nav_training">
+            <button class="flex items-center hover:text-brand-blue focus:outline-none" data-key="nav_training">
             Formations & conseils
             <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
-              fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd" />
+                fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd" />
             </svg>
-          </button>
-          <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20 dropdown-scrollable">
+            </button>
+            <div
+            class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-52 text-center z-20">
             <a href="formations-vr.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="training_vr">VR</a>
             <a href="formations-jeux.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="training_games">Jeux Vidéo</a>
             <a href="formations-iot.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="training_iot">Systèmes Embarqués & IOT</a>
             <a href="formations-consulting.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="training_consulting">Consulting & Accompagnement IT</a>
-          </div>
+            </div>
         </div>
 
         <!-- Recherche -->
         <a href="recherche.html" class="hover:text-brand-blue" data-key="nav_research">Recherche</a>
 
-        <!-- Actualités / Blog -->
+      <!-- Actualités -->
         <div class="relative group">
-          <button class="flex items-center text-brand-blue font-semibold focus:outline-none" data-key="nav_news">
+            <button class="flex items-center text-brand-blue font-semibold focus:outline-none" data-key="nav_news">
             Actualités / Blog
             <svg class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
-              fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd" />
+                fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd" />
             </svg>
-          </button>
-          <div class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20 dropdown-scrollable">
+            </button>
+            <div
+            class="absolute left-1/2 -translate-x-1/2 hidden group-hover:block bg-white shadow-xl rounded-lg mt-2 w-44 text-center z-20">
             <a href="actualites.html" class="block px-4 py-2 hover:bg-gray-100 hover:text-brand-blue" data-key="news_articles">Actualités</a>
-          </div>
+            </div>
         </div>
 
         <a href="contact.html" class="hover:text-brand-blue" data-key="nav_contact">Contact</a>
@@ -128,6 +118,7 @@
       </div>
     </nav>
   </header>
+
 <main>
     <!-- Section Héros -->
     <section class="relative bg-white">
@@ -281,7 +272,8 @@
 
 
     <!-- Lien vers le script JavaScript externe -->
-
+    
+<script type="module" src="js/dropdown.js"></script>
 
     <script type="module" src="js/lang.js"></script>
     <!-- Script pour le menu mobile -->
