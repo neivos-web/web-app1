@@ -11,11 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (button && menu) {
 
-      // Empêcher la fermeture du menu quand on clique ou qu'on scrolle à l'intérieur
+      // --- Empêcher la fermeture quand on scrolle ou clique dans le menu ---
       menu.addEventListener("click", (e) => e.stopPropagation());
       menu.addEventListener("wheel", (e) => e.stopPropagation());
 
-      // Ouvrir/fermer le menu correspondant
+      // --- Ouvrir/fermer au clic ---
       button.addEventListener("click", (e) => {
         e.stopPropagation();
 
@@ -27,13 +27,40 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        // Basculer l'affichage du menu actuel
+        // Toggle le menu actuel
         menu.classList.toggle("hidden");
+      });
+
+      // --- Ouvrir au survol (hover) ---
+      button.addEventListener("mouseenter", () => {
+        dropdownPairs.forEach(({ menuId: otherMenuId }) => {
+          const otherMenu = document.getElementById(otherMenuId);
+          if (otherMenuId !== menuId && otherMenu) {
+            otherMenu.classList.add("hidden");
+          }
+        });
+        menu.classList.remove("hidden");
+      });
+
+      // Garder le menu ouvert tant que la souris est dessus
+      menu.addEventListener("mouseenter", () => {
+        menu.classList.remove("hidden");
+      });
+
+      // Fermer quand la souris quitte le menu ou le bouton
+      button.addEventListener("mouseleave", (e) => {
+        // attendre un peu pour éviter la fermeture instantanée si on descend dans le menu
+        setTimeout(() => {
+          if (!menu.matches(":hover")) menu.classList.add("hidden");
+        }, 150);
+      });
+      menu.addEventListener("mouseleave", () => {
+        menu.classList.add("hidden");
       });
     }
   });
 
-  // Fermer tous les menus si clic à l’extérieur
+  // --- Fermer tous les menus quand on clique ailleurs ---
   document.addEventListener("click", (e) => {
     dropdownPairs.forEach(({ buttonId, menuId }) => {
       const button = document.getElementById(buttonId);
@@ -45,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Fermer les menus avec la touche Échap
+  // --- Fermer tous les menus avec la touche Échap ---
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       dropdownPairs.forEach(({ menuId }) => {
