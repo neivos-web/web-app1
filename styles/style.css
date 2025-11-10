@@ -1,6 +1,22 @@
 /* Ce fichier contient les styles de base partagés par les pages.
   La majorité du design est gérée par Tailwind CSS directement dans le HTML.
 */
+
+/* scroll fluide à l’intérieur des dropdowns */
+.dropdown-scrollable {
+  max-height: 250px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+.dropdown-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown-scrollable::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
 .hero-section {
   position: relative;
   background: url("images/cao_banner.jpg") center/cover no-repeat;
