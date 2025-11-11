@@ -106,3 +106,4 @@
                 </button>
             </div>
         </nav>
+<script type="module" src="/scripts/admin_menu.js" defer></script>
