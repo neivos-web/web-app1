@@ -212,7 +212,7 @@
     <!--<script src="js/load_page_content.js"></script> -->
    <!---- <script src="scripts/admin_main.js"></script>  -->
 
-    <script type="module" src="js/dropdown.js"></script>
+    
     <script type="module" src="js/lang.js"></script>
     <!-- Script pour le menu mobile -->
     <script>
