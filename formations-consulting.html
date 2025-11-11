@@ -249,5 +249,24 @@
         document.getElementById('menu').classList.toggle('hidden');
     });
     </script>
+    <script>
+        document.querySelectorAll('.group').forEach((dropdown) => {
+        let timeout;
+
+        const menu = dropdown.querySelector('.absolute');
+
+        dropdown.addEventListener('mouseenter', () => {
+            clearTimeout(timeout);
+            menu.classList.remove('hidden');
+        });
+
+        dropdown.addEventListener('mouseleave', () => {
+            // Wait 500ms before hiding (you can adjust this delay)
+            timeout = setTimeout(() => {
+            menu.classList.add('hidden');
+            }, 1500);
+        });
+        });
+    </script>
 </body>
 </html>
