@@ -155,7 +155,7 @@ header('Content-Type: text/html; charset=UTF-8');
             // Wait 500ms before hiding (you can adjust this delay)
             timeout = setTimeout(() => {
             menu.classList.add('hidden');
-            }, 800);
+            }, 100);
         });
         });
     </script>
