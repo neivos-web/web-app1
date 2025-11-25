@@ -62,6 +62,7 @@ class PageController extends Controller
         $page->headerScript = $request->headerScript;
         $page->footerScript = $request->footerScript;
         $page->pageStatus = $request->pageStatus;
+        $page->parent_id = $request->parent_id;
         $page->save();
 
         $notification = [
@@ -111,6 +112,7 @@ class PageController extends Controller
         $page->headerScript = $request->headerScript;
         $page->footerScript = $request->footerScript;
         $page->pageStatus = $request->pageStatus;
+        $page->parent_id = $request->parent_id;
         $page->save();
 
         $notification = [

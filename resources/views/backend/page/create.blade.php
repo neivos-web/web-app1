@@ -41,40 +41,29 @@
                                         <div class="form-group col-sm-7">
                                             <label for="pageName">Page Name:</label>
                                             <input type="text" name="pageName" class="form-control"
-                                                placeholder="Enter Title..." id="pageName">
+                                                placeholder="Enter Title..." id="pageName" value="{{ old('pageName') }}">
                                         </div>
-
-                                        {{-- @php
-
-                                          //   $pages = DB::table('pages')->select('id')->orderBy('id', 'desc')->first();
-                                          //   $pageId = $pages->id + 1;
-                                            $pageUrl = Str::slug($pageName . '-' . $pageName);
-
-                                        @endphp --}}
-
 
                                         <div class="form-group col-sm-3">
                                             <label for="pageUrl">Page Url:</label>
                                             <input type="text" name="pageUrl" class="form-control" 
-                                                placeholder="Enter Title..." id="pageUrl" onchange="pageUrl()">
+                                                placeholder="Enter Title..." id="pageUrl" onchange="pageUrl()" value="{{ old('pageUrl') }}">
                                         </div>
 
                                         <div class="form-group col-sm-2">
                                             <label for="pageStatus">Page Status:</label>
                                             <select name="pageStatus" id="pageStatus" class="form-control">
                                                 <option value=""> >> Chouse Type << </option>
-                                                <option value="publish">Publish</option>
-                                                <option value="unpublish">UnPublish</option>
+                                                <option value="publish" {{ old('pageStatus') == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                <option value="unpublish" {{ old('pageStatus') == 'unpublish' ? 'selected' : '' }}>UnPublish</option>
                                             </select>
-
                                         </div>
 
                                     </div>
 
                                     <div class="form-group">
                                         <label for="pageUrl">Page Description:</label>
-                                        <textarea name="description" id="summernote" class="form-control " placeholder="Enter Description...">{{ $page->pageDescription }}</textarea>
-
+                                        <textarea name="description" id="summernote" class="form-control " placeholder="Enter Description...">{{ old('description') }}</textarea>
                                     </div>
 
                                     <!-- Page Seo  -->
@@ -82,31 +71,48 @@
                                     <div class="form-group">
                                         <label for="metaTitle">Meta Title:</label>
                                         <input type="text" name="metaTitle" class="form-control"
-                                            placeholder="Enter Meta Title..." id="metaTitle">
+                                            placeholder="Enter Meta Title..." id="metaTitle" value="{{ old('metaTitle') }}">
                                     </div>
 
                                     <div class="form-group">
                                         <label for="metaKeywords">Meta Keywords:</label>
                                         <input type="text" name="metaKeywords" class="form-control"
-                                            placeholder="Enter Meta Keywords..." id="metaKeywords">
+                                            placeholder="Enter Meta Keywords..." id="metaKeywords" value="{{ old('metaKeywords') }}">
                                     </div>
 
                                     <div class="form-group">
                                         <label for="metaDescription">Meta Description:</label>
-                                        <textarea class="form-control" name="metaDescription" id="metaDescription" cols="30" rows="5"></textarea>
-
+                                        <textarea class="form-control" name="metaDescription" id="metaDescription" cols="30" rows="5">{{ old('metaDescription') }}</textarea>
                                     </div>
                                     <!-- Page Seo  -->
 
                                     <div class="d-flex">
                                         <div class="form-group col-sm-6">
                                             <label for="">Header Script</label>
-                                            <textarea class="form-control" name="headerScript" id="" cols="30" rows="10"></textarea>
+                                            <textarea class="form-control" name="headerScript" id="" cols="30" rows="10">{{ old('headerScript') }}</textarea>
                                         </div>
                                         <div class="form-group col-sm-6">
                                             <label for="">Footer Script</label>
-                                            <textarea class="form-control" name="footerScript" id="" cols="30" rows="10"></textarea>
+                                            <textarea class="form-control" name="footerScript" id="" cols="30" rows="10">{{ old('footerScript') }}</textarea>
                                         </div>
+                                    </div>
+
+                                    {{-- NOUVEAU : Champ Parent Page --}}
+                                    <div class="form-group mt-2">
+                                        <label for="parent_id">Parent Page (optionnel)</label>
+                                        <select name="parent_id" id="parent_id" class="form-control">
+                                            <option value="">-- Aucun (page principale) --</option>
+                                            @php
+                                                // récupérer toutes les pages existantes (tu peux filtrer si besoin)
+                                                $allPages = \App\Models\Page::orderBy('pageName','asc')->get();
+                                            @endphp
+
+                                            @foreach($allPages as $p)
+                                                <option value="{{ $p->id }}" {{ old('parent_id') == $p->id ? 'selected' : '' }}>
+                                                    {{ $p->pageName }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
 
                                     <div class="form-group mt-2">
@@ -138,11 +144,7 @@
             pageUrl = pageUrl.replace(/\s+/g, '-').toLowerCase();
 
             document.getElementById('pageUrl').value = pageUrl;
-
-
-
         }
     </script>
-
 
 @endsection

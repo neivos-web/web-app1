@@ -26,7 +26,6 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
-
         # category
         // $category = $this->app->make('category');
         // $category = Category::all();
@@ -39,8 +38,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
-
         if (!app()->runningInConsole() || app()->runningUnitTests()) {
             // $general_setting = DB::table('categories')->latest()->first();
             //...
@@ -61,13 +58,12 @@ class AppServiceProvider extends ServiceProvider
 
             view()->share('categorylist', $categorylist);
 
-            //Pages
+            // Pages
             $page = Page::first();
 
             # Mail Setting
             $mailSetting = MailSetting::first();
-
-            if(!empty($mailSetting)){
+            if (!empty($mailSetting)) {
                 $data_mail = [
                     'drive' => $mailSetting->mail_driver,
                     'host' => $mailSetting->mail_host,
@@ -80,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
                         'name' => $mailSetting->mail_form_name,
                     ]
                 ];
-                Config::set('mail',$data_mail);
+                Config::set('mail', $data_mail);
             }
 
             $data = [
@@ -96,7 +92,7 @@ class AppServiceProvider extends ServiceProvider
                 'TotalBlog' => $TotalBlog,
             ];
 
-            // Partage global (inchangé)
+            // Partage global
             View::share([
                 'category' => $category,
                 'TotalBlog' => $TotalBlog,
@@ -113,15 +109,22 @@ class AppServiceProvider extends ServiceProvider
                 'page' => $page,
             ]);
 
-            // --- NOUVEAU : View Composer pour afficher les pages publiées dans le frontend ---
+            // --- View Composer pour afficher les pages publiées dans le frontend ---
             View::composer('website.components.TopHeader', function ($view) {
-                $publishedPages = Page::where('pageStatus', 'publish') // pages publiées
-                    ->orderBy('menu_order', 'asc')                     // si tu as un ordre
-                    ->get(['pageName', 'slug']);                       // récupérer juste ce qui est nécessaire
+                $pages = Page::where('pageStatus', 'publish')
+                    ->whereNull('parent_id')  // pages principales seulement
+                    ->with(['children' => function($query) {
+                        $query->where('pageStatus', 'publish')
+                              ->orderBy('pageName', 'asc');
+                    }])
+                    ->orderBy('pageName', 'asc')
+                    ->get();
 
-                $view->with('publishedPages', $publishedPages);
+                $view->with('publishedPages', $pages);
             });
-        }
-    }
-}
+
+        } 
+    } // fin de boot()
+} 
+
 

@@ -247,7 +247,8 @@ Route::group(['prefix' => 'website'], function () {
     Route::post('/mail-send', [FrontendController::class, 'MailSend'])->name('mail.send');
 
     // Affiche une page publique par slug (ex: /website/page/a-propos)
-    Route::get('/page/{slug}', [App\Http\Controllers\frontend\PageController::class, 'show'])->name('website.page.show');
+    
+    Route::get('/page/{slug}', [App\Http\Controllers\frontend\FrontendController::class, 'show'])->name('website.page.show');
 
 // Optionnel : si tu veux utiliser pageUrl (champ pageUrl) au lieu du slug
 // Route::get('/page-url/{pageUrl}', [App\Http\Controllers\frontend\PageController::class, 'showByUrl'])->name('website.page.showByUrl');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\frontend;
 
 use App\Models\Faq;
+use App\Models\Page;
 use App\Models\Blog;
 use App\Models\Contact;
 use App\Models\Gallery;
