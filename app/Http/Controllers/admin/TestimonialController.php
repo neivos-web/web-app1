@@ -49,7 +49,7 @@ class TestimonialController extends Controller
         $testimonial->client_name = $request->client_name;
         $testimonial->designation = $request->designation;
         $testimonial->description = $request->description;
-        // $testimonial->status = $request->status;
+        $testimonial->status = $request->status;
 
         # If You want to Upload Image
 

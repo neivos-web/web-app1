@@ -44,7 +44,7 @@
                                         <th># Sl No</th>
                                         <th>Page Name</th>
                                         <th>Page URL</th>
-                                        <th>Meta Title</th>
+                                        <th>Parent</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -55,7 +55,7 @@
                                             <td>{{ $loop->index + 1 }}</td>
                                             <td>{{ $page->pageName }}</td>
                                             <td>{{ $page->pageUrl }}</td>
-                                            <td>{{ $page->metaTitle }}</td>
+                                            <td>{{ $page->parent_id }}</td>
                                             
                                             <td>
                                                 @if ($page->pageStatus == 'publish')

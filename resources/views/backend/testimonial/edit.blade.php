@@ -60,7 +60,7 @@
                                         <div class="form-group col-sm-6"></div>
                                             <label for="title">Status</label>
                                             <select class="form-control" name="status" id="">
-                                                <option value="pullish" {{ $testimonial->status == 'pullish' ? 'selected' : '' }}>Pullish</option>
+                                                <option value="publish" {{ $testimonial->status == 'pullish' ? 'selected' : '' }}>Publish</option>
                                                 <option value="draft" {{ $testimonial->status == 'draft' ? 'selected' : '' }}>Draft</option>
                                                 
                                             </select>    

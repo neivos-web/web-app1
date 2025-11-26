@@ -64,11 +64,11 @@
     </section>
     <!--===  About End ===-->
 
-    <!--===  Services Start ===-->
+    <!--===  Formations Start ===-->
     <section class="pxa_services mt_bgtempconatainer">
         <div class="pxa_container">
             <div class="pxa_heading_section">
-                <h2 class="">Our Services</h2>
+                <h2 class="">Nos Formations & Conseils</h2>
                 <p class="">Amet minim mollit non deserunt ullamco est sit aliqua dolordo
                     amet sint. Velit officia consequat duis enim velit mollit Exercitation.</p>
             </div>
@@ -193,7 +193,7 @@
     <!--===  Blog End ===-->
 
 
-    <!--===  Partners Start ===-->
+    <!--===  Partners Start ===--
     <section class="pxa_partners mt_bgtempconatainer"
         style="background-image: url({{ asset('frontend') }}/public/pages/assets/images/bg_partner.png)">
         <div class="pxa_container">
@@ -222,9 +222,9 @@
 
         </style>
     </section>
-    <!--===  Partners End ===-->
+    ===  Partners End ===--
 
-    <!--===  Team Start ===-->
+    !--===  Team Start ===--
 
     <section class="pxa_team mt_bgtempconatainer">
         <div class="pxa_container">
@@ -253,10 +253,10 @@
             </div>
         </div>
     </section>
-    <!--===  Team End ===-->
+    --===  Team End ===--
 
 
-    <!--===  Pricing Plan Start ===-->
+    --===  Pricing Plan Start ===--
     <section class="pxa_pricingPlan mt_bgtempconatainer">
         <div class="pxa_container">
             <div class="pxa_heading_section">
@@ -331,7 +331,7 @@
             </div>
         </div>
     </section>
-    <!--===  Pricing Plan End ===-->
+    !--===  Pricing Plan End ===--
 
 
     <!--===  Testimonial Start ===-->
@@ -339,7 +339,7 @@
     <section class="pxa_testimonial mt_bgtempconatainer">
         <div class="pxa_container">
             <div class="pxa_heading_section">
-                <h2 class="">Testimonial</h2>
+                <h2 class="">Témoignages</h2>
                 <p class="">Amet minim mollit non deserunt ullamco est sit aliqua dolordo
                     amet sint. Velit officia consequat duis enim velit mollit Exercitation.</p>
             </div>
