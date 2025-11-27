@@ -2,20 +2,19 @@
   <!--===  Footer Start ===-->
 
   <section class="pxa_footer mt_bgtempconatainer"
-      style="background-image: url({{ asset('frontend') }}/public/pages/assets/images/bg_footer.png)">
+      style=" background: linear-gradient(135deg, #08B3E5, #22E4AC); padding: 60px 0 10px 0;">
 
       <div class="pxa_container">
           <div class="row">
               <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                   <div class="pxa_footer_item">
-                      <a href="#" class="">
+                      <a href="/website" class="">
                           <img class="" src="{{ asset('frontend') }}/public/pages/assets/images/footer_logo.png"
                               alt="Logo" width="150" height="40">
                       </a>
 
-                      <p class="">Amet minim mollit non deserunt ullamco
-                          sit aliqua dolor amet. officia consequat
-                          enim velit mollit.</p>
+                      <p class="">Apprenez les technologies les plus demandées du moment grâce à 
+                        nos formations interactives et pratiques.</p>
                       <ul class="pxa_social_footer">
                           <li>
                               <a href="https://www.facebook.com/" class="" target="_blank">
@@ -53,18 +52,14 @@
                               <a class="" href="javascript:void(0);">Jeux vidéo</a>
                           </li>
                           <li>
-                              <a class="" href="javascript:void(0);">Network Infrastructure</a>
+                              <a class="" href="javascript:void(0);">MR/AR</a>
                           </li>
                           <li>
-                              <a class="" href="javascript:void(0);">Data Management</a>
+                              <a class="" href="javascript:void(0);">VR</a>
                           </li>
                           <li>
-                              <a class="" href="javascript:void(0);">Data Analytics Derive</a>
+                              <a class="" href="javascript:void(0);">CAD</a>
                           </li>
-                          <li>
-                              <a class="" href="javascript:void(0);">IT Professionals</a>
-                          </li>
-
                       </ul>
                   </div>
               </div>
