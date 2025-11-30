@@ -1,150 +1,332 @@
-@extends('layouts.admin-app')
-@section('title', 'Page || Create')
+{{-- resources/views/backend/page/create.blade.php --}}
+@extends('layouts.admin-form')
+
+@section('title', 'Créer une page')
+
 @section('content')
-
-    <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
-        <section class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
-                        <h1>Page</h1>
-                    </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
-                            <li class="breadcrumb-item {{ Route::currentRouteName() ? 'active' : '' }}">Page</li>
-                        </ol>
-                    </div>
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6"><h1>Créer une page</h1></div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('page.index') }}">Pages</a></li>
+                        <li class="breadcrumb-item active">Créer</li>
+                    </ol>
                 </div>
-            </div><!-- /.container-fluid -->
-        </section>
+            </div>
+        </div>
+    </section>
 
-        <!-- Main content -->
-        <section class="content">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title pt-2"><i class="fas fa-plus pr-2"></i>Create Page</h3>
-                                <a href="{{ route('page.index') }}" class="btn btn-success float-right"><i
-                                        class="fas fa-list pr-2"></i>All Page</a>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <h3 class="card-title">Nouvelle page</h3>
+                </div>
+
+                <form action="{{ route('page.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <label>Nom de la page <span class="text-danger">*</span></label>
+                                    <input type="text" name="pageName" id="pageName" class="form-control @error('pageName') is-invalid @enderror" value="{{ old('pageName') }}" required>
+                                    @error('pageName') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
                             </div>
-                            <!-- /.card-header -->
-                            <div class="card-body">
-
-                                <form action="{{ route('page.store') }}" method="POST" enctype="multipart/form-data">
-                                    @csrf
-
-                                    <div class="d-flex ga-4 align-item-center">
-                                        <div class="form-group col-sm-7">
-                                            <label for="pageName">Page Name:</label>
-                                            <input type="text" name="pageName" class="form-control"
-                                                placeholder="Enter Title..." id="pageName" value="{{ old('pageName') }}">
-                                        </div>
-
-                                        <div class="form-group col-sm-3">
-                                            <label for="pageUrl">Page Url:</label>
-                                            <input type="text" name="pageUrl" class="form-control" 
-                                                placeholder="Enter Title..." id="pageUrl" onchange="pageUrl()" value="{{ old('pageUrl') }}">
-                                        </div>
-
-                                        <div class="form-group col-sm-2">
-                                            <label for="pageStatus">Page Status:</label>
-                                            <select name="pageStatus" id="pageStatus" class="form-control">
-                                                <option value=""> >> Chouse Type << </option>
-                                                <option value="publish" {{ old('pageStatus') == 'publish' ? 'selected' : '' }}>Publish</option>
-                                                <option value="unpublish" {{ old('pageStatus') == 'unpublish' ? 'selected' : '' }}>UnPublish</option>
-                                            </select>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="pageUrl">Page Description:</label>
-                                        <textarea name="description" id="summernote" class="form-control " placeholder="Enter Description...">{{ old('description') }}</textarea>
-                                    </div>
-
-                                    <!-- Page Seo  -->
-
-                                    <div class="form-group">
-                                        <label for="metaTitle">Meta Title:</label>
-                                        <input type="text" name="metaTitle" class="form-control"
-                                            placeholder="Enter Meta Title..." id="metaTitle" value="{{ old('metaTitle') }}">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="metaKeywords">Meta Keywords:</label>
-                                        <input type="text" name="metaKeywords" class="form-control"
-                                            placeholder="Enter Meta Keywords..." id="metaKeywords" value="{{ old('metaKeywords') }}">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="metaDescription">Meta Description:</label>
-                                        <textarea class="form-control" name="metaDescription" id="metaDescription" cols="30" rows="5">{{ old('metaDescription') }}</textarea>
-                                    </div>
-                                    <!-- Page Seo  -->
-
-                                    <div class="d-flex">
-                                        <div class="form-group col-sm-6">
-                                            <label for="">Header Script</label>
-                                            <textarea class="form-control" name="headerScript" id="" cols="30" rows="10">{{ old('headerScript') }}</textarea>
-                                        </div>
-                                        <div class="form-group col-sm-6">
-                                            <label for="">Footer Script</label>
-                                            <textarea class="form-control" name="footerScript" id="" cols="30" rows="10">{{ old('footerScript') }}</textarea>
-                                        </div>
-                                    </div>
-
-                                    {{-- NOUVEAU : Champ Parent Page --}}
-                                    <div class="form-group mt-2">
-                                        <label for="parent_id">Parent Page (optionnel)</label>
-                                        <select name="parent_id" id="parent_id" class="form-control">
-                                            <option value="">-- Aucun (page principale) --</option>
-                                            @php
-                                                // récupérer toutes les pages existantes (tu peux filtrer si besoin)
-                                                $allPages = \App\Models\Page::orderBy('pageName','asc')->get();
-                                            @endphp
-
-                                            @foreach($allPages as $p)
-                                                <option value="{{ $p->id }}" {{ old('parent_id') == $p->id ? 'selected' : '' }}>
-                                                    {{ $p->pageName }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group mt-2">
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="fas fa-save pr-2"></i>Page Create</button>
-                                    </div>
-                                </form>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>URL (slug)</label>
+                                    <input type="text" name="pageUrl" id="pageUrl" class="form-control" value="{{ old('pageUrl') }}" placeholder="auto si vide">
+                                </div>
                             </div>
-                            <!-- /.card-body -->
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Statut</label>
+                                    <select name="pageStatus" class="form-control">
+                                        <option value="publish" {{ old('pageStatus', 'publish') === 'publish' ? 'selected' : '' }}>Publier</option>
+                                        <option value="unpublish" {{ old('pageStatus') === 'unpublish' ? 'selected' : '' }}>Dépublier</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <!-- /.card -->
-                    </div>
-                    <!-- /.col -->
-                </div>
-                <!-- /.row -->
 
+                        <div class="form-group">
+                            <label>Description générale</label>
+                            <textarea name="description" id="summernote" class="form-control">{{ old('description') }}</textarea>
+                        </div>
+
+                        <!-- SECTIONS -->
+                        <div class="card card-success">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h3 class="card-title mb-0">Sections de la page</h3>
+                                <button type="button" id="add-section" class="btn btn-success btn-sm">Ajouter une section</button>
+                            </div>
+                            <div class="card-body bg-light" id="sections-container">
+                                {{-- Si old('sections') existe, reconstruire --}}
+                                @if(old('sections'))
+                                    @foreach(old('sections') as $i => $s)
+                                        @php
+                                            $type = $s['type'] ?? 'text';
+                                            $position = $s['position'] ?? 'right';
+                                            $content = $s['content'] ?? '';
+                                        @endphp
+                                        <div class="section-block card mb-4 border shadow-sm" data-index="{{ $i }}">
+                                            <input type="hidden" name="sections[{{ $i }}][id]" value="{{ $s['id'] ?? '' }}">
+                                            <div class="card-header bg-white">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-3">
+                                                        <label class="font-weight-bold mb-1">Type</label>
+                                                        <select name="sections[{{ $i }}][type]" class="form-control section-type">
+                                                            <option value="text" {{ $type === 'text' ? 'selected' : '' }}>Texte seul</option>
+                                                            <option value="image" {{ $type === 'image' ? 'selected' : '' }}>Image + Texte</option>
+                                                            <option value="video" {{ $type === 'video' ? 'selected' : '' }}>Vidéo + Texte</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="font-weight-bold mb-1">Position du média</label>
+                                                        <select name="sections[{{ $i }}][position]" class="form-control section-position" {{ $type === 'text' ? 'disabled' : '' }}>
+                                                            <option value="left" {{ $position === 'left' ? 'selected' : '' }}>À gauche</option>
+                                                            <option value="right" {{ $position === 'right' ? 'selected' : '' }}>À droite</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="font-weight-bold mb-1">Ordre</label>
+                                                        <input type="number" name="sections[{{ $i }}][order]" class="form-control" value="{{ $s['order'] ?? ($i+1) }}">
+                                                    </div>
+                                                    <div class="col-md-4 text-right">
+                                                        <button type="button" class="btn btn-danger btn-sm remove-section float-right">Supprimer</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-body">
+                                                <!-- TEXTAREA UNIQUE -->
+                                                <div class="form-group">
+                                                    <label>Texte</label>
+                                                    <textarea name="sections[{{ $i }}][content]" class="form-control content-textarea" rows="8">{{ $content }}</textarea>
+                                                </div>
+
+                                                <!-- MEDIA WRAPPER -->
+                                                <div class="media-wrapper" style="display: {{ $type === 'text' ? 'none' : 'block' }};">
+                                                    <div class="row">
+                                                        <div class="col-lg-6 order-{{ $position === 'left' ? '2' : '1' }}">
+                                                            {{-- Texte (déjà affiché) --}}
+                                                        </div>
+                                                        <div class="col-lg-6 order-{{ $position === 'left' ? '1' : '2' }}">
+                                                            @if(!empty($s['current_media'] ?? false))
+                                                                <div class="mb-3">
+                                                                    <strong>Média actuel :</strong><br>
+                                                                    <img src="{{ $s['current_media'] }}" class="img-fluid rounded" style="max-height:200px">
+                                                                </div>
+                                                            @endif
+
+                                                            <div class="form-group">
+                                                                <label>Nouveau fichier</label>
+                                                                <input type="file" name="sections_media[{{ $i }}]" class="form-control-file">
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <label>Ou URL externe (YouTube, Vimeo...)</label>
+                                                                <input type="text" name="sections[{{ $i }}][media_url]" class="form-control" value="{{ $s['media_url'] ?? '' }}">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <label>Page parente (optionnel)</label>
+                            <select name="parent_id" class="form-control">
+                                <option value="">-- Aucune --</option>
+                                @foreach(\App\Models\Page::orderBy('pageName')->get() as $p)
+                                    <option value="{{ $p->id }}" {{ old('parent_id') == $p->id ? 'selected' : '' }}>{{ $p->pageName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-right">
+                        <a href="{{ route('page.index') }}" class="btn btn-default mr-2">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Créer la page</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+@endsection
+
+@push('scripts')
+<script src="{{ asset('backend/plugins/summernote/summernote-bs4.min.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    $('#summernote').summernote({ height: 200 });
+
+    // Slug auto
+    $('#pageName').on('input', function () {
+        if (!$('#pageUrl').val()) {
+            const slug = this.value.trim()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s-]/gi, '')
+                .replace(/\s+/g, '-').toLowerCase();
+            $('#pageUrl').val(slug);
+        }
+    });
+
+    let sectionIndex = 0;
+
+    // Si on a des sections old() préremplies, initialiser sectionIndex pour éviter collisions
+    const existingBlocks = document.querySelectorAll('#sections-container .section-block');
+    if (existingBlocks.length) {
+        existingBlocks.forEach(b => {
+            const idx = parseInt(b.getAttribute('data-index'));
+            if (!isNaN(idx) && idx >= sectionIndex) sectionIndex = idx + 1;
+        });
+    }
+
+    // Fonction d'ajout (utilisée par le bouton)
+    window.addSection = function(data = {}) {
+        const i = sectionIndex++;
+        const type = data.type || 'text';
+        const position = data.position || 'right';
+        // Échapper backticks pour template literal safety
+        const content = (data.content ?? '').replace(/`/g, '\\`').replace(/<\/?script/gi, '');
+
+        const html = `
+        <div class="section-block card mb-4 border shadow-sm" data-index="${i}">
+            <input type="hidden" name="sections[${i}][id]" value="${data.id || ''}">
+            <div class="card-header bg-white">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label class="font-weight-bold mb-1">Type</label>
+                        <select name="sections[${i}][type]" class="form-control section-type">
+                            <option value="text" ${type === 'text' ? 'selected' : ''}>Texte seul</option>
+                            <option value="image" ${type === 'image' ? 'selected' : ''}>Image + Texte</option>
+                            <option value="video" ${type === 'video' ? 'selected' : ''}>Vidéo + Texte</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="font-weight-bold mb-1">Position du média</label>
+                        <select name="sections[${i}][position]" class="form-control section-position" ${type === 'text' ? 'disabled' : ''}>
+                            <option value="left" ${position === 'left' ? 'selected' : ''}>À gauche</option>
+                            <option value="right" ${position === 'right' ? 'selected' : ''}>À droite</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="font-weight-bold mb-1">Ordre</label>
+                        <input type="number" name="sections[${i}][order]" class="form-control" value="${data.order ?? (i+1)}">
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <button type="button" class="btn btn-danger btn-sm remove-section float-right">Supprimer</button>
+                    </div>
+                </div>
             </div>
 
-        </section>
-        <!-- /.content -->
-    </div>
+            <div class="card-body">
+                <!-- TEXTAREA UNIQUE -->
+                <div class="form-group">
+                    <label>Texte</label>
+                    <textarea name="sections[${i}][content]" class="form-control content-textarea" rows="8">${content}</textarea>
+                </div>
 
-    <script>
-        function pageUrl() {
+                <!-- MEDIA WRAPPER -->
+                <div class="media-wrapper" style="display: ${type === 'text' ? 'none' : 'block'};">
+                    <div class="row">
+                        <div class="col-lg-6 order-${position === 'left' ? '2' : '1'}">
+                            <!-- Texte déjà affiché ci-dessus -->
+                        </div>
+                        <div class="col-lg-6 order-${position === 'left' ? '1' : '2'}">
+                            <div class="form-group">
+                                <label>Nouveau fichier</label>
+                                <input type="file" name="sections_media[${i}]" class="form-control-file">
+                            </div>
+                            <div class="form-group">
+                                <label>Ou URL externe (YouTube, Vimeo...)</label>
+                                <input type="text" name="sections[${i}][media_url]" class="form-control" value="${data.media_url ?? ''}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
 
-            var pageName = document.getElementById('pageName').value;
-            var pageUrl = document.getElementById('pageUrl').value = pageName;
+        document.getElementById('sections-container').insertAdjacentHTML('beforeend', html);
+    };
 
-            pageUrl = pageUrl.replace(/\s+/g, '-').toLowerCase();
+    // Ajouter la première section si aucune n'est présente (comportement existant)
+    if (document.querySelectorAll('#sections-container .section-block').length === 0) {
+        addSection();
+    }
 
-            document.getElementById('pageUrl').value = pageUrl;
+    // Bouton Ajouter
+    document.getElementById('add-section').addEventListener('click', function(e){
+        e.preventDefault();
+        addSection();
+    });
+
+    // Supprimer section (délégation)
+    document.getElementById('sections-container').addEventListener('click', function(e) {
+        const rem = e.target.closest('.remove-section');
+        if (rem) {
+            rem.closest('.section-block').remove();
         }
-    </script>
+    });
 
-@endsection
+    // Changement de type / position (délégation)
+    document.getElementById('sections-container').addEventListener('change', function(e) {
+        const block = e.target.closest('.section-block');
+        if (!block) return;
+
+        const typeSelect = block.querySelector('.section-type');
+        const positionSelect = block.querySelector('.section-position');
+        const mediaWrapper = block.querySelector('.media-wrapper');
+
+        if (e.target === typeSelect) {
+            const type = typeSelect.value;
+            if (type === 'text') {
+                mediaWrapper.style.display = 'none';
+                positionSelect.disabled = true;
+            } else {
+                mediaWrapper.style.display = 'block';
+                positionSelect.disabled = false;
+            }
+        }
+
+        if (e.target === positionSelect) {
+            // réarrangement visuel si besoin; ici les classes order-* sont appliquées lors de la création
+            const pos = positionSelect.value;
+            const cols = block.querySelectorAll('.media-wrapper .row > div');
+            if (cols.length >= 2) {
+                cols[0].className = `col-lg-6 order-${pos === 'left' ? '2' : '1'}`;
+                cols[1].className = `col-lg-6 order-${pos === 'left' ? '1' : '2'}`;
+            }
+        }
+    });
+});
+</script>
+<!-- CKEditor 5 -->
+<script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Transformer tous les textarea existants en éditeur riche
+    document.querySelectorAll('textarea').forEach((el) => {
+        ClassicEditor
+            .create(el)
+            .catch(error => console.error(error));
+    });
+});
+</script>
+
+@endpush

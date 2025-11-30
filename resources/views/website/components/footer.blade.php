@@ -49,10 +49,10 @@
                       <h3 class="">Portefeuille</h3>
                       <ul class="pxa_footer_links">
                           <li>
-                              <a class="" href="javascript:void(0);">Jeux vidéo</a>
+                              <a class="" href="/website/page/show">Jeux vidéo</a>
                           </li>
                           <li>
-                              <a class="" href="javascript:void(0);">MR/AR</a>
+                              <a class="" href="javascript:void(0);">AR/MR</a>
                           </li>
                           <li>
                               <a class="" href="javascript:void(0);">VR</a>
