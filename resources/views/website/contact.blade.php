@@ -9,7 +9,7 @@
         <div class="pxa_page_title_opacity">
           <h2 class="">Contact</h2>
           <ul>
-            <li><a class="" href="home.html">Accueil /</a></li>
+            <li><a href="{{ route('pages.frontend') }}">Accueil /</a></li>
             <li><a href="javascript:void(0);" class="">Contact</a></li>
           </ul>
         </div>
