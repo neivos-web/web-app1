@@ -25,9 +25,7 @@
                         class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         {{-- <span class="icon-dash">
                         </span> --}}
-                        <span class="icon-menu">
-                            <x-backend.icon.dashboard-icon name="dashboard" />
-                        </span>
+                    
                         <span class="menu-text">
                             Tableau de bord
                         </span> 
@@ -259,14 +257,7 @@
                         <p>Déconnexion</p>
                     </a>
                 </li>
-                <!--
-                <hr class="clear">
-                <li class="nav-item">
-                    <a href="{{ route('model.index') }}" class="nav-link ">
-                        <i class="far fa-circle"></i>
-                        <p>Model List</p>
-                    </a>
-                </li>-->
+                
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
