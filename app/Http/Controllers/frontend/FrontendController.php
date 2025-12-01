@@ -33,6 +33,9 @@ class FrontendController extends Controller
     public function show($slug)
     {
         $page = Page::where('slug', $slug)->firstOrFail();
+
+        // Récupération des sections associées
+        $sections = $page->sections()->orderBy('order')->get();
         return view('website.page.show', compact('page'));
     }
 

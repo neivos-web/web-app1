@@ -1,178 +1,64 @@
+<section class="pxa_footer" 
+    style="background: linear-gradient(135deg, #08B3E5, #22E4AC);
+           padding: 25px 20px 20px; color: white; position: relative;">
+    <div class="container text-center">
 
-  <!--===  Footer Start ===-->
+        <!-- Texte -->
+        <p class="mb-2" style="font-size: 14px; font-weight: 500;">
+            Vous avez des questions ? Contactez-nous — nous sommes à votre disposition.
+        </p>
 
-  <section class="pxa_footer mt_bgtempconatainer"
-      style=" background: linear-gradient(135deg, #08B3E5, #22E4AC); padding: 60px 0 10px 0;">
+        <!-- Bouton plus petit -->
+        <a href="{{ route('website.contact-us') }}"
+           class="btn btn-outline-light rounded-pill px-4 py-2 d-inline-block mb-2"
+           style="border: 1.5px solid white; font-size: 14px; font-weight: 600;">
+            Contactez-nous
+        </a>
 
-      <div class="pxa_container">
-          <div class="row">
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                  <div class="pxa_footer_item">
-                      <a href="/website" class="">
-                          <img class="" src="{{ asset('frontend') }}/public/pages/assets/images/footer_logo.png"
-                              alt="Logo" width="150" height="40">
-                      </a>
+        <!-- Réseaux sociaux -->
+        <div class="my-2">
+            <a href="#" class="text-white mx-2 fs-5 opacity-70"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" class="text-white mx-2 fs-5 opacity-70"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-white mx-2 fs-5 opacity-70"><i class="fab fa-facebook-f"></i></a>
+        </div>
 
-                      <p class="">Apprenez les technologies les plus demandées du moment grâce à 
-                        nos formations interactives et pratiques.</p>
-                      <ul class="pxa_social_footer">
-                          <li>
-                              <a href="https://www.facebook.com/" class="" target="_blank">
-                                  <img class=""
-                                      src="{{ asset('frontend') }}/public/pages/assets/images/footer_fb.png"
-                                      alt="Facebook" width="20" height="20">
-                              </a>
-                          </li>
-                          <li>
-                              <a href="https://twitter.com/i/flow/login" class="" target="_blank">
-                                  <img class="" src="{{ asset('frontend') }}/public/pages/assets/images/footer_twitter.png" alt="Twitter"
-                                      width="20" height="20">
-                              </a>
-                          </li>
-                          <li>
-                              <a href="https://www.instagram.com/" class="" target="_blank">
-                                  <img class="" src="{{ asset('frontend') }}/public/pages/assets/images/footer_instagram.png"
-                                      alt="Instagram" width="20" height="20">
-                              </a>
-                          </li>
-                          <li>
-                              <a href="https://in.linkedin.com/" class="" target="_blank">
-                                  <img class="" src="{{ asset('frontend') }}/public/pages/assets/images/footer_linkdin.png" alt="Linkdin"
-                                      width="20" height="20">
-                              </a>
-                          </li>
-                      </ul>
-                  </div>
-              </div>
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                  <div class="pxa_footer_item">
-                      <h3 class="">Portefeuille</h3>
-                      <ul class="pxa_footer_links">
-                          <li>
-                              <a class="" href="javascript:void(0);">Jeux vidéo</a>
-                          </li>
-                          <li>
-                              <a class="" href="javascript:void(0);">MR/AR</a>
-                          </li>
-                          <li>
-                              <a class="" href="javascript:void(0);">VR</a>
-                          </li>
-                          <li>
-                              <a class="" href="javascript:void(0);">CAD</a>
-                          </li>
-                      </ul>
-                  </div>
-              </div>
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                  <div class="pxa_footer_item">
-                      <h3 class="">Pages</h3>
-                      <ul class="pxa_footer_links">
-                          <li>
-                              <a class="" href="{{ route('website.about-us') }}">About</a>
-                          </li>
-                          <li>
-                              <a class="" href="{{ route('website.blog') }}">Blog</a>
-                          </li>
-                          <li>
-                              <a class="" href="{{ route('website.service') }}">Services</a>
-                          </li>
-                          <li>
-                              <a class="" href="{{ route('website.gallery') }}">Gallery</a>
-                          </li>
-                      </ul>
-                  </div>
-              </div>
-              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-                  <div class="pxa_footer_item">
-                      <h3 class="">Policy Pages</h3>
-                      <ul class="pxa_footer_links">
-                          <li>
-                              <a class="" href="{{ route('website.privacy-policy') }}">Privacy Policy</a>
-                          </li>
-                          <li>
-                              <a class="" href="{{ route('website.terms-and-conditions') }}">Terms And Conditions</a>
-                          </li>
-                          <li>
-                              <a class="" href="{{ route('website.contact-us') }}">Contact us</a>
-                          </li>
-                      </ul>
-                  </div>
-              </div>
-          </div>
-          <div class="row">
-              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                  <div class="pxa_footer_copyRight">
-                      <p class="">Copyright © 2025. All Rights Reserved</p>
-                  </div>
-              </div>
+        <!-- Logo plus petit -->
+        <div class="my-3">
+            <img src="{{ asset('frontend/public/pages/assets/images/footer_logo.png') }}"
+                 alt="Outsiders Logo"
+                 width="120"
+                 class="img-fluid">
+        </div>
 
-          </div>
-      </div>
-  </section>
+        <!-- Mentions légales -->
+        <div class="border-top border-white border-opacity-20 pt-2 small">
+            <div class="d-flex justify-content-center gap-3 flex-wrap mb-1">
+                <a href="{{ route('website.privacy-policy') }}" class="text-white text-decoration-none opacity-80">Mentions légales</a>
+                <a href="{{ route('website.terms-and-conditions') }}" class="text-white text-decoration-none opacity-80">Confidentialité</a>
+            </div>
+            <p class="mb-0 opacity-60" style="font-size: 12px;">
+                © {{ date('Y') }} Outsiders. Tous droits réservés.
+            </p>
+        </div>
+    </div>
 
-<!--===  Footer Plan End ===-->
+    <!-- Back to top -->
+    <a href="#" id="back-to-top" 
+       class="position-fixed bottom-0 end-0 mb-3 me-3 rounded-circle bg-white text-primary d-flex align-items-center justify-content-center shadow"
+       style="width: 38px; height: 38px; z-index: 1050; display: none;">
+        <i class="fas fa-arrow-up" style="font-size: 14px;"></i>
+    </a>
+</section>
 
-
-  <script src="{{ asset('frontend') }}/public/user_theme/assets/js/jquery.min.js"></script>
-  <script src="{{ asset('frontend') }}/public/admin_theme/assets/js/bootstrap.min.js"></script>
-
-  <script>
-      var ASSET_URL = "public/user_theme/index.html";
-      var BASE_URL = "index.html";
-      var PAGE_URL = "public/pages/index.html";
-      var HAPPY_STRIKER = "{{ asset('frontend') }}/public/user_theme/assets/images/success.png"
-      var SAD_STRIKER = "{{ asset('frontend') }}/public/user_theme/assets/images/oops.png"
-      $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          }
-      });
-  </script>
-
-  <!-- button laoder validation -->
-  <script src="{{ asset('frontend') }}/public/common/js/jquery.buttonLoader.min.js"></script>
-
-  <!-- jquery validation -->
-  <script src="{{ asset('frontend') }}/public/common/js/jquery.validate.js"></script>
-  <script src="{{ asset('frontend') }}/public/common/js/jquery-additional-methods.min.js"></script>
-  <!-- jquery validation -->
-
-  <!-- auth js -->
-  <script src="{{ asset('frontend') }}/public/user_theme/custom_assets/auth.js"></script>
-  <!-- auth js -->
-
-  <script src="{{ asset('frontend') }}/public/user_theme/custom_assets/common.js"></script>
-  <script src="{{ asset('frontend') }}/public/common/js/swiper-bundle.min.js"></script>
-
-  {{-- <script src="{{ asset('frontend') }}/public/pages/assets/js/page.js"></script> --}}
-  <script src="{{ asset('frontend') }}/public/pages/assets/js/common.js"></script>
-  <script src="{{ asset('frontend') }}/public/pages/assets/js/custom_plugin.js"></script>
-
-  <script src="{{ asset('frontend') }}/public/common/js/fontawesome-iconpicker.min.js"></script>
-  <script src="{{ asset('frontend') }}/public/common/js/iconpicker.js"></script>
-
-  <script src="{{ asset('frontend') }}/public/common/js/isotope.pkgd.min.js"></script>
-    <script src="{{ asset('frontend') }}/public/common/js/jquery.fancybox.min.js"></script>
 <script>
-        $(window).on("load", function() {
-            $(".gallery_grid").isotope({
-                itemSelector: ".grid-item",
-                filter: "*",
-            });
-            $(".pxa_project_gallery > .gallery_nav > ul > li").on(
-                "click",
-                "a",
-                function() {
-                    // filter button click
-                    var filterValue = $(this).attr("data-filter");
-                    $(".gallery_grid").isotope({
-                        filter: filterValue
-                    });
-
-                    //active class added
-                    $("a").removeClass("gallery_active");
-                    $(this).addClass("gallery_active");
-                }
-            );
-        });
-    </script>
+document.addEventListener('DOMContentLoaded', () => {
+    const b = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => 
+        b.style.display = window.scrollY > 300 ? 'flex' : 'none'
+    );
+    b.onclick = e => { 
+        e.preventDefault(); 
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    };
+});
+</script>

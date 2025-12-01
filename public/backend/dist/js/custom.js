@@ -175,3 +175,34 @@ Swal.fire({
     confirmButtonColor: "#3085d6",
     showCloseButton: true,
 });
+
+// Repeater pour ajouter section -Page Create/Edit-
+$(document).ready(function () {
+
+    $("#add-section-btn").on("click", function () {
+
+        let block = `
+            <div class="section-block border p-3 mt-3">
+
+                <label>Texte</label>
+                <textarea name="sections[text][]" class="form-control" rows="3"></textarea>
+
+                <label class="mt-2">Media (image / vidéo)</label>
+                <input type="file" name="sections[media][]" class="form-control">
+
+                <button type="button" class="btn btn-danger mt-2 remove-section">
+                    Supprimer
+                </button>
+
+            </div>
+        `;
+
+        $("#sections-container").append(block);
+    });
+
+    // bouton supprimer
+    $(document).on("click", ".remove-section", function () {
+        $(this).closest(".section-block").remove();
+    });
+
+});

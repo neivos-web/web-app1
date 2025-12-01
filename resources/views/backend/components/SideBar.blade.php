@@ -12,7 +12,7 @@
     </a>
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" style=" background: linear-gradient(135deg, #08B3E5, #22E4AC); padding: 60px 0 10px 0;">
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
@@ -29,8 +29,20 @@
                             <x-backend.icon.dashboard-icon name="dashboard" />
                         </span>
                         <span class="menu-text">
-                            Dashboard
+                            Tableau de bord
                         </span> 
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('testimonial.index') }}"
+                        class="nav-link {{ request()->routeIs('testimonial.index') ? 'active' : '' }}">
+                        <span class="icon-menu">
+                            <x-backend.icon.testimonial-icon />
+                        </span>
+                        <span class="menu-text">
+                            Gestion page d'accueil
+                        </span>
                     </a>
                 </li>
 
@@ -42,13 +54,25 @@
                             <x-backend.icon.page-icon name="category" />
                         </span>
                         <span class="menu-text">
-                            Page Management
+                            Gestion des Pages
                         </span>
 
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a href="{{ route('admin.blog.index') }}"
+                        class="nav-link {{ request()->routeIs('admin.blog.index') ? 'active' : '' }}">
+                        <span class="icon-menu">
+                            <x-backend.icon.blog-icon />
+                        </span>
+                        <span class="menu-text">
+                            Gestion des Blogs/Actualités
+                        </span>
+                    </a>
+                </li>
 
+                <!--
                 <li class="nav-item">
                     <a href="{{ route('model-create') }}"
                         class="nav-link {{ request()->routeIs('model-create') ? 'active' : '' }}">
@@ -61,9 +85,9 @@
                         </span>
                         {{-- <span class="pl-1">Category ( {{ $categorylist->count() }} ) </span> --}}
                     </a>
-                </li>
+                </li> -->
 
-
+                
                 <li class="nav-item">
                     <a href="{{ route('admin.category') }}"
                         class="nav-link {{ request()->routeIs('admin.category') ? 'active' : '' }}">
@@ -72,36 +96,26 @@
                             <x-backend.icon.category-icon name="category" />
                         </span>
                         <span class="menu-text">
-                            Category ( {{ $categorylist->count() }} )
+                            Les Categories ( {{ $categorylist->count() }} )
                         </span>
                         {{-- <span class="pl-1">Category ( {{ $categorylist->count() }} ) </span> --}}
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('admin.blog.index') }}"
-                        class="nav-link {{ request()->routeIs('admin.blog.index') ? 'active' : '' }}">
-                        <span class="icon-menu">
-                            <x-backend.icon.blog-icon />
-                        </span>
-                        <span class="menu-text">
-                            Blog
-                        </span>
-                    </a>
-                </li>
-
+                
                 <li class="nav-item">
                     <a href="{{ route('tag.index') }}"
                         class="nav-link {{ request()->routeIs('tag.index') ? 'active' : '' }}">
                         <span class="icon-menu">
-                            <x-backend.icon.tag-icon />
+                            <x-backend.icon.category-icon name="category" />
                         </span>
                         <span class="menu-text">
-                            Tag
+                            Les Tags
                         </span>
                     </a>
                 </li>
 
+                <!--
                 <li class="nav-item">
                     <a href="{{ route('service.index') }}"
                         class="nav-link {{ request()->routeIs('service.index') ? 'active' : '' }}">
@@ -109,11 +123,12 @@
                             <x-backend.icon.service-icon />
                         </span>
                         <span class="menu-text">
-                            Service
+                            Gestion des Services
                         </span>
                     </a>
-                </li>
+                </li>-->
 
+                <!--
                 <li class="nav-item">
                     <a href="{{ route('gallery.index') }}"
                         class="nav-link {{ request()->routeIs('gallery.index') ? 'active' : '' }}">
@@ -124,20 +139,10 @@
                             Gallery
                         </span>
                     </a>
-                </li>
+                </li>-->
 
-                <li class="nav-item">
-                    <a href="{{ route('testimonial.index') }}"
-                        class="nav-link {{ request()->routeIs('testimonial.index') ? 'active' : '' }}">
-                        <span class="icon-menu">
-                            <x-backend.icon.testimonial-icon />
-                        </span>
-                        <span class="menu-text">
-                            Testimonial
-                        </span>
-                    </a>
-                </li>
-
+               
+                <!--
                 <li class="nav-item">
                     <a href="{{ route('price-plan.index') }}"
                         class="nav-link {{ request()->routeIs('price-plan.index') ? 'active' : '' }}">
@@ -148,8 +153,10 @@
                             PricePlan
                         </span>
                     </a>
-                </li>
+                </li>-->
 
+
+                <!--
                 <li class="nav-item">
                     <a href="{{ route('faq.index') }}"
                         class="nav-link {{ request()->routeIs('faq.index') ? 'active' : '' }}">
@@ -160,8 +167,9 @@
                             Faq
                         </span>
                     </a>
-                </li>
+                </li>-->
 
+                <!--
                 <li class="nav-item">
                     <a href="{{ route('partner.index') }}"
                         class="nav-link {{ request()->routeIs('partner.index') ? 'active' : '' }}">
@@ -172,7 +180,7 @@
                             Partner
                         </span>
                     </a>
-                </li>
+                </li>-->
 
                 <li class="nav-item">
                     <a href="{{ route('team-member.index') }}"
@@ -181,7 +189,7 @@
                             <x-backend.icon.team-icon />
                         </span>
                         <span class="menu-text">
-                            Our Team
+                            Gestion des Membres
                         </span>
                     </a>
                 </li>
@@ -193,7 +201,7 @@
                             <x-backend.icon.contact-icon />
                         </span>
                         <span class="menu-text">
-                            Contact US
+                            Gestion des Contacts/Messages
                         </span>
                     </a>
                     {{-- {{ request()->routeIs('setting.website') ? 'menu-open' : '' }} --}}
@@ -210,7 +218,7 @@
                             <x-backend.icon.setting-icon />
                         </span>
                         <span class="menu-text">
-                            Setting
+                            Paramètres
                         </span>
                         <i class="right fas fa-angle-left"></i>
 
@@ -223,7 +231,7 @@
                                 class="nav-link {{ request()->routeIs('setting.website') ? 'active' : '' }}">
                                 {{-- <i class="far fa-circle nav-icon"></i> --}}
                                 <span class="icon-dash"></span>
-                                <span class="menu-text"> Website</span>
+                                <span class="menu-text">Site Web</span>
                             </a>
                         </li>
 
@@ -238,7 +246,7 @@
                             <a href="{{ route('setting.mail-setting') }}"
                                 class="nav-link {{ request()->routeIs('setting.mail-setting') ? 'active' : '' }}">
                                 <span class="icon-dash"></span>
-                                <span class="menu-text">Mail Setting</span>
+                                <span class="menu-text">Paramètres du mail</span>
                             </a>
                         </li>
 
@@ -248,16 +256,17 @@
                 <li class="nav-item">
                     <a href="#" class="nav-link ">
                         <i class="far fa-circle"></i>
-                        <p>Logout</p>
+                        <p>Déconnexion</p>
                     </a>
                 </li>
+                <!--
                 <hr class="clear">
                 <li class="nav-item">
                     <a href="{{ route('model.index') }}" class="nav-link ">
                         <i class="far fa-circle"></i>
                         <p>Model List</p>
                     </a>
-                </li>
+                </li>-->
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

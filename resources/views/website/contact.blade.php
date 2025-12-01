@@ -9,7 +9,7 @@
         <div class="pxa_page_title_opacity">
           <h2 class="">Contact</h2>
           <ul>
-            <li><a class="" href="home.html">Home /</a></li>
+            <li><a class="" href="home.html">Accueil /</a></li>
             <li><a href="javascript:void(0);" class="">Contact</a></li>
           </ul>
         </div>
@@ -32,30 +32,31 @@
           <div class="col-xxl-7 col-xl-7 col-lg-7 col-md-12 col-12">
             <div class="pxa-contact-form pxa-bg-design pxa-marTop30">
               <div class="pxa_subTitle">
-                <h3 class="">Hello, Welcome Back!</h3>
-                <h4 class="">Enter your details below to continue.</h4>
+                <h3 class="">Contactez-nous !</h3>
+                <p class="">Une question, une demande ou un partenariat ? N’hésitez pas à nous écrire. 
+                  Nous vous répondrons dans les plus brefs délais..</p>
               </div>
               <form id="frmContactUs" class="pxa_formBox pxa-marTop30" action="{{ route('mail.send') }}"method="POST">
                 @csrf
                 <div class="row">
                   <div class="col-md-6 col-12">
                     <div class="pxa_main_input">
-                      <label class="">Name</label>
-                      <input type="text" id="pxa-name" name="name" class="pxa_custom_input" placeholder="Enter Name Here...">
+                      <label class="">Nom Complet</label>
+                      <input type="text" id="pxa-name" name="name" class="pxa_custom_input" placeholder="Saisir Votre Nom Ici...">
                     </div>
                   </div>
                   <div class="col-md-6 col-12">
                     <div class="pxa_main_input">
                       <label class="">Email</label>
-                      <input type="text" id="pxa-email" name="email" class="pxa_custom_input" placeholder="Enter Email Here...">
+                      <input type="text" id="pxa-email" name="email" class="pxa_custom_input" placeholder="Saisir votre Email Ici...">
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-md-12 col-12">
                     <div class="pxa_main_input">
-                      <label class="">Subject</label>
-                      <input type="text" id="pxa-subject" name="subject" class="pxa_custom_input" placeholder="Enter Subject Here...">
+                      <label class="">Objet</label>
+                      <input type="text" id="pxa-subject" name="subject" class="pxa_custom_input" placeholder="Saisir Votre Objet Ici...">
                     </div>
                   </div>
                 </div>
@@ -63,13 +64,13 @@
                   <div class="col-md-12 col-12">
                     <div class="pxa_main_input">
                       <label class="">Message</label>
-                      <textarea id="pxa-msg" rows="2" name="message" class="pxa_custom_textarea" placeholder="Message Here..."></textarea>
+                      <textarea id="pxa-msg" rows="2" name="message" class="pxa_custom_textarea" placeholder="Saisir Votre Message Ici..."></textarea>
                     </div>
                   </div>
                 </div>
                 <div class="pxa_contact_btn">
                   <button type="submit" class="pxa_btn me-2" id="frmContactUs-btn">
-                    <span class="">Submit</span>
+                    <span class="">Envoyer</span>
                   </button>
                 </div>
               </form>
