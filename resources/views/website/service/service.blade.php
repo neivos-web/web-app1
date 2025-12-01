@@ -8,7 +8,7 @@
             <div class="pxa_page_title_opacity">
                 <h2>Our Service</h2>
                 <ul>
-                    <li><a href="https://preview.kamleshyadav.com/pixacms">Home /</a></li>
+                    <li><a href="{{ route('pages.frontend') }}">Accueil /</a></li>
                     <li><a href="javascript:void(0);">Service</a></li>
                 </ul>
             </div>

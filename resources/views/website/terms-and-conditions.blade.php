@@ -8,7 +8,7 @@
             <div class="pxa_page_title_opacity">
                 <h2 class="">Terms And Conditions</h2>
                 <ul>
-                    <li><a class="" href="home.html">Home /</a></li>
+                    <li><a href="{{ route('pages.frontend') }}">Accueil /</a></li>
                     <li><a href="javascript:void(0);" class="">Terms And Conditions</a></li>
                 </ul>
             </div>

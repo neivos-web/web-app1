@@ -8,7 +8,7 @@
             <div class="pxa_page_title_opacity">
                 <h2>Our Blog</h2>
                 <ul>
-                    <li><a href="{{ route('website.home') }}">Home /</a></li>
+                    <li><a href="{{ route('pages.frontend') }}">Accueil /</a></li>
                     <li><a href="javascript:void(0);">Blog</a></li>
                 </ul>
             </div>
