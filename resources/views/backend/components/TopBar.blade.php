@@ -1,153 +1,99 @@
-<nav class="main-header navbar navbar-expand navbar-white navbar-light">
-   
-    <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
-      <!-- Navbar Search -->
-      <li class="nav-item">
-        <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-          <i class="fas fa-search"></i>
-        </a>
-        <div class="navbar-search-block">
-          <form class="form-inline">
-            <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-              <div class="input-group-append">
-                <button class="btn btn-navbar" type="submit">
-                  <i class="fas fa-search"></i>
-                </button>
-                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </li>
 
-      <!-- Messages Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-comments"></i>
-          <span class="badge badge-danger navbar-badge">3</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="{{ asset('backend')}}/dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Brad Diesel
-                  <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">Call me whenever you can...</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="{{ asset('backend')}}/dist/img/user8-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  John Pierce
-                  <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">I got your message bro</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="{{ asset('backend')}}/dist/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Nora Silvester
-                  <span class="float-right text-sm text-warning"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">The subject goes here</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-        </div>
-      </li>
-      <!-- Notifications Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">15 Notifications</span>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-        </div>
-      </li>
+<nav x-data="{ open: false }" class="main-header navbar navbar-expand navbar-white navbar-light shadow-sm border-bottom">
 
-    <!-- User Dropdown Menu -->
-    <li class="nav-item dropdown">
-      <a class="nav-link" data-toggle="dropdown" href="#">
-        <!-- <i class="far fa-user"></i> -->
-        <img src="{{ asset('backend')}}/dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-20 mr-1 mb-2 img-circle" height="30" >
-        USer
-      </a>
-
-      <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-        <!-- <div class="card rounded-0">
-          <div class="card-body d-block">
-            <img src="{{ asset('backend')}}/dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle mb-2" height="30">
-            <h3 class="dropdown-item-title">
-              Brad Diesel</h3>
-              <p class="text-sm">Call me whenever you can...</p>
-          </div>
-        </div> -->
-
-        <div class="card" >
-          <img class="card-img-top" src="{{ asset('backend')}}/dist/img/user1-128x128.jpg" alt="Card image" class="img-size-50 mr-3 img-circle mb-2" >
-          <div class="card-body rounded-0">
-            <h4 class="card-title">John Doe</h4>
-            <p class="card-text">Some example text.</p>
-            <a href="#" class="btn btn-primary">See Profile</a>
-          </div>
-        </div>
-
-        <!-- <div class="dropdown-divider"></div> -->
-        <!-- <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-        <div class="dropdown-divider"></div> -->
-        <a href="#" class="btn btn-danger p-2 d-block rounded-0">
-          <i class="fas fa-sign-out-alt mr-2">Logout</i>
-        </a>
-      </div>
-
-    </li>
-
-     
-
+    <!-- Left navbar -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#">
+                <i class="fas fa-bars"></i>
+            </a>
+        </li>
     </ul>
-  </nav>
+
+    <!-- Right navbar -->
+    <ul class="navbar-nav ml-auto">
+
+        <!-- User Dropdown -->
+        <li class="nav-item dropdown">
+
+            <!-- User Button -->
+            <a class="nav-link d-flex align-items-center py-2 px-3 hover-bg"
+               data-toggle="dropdown" href="#">
+
+                <img src="{{ asset('backend/dist/img/user1-128x128.jpg') }}"
+                     alt="User"
+                     class="rounded-circle mr-2"
+                     style="width:28px; height:28px; object-fit:cover;">
+
+                <span class="text-sm font-weight-medium">
+                    {{ Auth::user()->name }}
+                </span>
+
+                <i class="fas fa-angle-down ml-2 text-muted"></i>
+            </a>
+
+            <!-- Dropdown Menu -->
+            <div class="dropdown-menu dropdown-menu-right p-0 shadow-lg border-0">
+
+                <!-- Header Section -->
+                <div class="p-3 text-center bg-light border-bottom">
+                    <img src="{{ asset('backend/dist/img/user1-128x128.jpg') }}"
+                         alt="Avatar"
+                         class="rounded-circle mb-2"
+                         style="width:60px; height:60px; object-fit:cover;">
+
+                    <div class="font-weight-bold">{{ Auth::user()->name }}</div>
+                    <div class="text-muted small">{{ Auth::user()->email }}</div>
+                </div>
+
+                <!-- Profile Link -->
+                <a href="{{ route('profile.edit') }}"
+                   class="dropdown-item d-flex align-items-center">
+                    <i class="fas fa-user mr-2 text-primary"></i> Profile
+                </a>
+
+                <div class="dropdown-divider m-0"></div>
+
+                <!-- Logout -->
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                            class="dropdown-item text-danger d-flex align-items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i> {{ __('Log Out') }}
+                    </button>
+                </form>
+            </div>
+        </li>
+
+        <!-- Mobile Menu Toggle -->
+<!--         <li class="nav-item sm:hidden">
+            <button @click="open = !open"
+                    class="nav-link border rounded p-2 text-gray-600">
+                <i :class="open ? 'fas fa-times' : 'fas fa-bars'"></i>
+            </button>
+        </li> -->
+    </ul>
+
+    <!-- Mobile Responsive Menu -->
+    <div :class="{'block': open, 'd-none': !open}"
+         class="d-none w-100 bg-white shadow-sm border-top">
+        <div class="p-3">
+            <div class="font-weight-bold">{{ Auth::user()->name }}</div>
+            <div class="text-muted small">{{ Auth::user()->email }}</div>
+
+            <hr>
+
+            <a href="{{ route('profile.edit') }}" class="d-block py-2">
+                <i class="fas fa-user mr-2"></i> Profile
+            </a>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                        class="btn btn-danger btn-block mt-2">
+                    {{ __('Log Out') }}
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
