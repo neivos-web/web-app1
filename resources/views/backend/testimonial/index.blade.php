@@ -1,5 +1,5 @@
 @extends('layouts.admin-app')
-@section('title', 'testimonial Page')
+@section('title', 'Gestion Page Accueil')
 @section('content')
 
     <div class="content-wrapper">
@@ -8,12 +8,12 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1>testimonial</h1>
+                        <h1>Gestion Page d'Accueil</h1>
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
-                            <li class="breadcrumb-item active">testimonial</li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Accueil</a></li>
+                            <li class="breadcrumb-item active">Gestion Page d'Accueil</li>
                         </ol>
                     </div>
                 </div>
@@ -28,9 +28,9 @@
                     <div class="card">
 
                         <div class="card-header">
-                            <h3 class="card-title pt-2">Testimonial List</h3>
+                            <h3 class="card-title pt-2">Contenu de la page d'aacueil</h3>
                             <a href="{{ route('testimonial.create') }}" class="btn btn-success float-right"><i
-                                    class="fas fa-plus"></i> Create Testimonial</a>
+                                    class="fas fa-plus"></i> Créer une section</a>
 
                         </div>
                         <!-- /.card-header -->
@@ -39,7 +39,7 @@
                                 <thead>
                                     <tr>
                                         <th># Sl No</th>
-                                        <th>Client Name</th>
+                                        <th>Titre</th>
                                         <th>Designation</th>
                                         <th>Description</th>
                                         <th>Image</th>
@@ -61,9 +61,9 @@
                                             </td>
                                             <td>
                                                 @if ($item->status == 'publish')
-                                                    <span class="badge bg-success">Publish</span>
+                                                    <span class="badge bg-success">Publier</span>
                                                 @else
-                                                    <span class="badge bg-danger">Draft</span>
+                                                    <span class="badge bg-danger">Dépublier</span>
                                                 @endif
                                             </td>
 
@@ -77,8 +77,6 @@
                                                     class="btn btn-info btn-sm">
                                                     <i class="far fa-edit"></i>
                                                 </a>
-
-
 
                                                 <form action="{{ route('testimonial.destroy', $item->id) }}"
                                                     method="POST">

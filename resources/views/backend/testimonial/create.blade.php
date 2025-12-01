@@ -8,12 +8,12 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1>Testimonial create</h1>
+                        <h1>Ajout Section</h1>
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
-                            <li class="breadcrumb-item active">Testimonial</li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Accueil</a></li>
+                            <li class="breadcrumb-item active">Section</li>
                         </ol>
                     </div>
                 </div>
@@ -28,11 +28,11 @@
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title pt-2">
-                                    <i class="fas fa-plus"></i> Create Testimonial
+                                    <i class="fas fa-plus"></i> Ajouter une Section
                                  </h3>
                                 <a href="{{ route('testimonial.index') }}" class="btn btn-success float-right">
-                                    <i class="fas fa-list"></i> Testimonial
-                                    List</a>
+                                    <i class="fas fa-list"></i> Liste section
+                                    </a>
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body">
@@ -42,7 +42,7 @@
 
                                     <div class="d-flex align-item-center">
                                         <div class="form-group col-sm-6">
-                                            <label for="title">Client Name:</label>
+                                            <label for="title">Titre:</label>
                                             <input type="text" name="client_name" class="form-control @error('client_name') is-invalid @enderror"
                                                 placeholder="Enter Title..." id="title" value="{{ old('client_name') }}">
                                                 @error('client_name')
@@ -78,7 +78,7 @@
                                     </div>
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>
-                                            Create</button>
+                                            Créer </button>
                                     </div>
                             </div>
 

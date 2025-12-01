@@ -42,7 +42,7 @@
                                     @method('PUT')
                                     <div class="d-flex align-item-center">
                                         <div class="form-group col-sm-6">
-                                            <label for="title">Client Name:</label>
+                                            <label for="title">Titre:</label>
                                             <input type="text" name="client_name" class="form-control"
                                                 placeholder="Enter Title..." id="title" value="{{ $testimonial->client_name }}">
                                         </div>
