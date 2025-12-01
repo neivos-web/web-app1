@@ -242,14 +242,15 @@
                 @endforeach
 
             </div>
+            <!--
             <div class="pxa_btn_wr">
                 <a href="{{ route('website.blog') }}" class="pxa_btn">Voir Plus</a>
-            </div>
+            </div><-->
         </div>
     </section>
     <!--===  Blog End ===-->
 
-    <!--===  About ===-->
+    <!--===  About ===--
     <section class="pxa_about mt_bgtempconatainer">
         <div class="pxa_container">
             <div class="row align-items-center pxa_about_wr">
@@ -284,7 +285,7 @@
 
    
 
-    <!--===  Formations Start ===-->
+    <!--===  Formations Start ===--
     <section class="pxa_services mt_bgtempconatainer">
         <div class="pxa_container">
             <div class="pxa_heading_section">
@@ -500,7 +501,7 @@
 
 
 
-    <!--===  Faq Section Start ===-->
+    <!--===  Faq Section Start ===--
     <section class="pxa_accordion accordion mt_bgtempconatainer">
         <div class="pxa_container">
             <div class="pxa_heading_section">
