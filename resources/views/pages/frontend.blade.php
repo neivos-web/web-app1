@@ -242,10 +242,11 @@
                 @endforeach
 
             </div>
-            <!--
+            
             <div class="pxa_btn_wr">
                 <a href="{{ route('website.blog') }}" class="pxa_btn">Voir Plus</a>
-            </div><-->
+            </div>
+            <br></br>
         </div>
     </section>
     <!--===  Blog End ===-->

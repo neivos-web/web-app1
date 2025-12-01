@@ -39,7 +39,7 @@ use App\Http\Controllers\admin\WebsiteSettingController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('pages.frontend');
 });
 
 Route::get('/dashboard', function () {
@@ -222,7 +222,7 @@ Route::group(['prefix' => 'admin'], function () {
 
 Route::group(['prefix' => 'website'], function () {
 
-    Route::get('/', [FrontendController::class, 'index'])->name('website.home');
+    Route::get('/', [FrontendController::class, 'index'])->name('pages.frontend');
 
     Route::get('/about-us', [FrontendController::class, 'about'])->name('website.about-us');
 

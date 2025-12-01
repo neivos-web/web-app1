@@ -97,14 +97,14 @@
 <div class="pxa_header_full">
     <div class="pxa_header_flex">
         <div class="pxa_header_logo">
-            <a href="{{ route('website.home') }}">
+            <a href="{{ route('pages.frontend') }}">
                 <img src="{{ asset('frontend/public/pages/assets/images/pxa_logo.png') }}" alt="Logo" height="40">
             </a>
         </div>
 
         <div class="pxa_header_nav">
             <ul class="pxa_menu_list pxa-tabs">
-                <li><a href="{{ route('website.home') }}">Accueil</a></li>
+                <li><a href="{{ route('pages.frontend') }}">Accueil</a></li>
 
                 @foreach($publishedPages as $page)
                     <li class="pxa_megamenu_list">
